@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified" targetNamespace="http://www.mimacom.com/liferay/setup"
+           xmlns="http://www.mimacom.com/liferay/setup">
+
+    <xs:element name="setup">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- specify the email address of user, which will be used for performing
+                    all operations within setup hook -->
+                <xs:element ref="configuration" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="roles" minOccurs="0"/>
+                <xs:element ref="users" minOccurs="0"/>
+                <xs:element ref="portletPermissions" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="organizations" minOccurs="0"/>
+                <xs:element ref="customFields" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="deleteLiferayObjects" minOccurs="0" maxOccurs="1"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="page-templates"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="configuration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="1" ref="runasuser"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="roles">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="role"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="users">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="user"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="portletPermissions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" name="portlet">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" name="actionId">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element maxOccurs="unbounded" ref="role"/>
+                                    </xs:sequence>
+                                    <xs:attribute name="name" type="xs:string" use="required"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="portletId" type="xs:string" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="organizations">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="organization"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="objectsToBeDeleted">
+        <xs:complexType>
+            <xs:choice minOccurs="1" maxOccurs="1">
+                <xs:element ref="roles"/>
+                <xs:element ref="users"/>
+                <xs:element ref="organizations"/>
+                <xs:element ref="customFields"/>
+            </xs:choice>
+
+            <xs:attribute name="deleteMethod" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="excludeListed"/>
+                        <xs:enumeration value="onlyListed"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="runasuser" type="xs:string">
+    </xs:element>
+
+    <xs:element name="organization">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="1" minOccurs="0" ref="public-pages"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="private-pages"/>
+                <xs:element ref="document-folder" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="document" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="article-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article-template" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article-folder" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="adt" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="vocabulary" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="default" type="xs:boolean" default="false"/>
+            <xs:attribute name="strict-web-folder-definition" type="xs:boolean" default="false"/>
+            <xs:attribute name="strict-document-folder-definition" type="xs:boolean" default="false"/>
+            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
+            <xs:attribute name="maintain-site-hierarchy" type="xs:boolean" default="false"/>
+            <xs:attribute name="site-name" type="xs:string"/>
+            <xs:attribute name="site-friendly-url" type="xs:string"/>
+
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="page-templates">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="1" ref="page-template"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="page-template">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="1" minOccurs="1" ref="page"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="public-pages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="page"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+            </xs:sequence>
+            <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
+        </xs:complexType>
+
+    </xs:element>
+
+    <xs:element name="private-pages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="page"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+            </xs:sequence>
+            <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="pageportlet">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="portlet-preference"/>
+            </xs:sequence>
+            <xs:attribute name="portletId" type="xs:string" use="required"/>
+            <xs:attribute name="column" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="portlet-preference">
+        <xs:annotation>
+            <xs:appinfo>W3Schools Note</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Resolves a portlet-preference value with any of the following resolver expressions to a corresponding
+                value:
+                <ul>
+                    <li>{{$ARTICLE-ID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ARTICLE-UUIID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ARTICLE-RESID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-STRUCTURE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-STRUCTURE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ADT-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ADT-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$CLASS-ID-BY-NAME=&lt; fully qualified class name &gt;$}}</li>
+                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
+                        &gt;$}}
+                    </li>
+                    <li>{{$PUB-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}</li>
+                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
+                        &gt;$}}
+                    </li>
+                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page
+                        &gt;$}}
+                    </li>
+                    <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
+                    <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
+                    <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
+                    <li>{{ID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
+                    <li>{{UUDID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
+                </ul>
+
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="role">
+        <xs:complexType>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="type" use="optional" default="portal">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="portal"/>
+                        <xs:enumeration value="site"/>
+                        <xs:enumeration value="organization"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <!-- Site or organization name (depend of the role type)-->
+            <xs:attribute name="site" use="optional" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="role-permissions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="role-permission" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="clear-permissions" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="role-permission">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="permission-action" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="role-name" use="required" type="xs:string"/>
+            <xs:attribute name="permission" use="optional" default="view">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="view"/>
+                        <xs:enumeration value="update"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="clear-permissions" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="permission-action">
+        <xs:complexType>
+            <xs:attribute name="action-name" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="user">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="organization" minOccurs="0"/>
+                <xs:element maxOccurs="unbounded" ref="role"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+
+            <xs:attribute name="screenName" use="required" type="xs:string"/>
+            <xs:attribute name="emailAddress" use="required" type="xs:string"/>
+            <xs:attribute name="password" use="required" type="xs:string"/>
+            <xs:attribute name="firstName" use="required" type="xs:string"/>
+            <xs:attribute name="lastName" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="page">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="page"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="pageportlet"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="friendlyURL" use="required"/>
+            <xs:attribute name="type" default="portlet"/>
+            <xs:attribute name="hidden" type="xs:boolean" default="false"/>
+            <xs:attribute name="layout" type="xs:NCName">
+                <xs:annotation>
+                    <xs:documentation>ID of layout template for this page. Note that if the layout
+                        template is part of a Theme plugin, Theme plugin ID must be configured
+                        as the layoutContainedInThemeWithId attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="layoutContainedInThemeWithId" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>If Layout template is delivered as a part of Theme plugin, ID
+                        of this Theme plugin must be defined in this attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
+
+            <xs:attribute name="clearPage" default="true" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>If this attribute is set to true, all portlets will be removed
+                        from the page before the new ones are set up.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="linkToURL" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="customFields">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" name="field">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" ref="role-permission"/>
+                        </xs:sequence>
+                        <xs:attribute name="name" use="required"/>
+                        <xs:attribute name="type" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="stringArray"/>
+                                    <xs:enumeration value="string"/>
+                                    <xs:enumeration value="int"/>
+                                    <xs:enumeration value="boolean"/>
+                                    <xs:enumeration value="date"/>
+                                    <xs:enumeration value="long"/>
+                                    <xs:enumeration value="double"/>
+                                    <xs:enumeration value="float"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="className" use="required"/>
+                        <xs:attribute name="indexed" use="optional" default="none">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="none"/>
+                                    <xs:enumeration value="text"/>
+                                    <xs:enumeration value="keyword"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="displayType" use="optional" default="text-box">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="checkbox"/>
+                                    <xs:enumeration value="radio"/>
+                                    <xs:enumeration value="selection-list"/>
+                                    <xs:enumeration value="text-box"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="defaultData" use="optional"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+
+    <xs:element name="custom-field-setting">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="deleteLiferayObjects">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="objectsToBeDeleted"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="title-translation">
+        <xs:complexType>
+            <xs:attribute name="locale" type="xs:string" use="required"/>
+            <xs:attribute name="title-text" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="theme">
+        <xs:complexType>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="structure">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="key" use="required" type="xs:string"/>
+        <xs:attribute name="path" use="required" type="xs:string"/>
+        <xs:attribute name="parent" use="optional" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:element name="article-template">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="key" use="required" type="xs:string"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="language" default="ftl" type="xs:string"/>
+            <xs:attribute name="article-structure-key" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="article-folder">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="folder-path" use="required" type="xs:string"/>
+            <xs:attribute name="description" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="article">
+        <xs:annotation>
+            <xs:appinfo>W3Schools Note</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Resolves any of the following resolver expressions contained in the content of an article to a
+                corresponding value:
+                <ul>
+                    <li>{{$ARTICLE-ID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ARTICLE-UUIID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ARTICLE-RESID-BY-ARTICLE-ID=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-STRUCTURE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ART-STRUCTURE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ADT-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$ADT-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
+                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
+                        documents and media folder title of the file &gt;$}}
+                    </li>
+                    <li>{{$CLASS-ID-BY-NAME=&lt; fully qualified class name &gt;$}}</li>
+                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
+                        &gt;$}}
+                    </li>
+                    <li>{{$PUB-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}</li>
+                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
+                        &gt;$}}
+                    </li>
+                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page
+                        &gt;$}}
+                    </li>
+                    <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
+                    <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
+                    <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
+                    <li>{{ID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
+                    <li>{{UUDID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
+                </ul>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="related-assets"/>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="article-structure-key" type="xs:string"/>
+            <xs:attribute name="article-template-key" type="xs:string"/>
+            <xs:attribute name="articleId" type="xs:string" default=""/>
+            <xs:attribute name="title" use="required" type="xs:string"/>
+            <xs:attribute name="article-folder-path" type="xs:string"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="related-assets">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="related-asset"/>
+            </xs:sequence>
+            <xs:attribute name="clearAllAssets" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="related-asset">
+        <xs:complexType>
+            <xs:attribute name="asset-class" use="required" type="xs:string"/>
+            <xs:attribute name="asset-class-primary-key" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="document-folder">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="folder-name" use="required" type="xs:string"/>
+            <xs:attribute name="create-if-not-exists" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="document">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="document-title" type="xs:string" use="required"/>
+            <xs:attribute name="document-filename" type="xs:string" use="required"/>
+            <xs:attribute name="extension" type="xs:string" default=""/>
+            <xs:attribute name="document-folder-name" type="xs:string" default=""/>
+            <xs:attribute name="file-system-name" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="adt">
+        <xs:complexType>
+            <xs:attribute name="template-key" type="xs:string"/>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="description" use="required" type="xs:string"/>
+            <xs:attribute name="language" use="required" type="xs:string"/>
+            <xs:attribute name="class-name" use="required" type="xs:string"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="cacheable" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="vocabulary">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="category"/>
+            </xs:sequence>
+            <xs:attribute name="title" use="required" type="xs:string"/>
+            <xs:attribute name="description" type="xs:string" default=""/>
+            <xs:attribute name="multi-valued" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ddl-recordset">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string"/>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="description" use="required" type="xs:string"/>
+            <xs:attribute name="ddl-structure-key" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="category">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="category"/>
+            </xs:sequence>
+            <xs:attribute name="title" use="required" type="xs:string"/>
+            <xs:attribute name="description" type="xs:string" default=""/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
