@@ -79,7 +79,7 @@ public final class MarshallUtil {
 
     public static boolean validateAgainstXSD(final InputStream xml) throws IOException {
         ClassLoader cl = MarshallUtil.class.getClassLoader();
-        URL url = cl.getResource("setup_definition.xsd");
+        URL url = cl.getResource("setup_definition-1.0.xsd");
         if (url == null) {
             throw new IOException("XSD configuration not found");
         }

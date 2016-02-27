@@ -26,6 +26,16 @@ Run <code>com.mimacom.liferay.portal.setup.LiferaySetup#setup(java.io.File)</cod
     <configuration>
         <runasuser>test@liferay.com</runasuser>
     </configuration>
+ 
+    <!--
+    This will add new custom field that can be used in theme to control if ads should display on
+    particular page.
+    -->
+    <customFields>
+        <field name="showAds" type="boolean" className="com.liferay.portal.model.Layout">
+            <role-permission role-name="Guest" permission="view"/>
+        </field>
+    </customFields>
 </setup>
 ```
 
