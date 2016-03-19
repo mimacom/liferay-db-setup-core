@@ -1,4 +1,6 @@
 # Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/mimacom/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/mimacom/liferay-db-setup-core)
+
+[![Join the chat at https://gitter.im/mimacom/liferay-db-setup-core](https://badges.gitter.im/mimacom/liferay-db-setup-core.svg)](https://gitter.im/mimacom/liferay-db-setup-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Library that allows to setup a number of Liferay artifacts in the DB. It uses xml configuration and Liferay APIs to add all configured artifacts.
 
 # Usage
