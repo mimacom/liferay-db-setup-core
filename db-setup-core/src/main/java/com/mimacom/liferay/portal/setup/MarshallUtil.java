@@ -79,44 +79,30 @@ public final class MarshallUtil {
             */
             SAXSource src = new SAXSource(xr, new InputSource(stream));
             return (Setup) getUnmarshaller().unmarshal(src);
-        } catch (JAXBException e) {
-            LOG.error("Cannot unmarshall the provided stream", e);
-            throw e;
-        } catch (ParserConfigurationException | SAXException e) {
+        } catch (JAXBException | ParserConfigurationException | SAXException e) {
             LOG.error("Cannot unmarshall the provided stream", e);
             throw e;
         }
     }
 
     private static Unmarshaller getUnmarshaller() throws JAXBException {
+
         ClassLoader cl = ObjectFactory.class.getClassLoader();
         JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName(), cl);
         return jc.createUnmarshaller();
     }
 
     public static boolean validateAgainstXSD(final InputStream xml) throws IOException {
-        ClassLoader cl = MarshallUtil.class.getClassLoader();
-        URL url = cl.getResource("setup_definition-1.0.xsd");
-        if (url == null) {
-            throw new IOException("XSD configuration not found");
-        }
-        URI uri;
-        try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
-            throw new IOException("Problem with reading xsd", e);
-        }
 
-        File file;
-        if (uri.getScheme().equals("file")) {
-            file = new File(uri);
-        } else {
-            throw new IOException("Problem with reading xsd");
+        ClassLoader cl = MarshallUtil.class.getClassLoader();
+        InputStream schemaInputStream = cl.getResourceAsStream("setup_definition-1.0.xsd");
+        if (schemaInputStream == null) {
+            throw new IOException("XSD configuration not found");
         }
 
         try {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = factory.newSchema(new StreamSource(file));
+            Schema schema = factory.newSchema(new StreamSource(schemaInputStream));
             Validator validator = schema.newValidator();
             validator.validate(new StreamSource(xml));
 

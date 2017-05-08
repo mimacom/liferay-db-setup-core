@@ -30,6 +30,7 @@ package com.mimacom.liferay.portal.setup;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -65,19 +66,14 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
         for (String fileName : fileNames) {
             LOG.info("Starting upgrade process. Filename: " + fileName);
 
-            File file = getSetupFile(fileName);
-            if (file == null) {
-                throw new UpgradeException("XML configuration not found");
+            InputStream is = BasicSetupUpgradeProcess.class.getClassLoader().getResourceAsStream(fileName);
+
+            if (is == null) {
+                throw new UpgradeException("XML configuration not found: " + fileName);
             }
             try {
-                LiferaySetup.setup(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (ParserConfigurationException e) {
-                e.printStackTrace();
-            } catch (SAXException e) {
-                e.printStackTrace();
-            } catch (JAXBException e) {
+                LiferaySetup.setup(is);
+            } catch (FileNotFoundException | ParserConfigurationException | JAXBException | SAXException e) {
                 e.printStackTrace();
             }
             LOG.info("Finished upgrade process. Filename: " + fileName);
@@ -85,41 +81,7 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
     }
 
     /**
-     * checks and returns file used for setup.
-     *
-     * @param fileName
-     *            name of resource
-     * @return setup xml file
-     */
-    public final File getSetupFile(final String fileName) {
-
-        ClassLoader cl = this.getClass().getClassLoader();
-        URL url = cl.getResource(fileName);
-        if (url == null) {
-            LOG.error("XML configuration not found");
-
-            return null;
-        }
-
-        URI uri;
-        try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
-            LOG.error("Problem with reading configuration xml", e);
-            return null;
-        }
-
-        File file = null;
-        if (uri.getScheme().equals("file")) {
-            file = new File(uri);
-        }
-
-        return file;
-    }
-
-    /**
      * @return paths to setup xml files.
      */
     protected abstract String[] getSetupFileNames();
-
 }

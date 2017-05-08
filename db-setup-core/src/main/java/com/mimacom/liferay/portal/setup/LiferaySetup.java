@@ -49,6 +49,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 public final class LiferaySetup {
@@ -64,6 +65,11 @@ public final class LiferaySetup {
 
     public static boolean setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
         Setup setup = MarshallUtil.unmarshall(file);
+        return setup(setup);
+    }
+
+    public static boolean setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+        Setup setup = MarshallUtil.unmarshall(inputStream);
         return setup(setup);
     }
 
