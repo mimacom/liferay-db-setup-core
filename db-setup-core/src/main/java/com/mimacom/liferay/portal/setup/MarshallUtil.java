@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,27 +26,30 @@ package com.mimacom.liferay.portal.setup;
  * #L%
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.mimacom.liferay.portal.setup.domain.ObjectFactory;
+import com.mimacom.liferay.portal.setup.domain.Setup;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
-import com.mimacom.liferay.portal.setup.domain.Setup;
-import org.jboss.vfs.VirtualFile;
-
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public final class MarshallUtil {
     private static final Log LOG = LogFactoryUtil.getLog(MarshallUtil.class);
@@ -54,26 +57,40 @@ public final class MarshallUtil {
     private MarshallUtil() {
     }
 
-    public static Setup unmarshall(final File xmlFile) {
-        try {
-            return (Setup) getUnmarshaller().unmarshal(xmlFile);
-        } catch (JAXBException e) {
-            LOG.error("cannot unmarshall", e);
-            throw new IllegalArgumentException("cannot unmarshallFile");
-        }
+    public static Setup unmarshall(final File xmlFile) throws FileNotFoundException, JAXBException, ParserConfigurationException, SAXException {
+        return MarshallUtil.unmarshall(new FileInputStream(xmlFile));
     }
 
-    public static Setup unmarshall(final InputStream stream) {
+    public static Setup unmarshall(final InputStream stream) throws JAXBException, ParserConfigurationException, SAXException {
         try {
-            return (Setup) getUnmarshaller().unmarshal(stream);
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            //spf.setXIncludeAware(true);
+            spf.setNamespaceAware(true);
+            XMLReader xr = spf.newSAXParser().getXMLReader();
+            /*
+            EntityResolver entityResolver = new EntityResolver() {
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                    InputStream resourceAsStream = MarshallUtil.class.getClassLoader().getResourceAsStream(systemId);
+                    return new InputSource(resourceAsStream);
+                }
+            };
+            xr.setEntityResolver(entityResolver);
+            */
+            SAXSource src = new SAXSource(xr, new InputSource(stream));
+            return (Setup) getUnmarshaller().unmarshal(src);
         } catch (JAXBException e) {
-            LOG.error("cannot unmarshall", e);
-            throw new IllegalArgumentException("cannot unmarshallFile");
+            LOG.error("Cannot unmarshall the provided stream", e);
+            throw e;
+        } catch (ParserConfigurationException | SAXException e) {
+            LOG.error("Cannot unmarshall the provided stream", e);
+            throw e;
         }
     }
 
     private static Unmarshaller getUnmarshaller() throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance("org.mimacom.liferay.portal.setup.domain");
+        ClassLoader cl = ObjectFactory.class.getClassLoader();
+        JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName(), cl);
         return jc.createUnmarshaller();
     }
 
@@ -83,19 +100,15 @@ public final class MarshallUtil {
         if (url == null) {
             throw new IOException("XSD configuration not found");
         }
-        URI uri = null;
+        URI uri;
         try {
             uri = url.toURI();
         } catch (URISyntaxException e) {
             throw new IOException("Problem with reading xsd", e);
         }
 
-        File file = null;
-        if (uri.getScheme().equals("vfs")) {
-            VirtualFile virtualFile = (VirtualFile) url.openConnection().getContent();
-            file = virtualFile.getPhysicalFile();
-
-        } else if (uri.getScheme().equals("file")) {
+        File file;
+        if (uri.getScheme().equals("file")) {
             file = new File(uri);
         } else {
             throw new IOException("Problem with reading xsd");

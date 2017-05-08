@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,18 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.core.util.DocumentUtil;
+import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
+import com.mimacom.liferay.portal.setup.domain.Document;
+import com.mimacom.liferay.portal.setup.domain.Organization;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,20 +45,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.DocumentUtil;
-import com.mimacom.liferay.portal.setup.domain.Document;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 
 public final class SetupDocuments {
 
@@ -83,7 +81,7 @@ public final class SetupDocuments {
     }
 
     public static void setupOrganizationDocuments(final Organization organization,
-            final long groupId, final long company) {
+                                                  final long groupId, final long company) {
         for (Document doc : organization.getDocument()) {
             String folderPath = doc.getDocumentFolderName();
             String documentName = doc.getDocumentFilename();

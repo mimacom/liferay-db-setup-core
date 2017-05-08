@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,18 +27,17 @@ package com.mimacom.liferay.portal.setup.core;
  */
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.liferay.journal.model.JournalFolder;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
 import com.mimacom.liferay.portal.setup.domain.ArticleFolder;
+import com.mimacom.liferay.portal.setup.domain.Organization;
 
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portlet.journal.model.JournalFolder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public final class SetupWebFolders {
     private static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
@@ -71,8 +70,8 @@ public final class SetupWebFolders {
     }
 
     public static void setupWebFolders(
-        final Organization org, final long groupId,
-        final long companyId) {
+            final Organization org, final long groupId,
+            final long companyId) {
         for (ArticleFolder af : org.getArticleFolder()) {
             String webFolderPath = af.getFolderPath();
             String description = af.getDescription();

@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,36 +26,30 @@ package com.mimacom.liferay.portal.setup;
  * #L%
  */
 
-import java.io.File;
-import java.util.List;
-
-import com.mimacom.liferay.portal.setup.core.SetupOrganizations;
-import com.mimacom.liferay.portal.setup.core.SetupPages;
-import com.mimacom.liferay.portal.setup.core.SetupRoles;
-import com.mimacom.liferay.portal.setup.core.SetupUsers;
-import com.mimacom.liferay.portal.setup.domain.*;
-import com.mimacom.liferay.portal.setup.core.SetupCustomFields;
-import com.mimacom.liferay.portal.setup.core.SetupPermissions;
-import com.mimacom.liferay.portal.setup.domain.Configuration;
-import com.mimacom.liferay.portal.setup.domain.CustomFields;
-import com.mimacom.liferay.portal.setup.domain.ObjectsToBeDeleted;
-import com.mimacom.liferay.portal.setup.domain.Setup;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Role;
-import com.liferay.portal.model.User;
-import com.liferay.portal.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.core.*;
+import com.mimacom.liferay.portal.setup.domain.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 public final class LiferaySetup {
 
@@ -68,7 +62,7 @@ public final class LiferaySetup {
     private LiferaySetup() {
     }
 
-    public static boolean setup(final File file) {
+    public static boolean setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
         Setup setup = MarshallUtil.unmarshall(file);
         return setup(setup);
     }
@@ -83,12 +77,10 @@ public final class LiferaySetup {
                 setAdminPermissionCheckerForThread(PortalUtil.getDefaultCompanyId());
                 LOG.info("Using default administrator.");
             } else {
-                User user = UserLocalServiceUtil
-                        .getUserByEmailAddress(PortalUtil.getDefaultCompanyId(), runAsUser);
+                User user = UserLocalServiceUtil.getUserByEmailAddress(PortalUtil.getDefaultCompanyId(), runAsUser);
                 runAsUserId = user.getUserId();
                 PrincipalThreadLocal.setName(runAsUserId);
-                PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(user,
-                        true);
+                PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(user);
                 PermissionThreadLocal.setPermissionChecker(permissionChecker);
 
                 LOG.info("Execute setup module as user " + setup.getConfiguration().getRunasuser());
@@ -114,8 +106,6 @@ public final class LiferaySetup {
             defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId);
         } catch (PortalException e1) {
             LOG.error("default user not found", e1);
-        } catch (SystemException e1) {
-            LOG.error("default user not found", e1);
         }
         long groupId = 0;
         Group g;
@@ -123,8 +113,6 @@ public final class LiferaySetup {
             g = GroupLocalServiceUtil.getGroup(companyId, "Guest");
             groupId = g.getGroupId();
         } catch (PortalException e) {
-            LOG.error("Default site not found", e);
-        } catch (SystemException e) {
             LOG.error("Default site not found", e);
         }
 
@@ -201,12 +189,10 @@ public final class LiferaySetup {
     /**
      * Returns Liferay user, that has Administrator role assigned.
      *
-     * @param companyId
-     *            company ID
+     * @param companyId company ID
      * @return Liferay {@link com.mimacom.liferay.portal.setup.domain.User}
-     *         instance, if no user is found, returns null
-     * @throws Exception
-     *             if cannot obtain permission checker
+     * instance, if no user is found, returns null
+     * @throws Exception if cannot obtain permission checker
      */
     private static User getAdminUser(final long companyId) throws Exception {
 
@@ -228,10 +214,8 @@ public final class LiferaySetup {
      * Initializes permission checker for Liferay Admin. Used to grant access to
      * custom fields.
      *
-     * @param companyId
-     *            company ID
-     * @throws Exception
-     *             if cannot set permission checker
+     * @param companyId company ID
+     * @throws Exception if cannot set permission checker
      */
     private static void setAdminPermissionCheckerForThread(final long companyId) throws Exception {
 

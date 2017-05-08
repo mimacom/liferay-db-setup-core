@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,27 +26,20 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import com.mimacom.liferay.portal.setup.domain.TitleTranslation;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.domain.TitleTranslation;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.*;
 
 public final class TitleMapUtil {
     private static final Log LOG = LogFactoryUtil.getLog(TitleMapUtil.class);
@@ -55,7 +48,7 @@ public final class TitleMapUtil {
     }
 
     public static Map<Locale, String> getTitleMap(final List<TitleTranslation> translations,
-            final long groupId, final String defaultLocaleTitle, final String locationHint) {
+                                                  final long groupId, final String defaultLocaleTitle, final String locationHint) {
         Map<Locale, String> titleMap = new HashMap<>();
         Locale siteDefaultLocale = getDefaultLocale(groupId, locationHint);
 

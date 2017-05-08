@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,19 +26,17 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portlet.documentlibrary.NoSuchFolderException;
-import com.mimacom.liferay.portal.setup.core.SetupDocumentFolders;
-import com.mimacom.liferay.portal.setup.core.SetupPermissions;
-
+import com.liferay.document.library.kernel.exception.NoSuchFolderException;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.journal.model.JournalFolder;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
-import com.liferay.portlet.journal.model.JournalFolder;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.mimacom.liferay.portal.setup.core.SetupDocumentFolders;
+import com.mimacom.liferay.portal.setup.core.SetupPermissions;
 
 public final class FolderUtil {
 
@@ -49,7 +47,7 @@ public final class FolderUtil {
     }
 
     public static Folder findFolder(final long company, final long groupId, final long repoId,
-            final long userId, final String name, final boolean createIfNotExists) {
+                                    final long userId, final String name, final boolean createIfNotExists) {
         String[] folderPath = name.split("/");
         Folder foundFolder = null;
         int count = 0;
@@ -79,7 +77,7 @@ public final class FolderUtil {
     }
 
     public static Folder findFolder(final Long groupId, final Long parentFolderId,
-            final String name) {
+                                    final String name) {
         Folder dir = null;
         try {
             dir = DLAppLocalServiceUtil.getFolder(groupId, parentFolderId, name);
@@ -94,9 +92,7 @@ public final class FolderUtil {
     }
 
     public static Folder createDocumentFolder(final long companyId, final long groupId,
-            final long repoId, final long userId, final Long pFolderId, final String folderName) {
-
-        Long folderId = null;
+                                              final long repoId, final long userId, final Long pFolderId, final String folderName) {
 
         Long currentFolderId = null;
         Folder folder = null;
@@ -111,7 +107,6 @@ public final class FolderUtil {
                             folderName, new ServiceContext());
 
                 }
-                folderId = folder.getFolderId();
             } catch (SystemException | PortalException e) {
                 e.printStackTrace();
             }

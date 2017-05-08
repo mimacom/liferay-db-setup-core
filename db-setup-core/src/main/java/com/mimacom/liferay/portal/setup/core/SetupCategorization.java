@@ -2,7 +2,7 @@
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,26 +25,26 @@
  */
 package com.mimacom.liferay.portal.setup.core;
 
+import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.asset.kernel.model.AssetVocabulary;
+import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
+import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.domain.Category;
+import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Vocabulary;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.mimacom.liferay.portal.setup.domain.Category;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.domain.Vocabulary;
-
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portlet.asset.model.AssetCategory;
-import com.liferay.portlet.asset.model.AssetVocabulary;
-import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
-import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 
 /**
  * Setup module for creating / updating the categorization. So far it creates
@@ -74,7 +74,7 @@ public final class SetupCategorization {
     }
 
     private static void setupVocabulary(final Vocabulary vocabulary,
-            final Organization organization, final long groupId, final Locale defaultLocale) {
+                                        final Organization organization, final long groupId, final Locale defaultLocale) {
 
         LOG.info("Setting up vocabulary with title: " + vocabulary.getTitle());
 
@@ -116,7 +116,7 @@ public final class SetupCategorization {
             serviceContext.setCompanyId(PortalUtil.getDefaultCompanyId());
             serviceContext.setScopeGroupId(groupId);
             assetVocabulary = AssetVocabularyLocalServiceUtil.addVocabulary(
-                    LiferaySetup.getRunAsUserId(), null, titleMap, descMap, null, serviceContext);
+                    LiferaySetup.getRunAsUserId(), groupId, null, titleMap, descMap, null, serviceContext);
             LOG.info("AssetVocabulary successfuly added. ID:" + assetVocabulary.getVocabularyId()
                     + ", group:" + assetVocabulary.getGroupId());
             setupCategories(assetVocabulary.getVocabularyId(), groupId, 0L,
@@ -139,7 +139,7 @@ public final class SetupCategorization {
     }
 
     private static void setupCategory(final Category category, final long vocabularyId,
-            final long groupId, final Locale defaultLocale, final long parentCategoryId) {
+                                      final long groupId, final Locale defaultLocale, final long parentCategoryId) {
 
         LOG.info("Setting up category with title:" + category.getTitle());
 
@@ -190,7 +190,7 @@ public final class SetupCategorization {
         }
 
         try {
-            assetCategory = AssetCategoryLocalServiceUtil.addCategory(LiferaySetup.getRunAsUserId(),
+            assetCategory = AssetCategoryLocalServiceUtil.addCategory(LiferaySetup.getRunAsUserId(), groupId,
                     parentCategoryId, titleMap, descMap, vocabularyId, null, serviceContext);
             LOG.info("Category successfully added with title: " + assetCategory.getTitle());
 

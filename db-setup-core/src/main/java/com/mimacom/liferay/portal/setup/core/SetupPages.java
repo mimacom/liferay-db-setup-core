@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,66 +26,35 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.portlet.ReadOnlyException;
-import javax.portlet.ValidatorException;
-
-import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
-import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.domain.Page;
-import com.mimacom.liferay.portal.setup.domain.PageTemplate;
-import com.mimacom.liferay.portal.setup.domain.PageTemplates;
-import com.mimacom.liferay.portal.setup.domain.Pageportlet;
-import com.mimacom.liferay.portal.setup.domain.PortletPreference;
-import com.mimacom.liferay.portal.setup.domain.PrivatePages;
-import com.mimacom.liferay.portal.setup.domain.PublicPages;
-import com.mimacom.liferay.portal.setup.domain.Theme;
-
-import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.*;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.*;
+import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutPrototype;
-import com.liferay.portal.model.LayoutSet;
-import com.liferay.portal.model.LayoutTemplate;
-import com.liferay.portal.model.LayoutTypePortlet;
-import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.LayoutPrototypeLocalServiceUtil;
-import com.liferay.portal.service.LayoutServiceUtil;
-import com.liferay.portal.service.LayoutSetLocalServiceUtil;
-import com.liferay.portal.service.LayoutTemplateLocalServiceUtil;
-import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.service.ResourceLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.service.permission.PortletPermissionUtil;
-import com.liferay.portal.util.PortletKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
+import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
+import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.domain.*;
+import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Theme;
+
+import javax.portlet.ReadOnlyException;
+import javax.portlet.ValidatorException;
+import java.io.IOException;
+import java.util.*;
+
 
 public final class SetupPages {
     private static final Log LOG = LogFactoryUtil.getLog(SetupPages.class);
@@ -137,7 +106,7 @@ public final class SetupPages {
      * @throws PortalException
      */
     public static void setupOrganizationPages(final Organization organization, final long groupId,
-            final long company, final long userid) throws SystemException, PortalException {
+                                              final long company, final long userid) throws SystemException, PortalException {
 
         PublicPages publicPages = organization.getPublicPages();
         if (publicPages != null) {
@@ -168,17 +137,13 @@ public final class SetupPages {
     /**
      * Set the page templates up. As this is heavily based on page (layout).
      *
-     * @param pageTemplates
-     *            The page template definitions that are imported.
-     * @param groupId
-     *            The group id of the site where to import the
-     * @param company
-     *            The id of the company to which the templates are imported.
-     * @param userid
-     *            The user id of the importing user.
+     * @param pageTemplates The page template definitions that are imported.
+     * @param groupId       The group id of the site where to import the
+     * @param company       The id of the company to which the templates are imported.
+     * @param userid        The user id of the importing user.
      */
     public static void setupPageTemplates(final PageTemplates pageTemplates, final long groupId,
-            final long company, final long userid) {
+                                          final long company, final long userid) {
         try {
             for (PageTemplate pageTemplate : pageTemplates.getPageTemplate()) {
                 String name = pageTemplate.getName();
@@ -251,8 +216,8 @@ public final class SetupPages {
      * @throws PortalException
      */
     private static void addPages(final List<Page> pages, final long groupId,
-            final boolean isPrivate, final long parentLayoutId, final long company,
-            final long userId) throws SystemException, PortalException {
+                                 final boolean isPrivate, final long parentLayoutId, final long company,
+                                 final long userId) throws SystemException, PortalException {
 
         for (Page page : pages) {
 
@@ -287,8 +252,8 @@ public final class SetupPages {
     }
 
     private static void setupLiferayPage(final Layout layout, final Page page, final long groupId,
-            final boolean isPrivate, final long company, final long userId,
-            final String pageTemplateName) throws SystemException, PortalException {
+                                         final boolean isPrivate, final long company, final long userId,
+                                         final String pageTemplateName) throws SystemException, PortalException {
         if (page.getTheme() != null) {
             setPageTheme(layout, page);
         }
@@ -336,7 +301,7 @@ public final class SetupPages {
     }
 
     private static Layout createLinkPage(final Page p, final long groupId,
-            final long parentLayoutId, final long userId) {
+                                         final long parentLayoutId, final long userId) {
         // all values are usually retrieved via special methods from our code
         // for better readability I have added the real values here
 
@@ -402,7 +367,7 @@ public final class SetupPages {
     }
 
     private static void setCustomFields(final long runAsUserId, final long groupId,
-            final long company, final Page page, final Layout layout) {
+                                        final long company, final Page page, final Layout layout) {
         Class clazz = Layout.class;
         String resolverHint = "Resolving customized value for page " + page.getFriendlyURL() + " "
                 + "failed for key " + "%%key%% and value %%value%%";
@@ -427,8 +392,8 @@ public final class SetupPages {
     }
 
     private static void addPortletIntoPage(final Page page, final Layout layout,
-            final Pageportlet portlet, final long company, final long groupId)
-                    throws SystemException, ValidatorException, IOException, PortalException {
+                                           final Pageportlet portlet, final long company, final long groupId)
+            throws SystemException, ValidatorException, IOException, PortalException {
         if (page.getLinkToURL() != null && !page.getLinkToURL().equals("")) {
             LOG.error("This is a link page! It cannot be cleared. If you intend to use this page "
                     + "for portlets, please"
@@ -449,7 +414,7 @@ public final class SetupPages {
                 if (portletIdInc == null) {
                     portletIdInc = portletId;
                 }
-            } catch (PortalException | SystemException e) {
+            } catch (SystemException e) {
                 LOG.error("Add portlet error ", e);
             }
 
@@ -475,8 +440,8 @@ public final class SetupPages {
     }
 
     private static void addPortletPreferences(final javax.portlet.PortletPreferences prefs,
-            final Pageportlet portlet, final long company, final long groupId,
-            final long runAsUserId) {
+                                              final Pageportlet portlet, final long company, final long groupId,
+                                              final long runAsUserId) {
         List<PortletPreference> prefsList = portlet.getPortletPreference();
         for (PortletPreference p : prefsList) {
             try {
@@ -509,23 +474,17 @@ public final class SetupPages {
      * of path and title of the refered document &gt; }}</li>
      * </ul>
      *
-     * @param key
-     *            The portlet key.
-     * @param value
-     *            The defined value which should be parametrized.
-     * @param portlet
-     *            The pageportlet definition.
-     * @param company
-     *            Id of the company.
-     * @param groupId
-     *            The group id.
-     * @param runAsUserId
-     *            The user id which import the data.
+     * @param key         The portlet key.
+     * @param value       The defined value which should be parametrized.
+     * @param portlet     The pageportlet definition.
+     * @param company     Id of the company.
+     * @param groupId     The group id.
+     * @param runAsUserId The user id which import the data.
      * @return
      */
     private static String resolvePortletPrefValue(final String key, final String value,
-            final Pageportlet portlet, final long company, final long groupId,
-            final long runAsUserId) {
+                                                  final Pageportlet portlet, final long company, final long groupId,
+                                                  final long runAsUserId) {
         String locationHint = "Key: " + key + " of portlet " + portlet.getPortletId();
         return ResolverUtil.lookupAll(runAsUserId, groupId, company, value, locationHint);
     }
@@ -581,11 +540,11 @@ public final class SetupPages {
     }
 
     private static void removeAllPortlets(final long runasUser,
-            final LayoutTypePortlet layoutTypePortlet, final Layout layout) {
+                                          final LayoutTypePortlet layoutTypePortlet, final Layout layout) {
         List<Portlet> portlets = null;
         try {
             portlets = layoutTypePortlet.getAllPortlets();
-        } catch (PortalException | SystemException e1) {
+        } catch (SystemException e1) {
             e1.printStackTrace();
         }
         if (portlets != null) {
@@ -603,10 +562,10 @@ public final class SetupPages {
                                 rootPortletId, ResourceConstants.SCOPE_INDIVIDUAL,
                                 PortletPermissionUtil.getPrimaryKey(layout.getPlid(), portletId));
                         LayoutLocalServiceUtil.updateLayout(layoutTypePortlet.getLayout());
-                        List<com.liferay.portal.model.PortletPreferences> list = PortletPreferencesLocalServiceUtil
+                        List<PortletPreferences> list = PortletPreferencesLocalServiceUtil
                                 .getPortletPreferences(PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
                                         layout.getPlid(), portletId);
-                        for (com.liferay.portal.model.PortletPreferences p : list) {
+                        for (PortletPreferences p : list) {
                             PortletPreferencesLocalServiceUtil.deletePortletPreferences(p);
                         }
                     }
@@ -629,12 +588,11 @@ public final class SetupPages {
     }
 
     private static Layout createPage(final long groupId, final Page currentPage,
-            final long parentLayoutId, final boolean isPrivate)
-                    throws SystemException, PortalException {
+                                     final long parentLayoutId, final boolean isPrivate)
+            throws SystemException, PortalException {
 
-        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate,
-                parentLayoutId, currentPage.getName(), currentPage.getName(),
-                LiferaySetup.DESCRIPTION, currentPage.getType(), currentPage.isHidden(),
+        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate, parentLayoutId,
+                currentPage.getName(), currentPage.getName(), "", currentPage.getType(), currentPage.isHidden(),
                 currentPage.getFriendlyURL(), new ServiceContext());
     }
 

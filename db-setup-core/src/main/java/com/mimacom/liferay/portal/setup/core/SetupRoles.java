@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,23 +26,24 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
+import com.liferay.portal.kernel.dao.orm.ObjectNotFoundException;
+import com.liferay.portal.kernel.exception.NoSuchRoleException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.RequiredRoleException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import com.liferay.portal.NoSuchRoleException;
-import com.liferay.portal.RequiredRoleException;
-import com.liferay.portal.kernel.dao.orm.ObjectNotFoundException;
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Role;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 
 public final class SetupRoles {
     private static final Log LOG = LogFactoryUtil.getLog(SetupRoles.class);
@@ -83,8 +84,8 @@ public final class SetupRoles {
             }
 
             long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
-            RoleLocalServiceUtil.addRole(defaultUserId, COMPANY_ID, role.getName(), localeTitleMap,
-                    null, roleType);
+            RoleLocalServiceUtil.addRole(defaultUserId, null, 0, role.getName(), localeTitleMap,
+                    null, roleType, null, null);
 
             LOG.info("Setup: Role " + role.getName() + " does not exist, adding...");
 
@@ -95,50 +96,50 @@ public final class SetupRoles {
     }
 
     public static void deleteRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles,
-            final String deleteMethod) {
+                                   final String deleteMethod) {
 
         switch (deleteMethod) {
-        case "excludeListed":
-            Map<String, com.mimacom.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
-                    roles);
-            try {
-                for (Role role : RoleLocalServiceUtil.getRoles(-1, -1)) {
-                    String name = role.getName();
-                    if (!toBeDeletedRoles.containsKey(name)) {
-                        try {
-                            RoleLocalServiceUtil
-                                    .deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
-                            LOG.info("Deleting Role " + name);
+            case "excludeListed":
+                Map<String, com.mimacom.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
+                        roles);
+                try {
+                    for (Role role : RoleLocalServiceUtil.getRoles(-1, -1)) {
+                        String name = role.getName();
+                        if (!toBeDeletedRoles.containsKey(name)) {
+                            try {
+                                RoleLocalServiceUtil
+                                        .deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
+                                LOG.info("Deleting Role " + name);
 
-                        } catch (Exception e) {
-                            LOG.info("Skipping deletion fo system role " + name);
+                            } catch (Exception e) {
+                                LOG.info("Skipping deletion fo system role " + name);
+                            }
                         }
                     }
+                } catch (SystemException e) {
+                    LOG.error("problem with deleting roles", e);
                 }
-            } catch (SystemException e) {
-                LOG.error("problem with deleting roles", e);
-            }
-            break;
+                break;
 
-        case "onlyListed":
-            for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
-                String name = role.getName();
-                try {
-                    RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
-                    LOG.info("Deleting Role " + name);
+            case "onlyListed":
+                for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
+                    String name = role.getName();
+                    try {
+                        RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
+                        LOG.info("Deleting Role " + name);
 
-                } catch (RequiredRoleException e) {
-                    LOG.info("Skipping deletion fo system role " + name);
+                    } catch (RequiredRoleException e) {
+                        LOG.info("Skipping deletion fo system role " + name);
 
-                } catch (PortalException | SystemException e) {
-                    LOG.error("Unable to delete role.", e);
+                    } catch (PortalException | SystemException e) {
+                        LOG.error("Unable to delete role.", e);
+                    }
                 }
-            }
-            break;
+                break;
 
-        default:
-            LOG.error("Unknown delete method : " + deleteMethod);
-            break;
+            default:
+                LOG.error("Unknown delete method : " + deleteMethod);
+                break;
         }
 
     }

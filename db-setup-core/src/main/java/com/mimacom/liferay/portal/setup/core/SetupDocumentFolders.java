@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,26 +27,25 @@ package com.mimacom.liferay.portal.setup.core;
  */
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
 import com.mimacom.liferay.portal.setup.domain.DocumentFolder;
 import com.mimacom.liferay.portal.setup.domain.Organization;
 
-import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public final class SetupDocumentFolders {
     public static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
 
     static {
-        DEFAULT_PERMISSIONS = new HashMap<String, List<String>>();
-        List<String> actionsOwner = new ArrayList<String>();
+        DEFAULT_PERMISSIONS = new HashMap<>();
+        List<String> actionsOwner = new ArrayList<>();
 
         actionsOwner.add(ActionKeys.VIEW);
         actionsOwner.add(ActionKeys.UPDATE);
@@ -59,11 +58,11 @@ public final class SetupDocumentFolders {
 
         DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
 
-        List<String> actionsUser = new ArrayList<String>();
+        List<String> actionsUser = new ArrayList<>();
         actionsUser.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.USER, actionsUser);
 
-        List<String> actionsGuest = new ArrayList<String>();
+        List<String> actionsGuest = new ArrayList<>();
         actionsGuest.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.GUEST, actionsGuest);
     }
@@ -72,15 +71,12 @@ public final class SetupDocumentFolders {
 
     }
 
-    public static void setupDocumentFolders(
-        final Organization org, final long groupId,
-        final long companyId) {
+    public static void setupDocumentFolders(final Organization org, final long groupId, final long companyId) {
         for (DocumentFolder df : org.getDocumentFolder()) {
             boolean create = df.isCreateIfNotExists();
             String folderName = df.getFolderName();
 
-            Folder folder = FolderUtil.findFolder(companyId, groupId, groupId,
-                    LiferaySetup.getRunAsUserId(), folderName, create);
+            Folder folder = FolderUtil.findFolder(companyId, groupId, groupId, LiferaySetup.getRunAsUserId(), folderName, create);
             SetupPermissions.updatePermission("Document folder " + folderName, groupId, companyId,
                     folder.getFolderId(), DLFolder.class, df.getRolePermissions(),
                     DEFAULT_PERMISSIONS);

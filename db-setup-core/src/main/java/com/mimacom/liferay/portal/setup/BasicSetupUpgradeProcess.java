@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,20 @@ package com.mimacom.liferay.portal.setup;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.jboss.vfs.VirtualFile;
-
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by mapa on 13.3.2015.
@@ -66,7 +69,17 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
             if (file == null) {
                 throw new UpgradeException("XML configuration not found");
             }
-            LiferaySetup.setup(file);
+            try {
+                LiferaySetup.setup(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            } catch (SAXException e) {
+                e.printStackTrace();
+            } catch (JAXBException e) {
+                e.printStackTrace();
+            }
             LOG.info("Finished upgrade process. Filename: " + fileName);
         }
     }
@@ -97,16 +110,7 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
         }
 
         File file = null;
-        if (uri.getScheme().equals("vfs")) {
-            try {
-                VirtualFile virtualFile = (VirtualFile) url.openConnection().getContent();
-                file = virtualFile.getPhysicalFile();
-
-            } catch (IOException e) {
-                LOG.error("Couldn't open xml configuration", e);
-                return null;
-            }
-        } else if (uri.getScheme().equals("file")) {
+        if (uri.getScheme().equals("file")) {
             file = new File(uri);
         }
 

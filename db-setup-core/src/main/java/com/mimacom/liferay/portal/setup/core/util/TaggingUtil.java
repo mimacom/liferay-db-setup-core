@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,19 +26,18 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
-import java.util.List;
-
+import com.liferay.asset.kernel.exception.NoSuchTagException;
+import com.liferay.asset.kernel.model.AssetTag;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
+import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.asset.NoSuchTagException;
-import com.liferay.portlet.asset.model.AssetTag;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
-import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
-import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portal.kernel.service.ServiceContext;
+
+import java.util.List;
 
 public final class TaggingUtil {
     private static final Log LOG = LogFactoryUtil.getLog(TaggingUtil.class);
@@ -47,8 +46,8 @@ public final class TaggingUtil {
     }
 
     public static void associateTagsWithJournalArticle(final List<String> tags,
-            final List<String> categories, final long userId, final long groupId,
-            final long primaryKey, final Class className) {
+                                                       final List<String> categories, final long userId, final long groupId,
+                                                       final long primaryKey, final Class className) {
 
         try {
             long[] catIds = new long[0];
@@ -65,7 +64,7 @@ public final class TaggingUtil {
     }
 
     public static long[] getCategories(final List<String> categories, final long groupId,
-            final long runAsUser) {
+                                       final long runAsUser) {
         // The categories and tags to assign
         final long[] assetCategoryIds = new long[categories.size()];
         final String[] tagProperties = new String[0]; // Might be null too
@@ -78,8 +77,7 @@ public final class TaggingUtil {
                 assetTag = AssetTagLocalServiceUtil.getTag(groupId, name);
             } catch (final NoSuchTagException e) {
                 try {
-                    assetTag = AssetTagLocalServiceUtil.addTag(runAsUser, name, tagProperties,
-                            new ServiceContext());
+                    assetTag = AssetTagLocalServiceUtil.addTag(runAsUser, groupId, name, new ServiceContext());
                 } catch (PortalException | SystemException e1) {
                     LOG.error("Category " + name + " not found! ", e1);
                 }

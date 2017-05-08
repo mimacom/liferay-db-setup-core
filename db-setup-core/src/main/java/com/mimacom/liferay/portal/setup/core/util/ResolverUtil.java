@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,33 +27,29 @@ package com.mimacom.liferay.portal.setup.core.util;
  */
 
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.document.library.kernel.util.DLUtil;
+import com.liferay.dynamic.data.lists.model.DDLRecordSet;
+import com.liferay.dynamic.data.lists.service.DDLRecordSetLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
+import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.UserGroup;
-import com.liferay.portal.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
-import com.liferay.portal.service.UserGroupLocalServiceUtil;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.documentlibrary.util.DLUtil;
-import com.liferay.portlet.dynamicdatalists.model.DDLRecordSet;
-import com.liferay.portlet.dynamicdatalists.service.DDLRecordSetLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
-import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
-import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
-import com.liferay.portlet.journal.model.JournalArticle;
-import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -622,6 +618,7 @@ public final class ResolverUtil {
                 DDLRecordSet rs = null;
                 try {
                     rs = DDLRecordSetLocalServiceUtil.getRecordSet(siteGroupId, recordsetId);
+
                 } catch (PortalException e) {
                     LOG.error("Error retrieving referred DDL structure " + recordsetId + ".");
                 } catch (SystemException e) {
@@ -693,11 +690,7 @@ public final class ResolverUtil {
                                     .toString(getStructureId(name, siteGroupId, referredClass));
                         }
                     }
-                } catch (SystemException e) {
-                    LOG.error("Template with key contentCopy " + name + " not found for "
-                            + locationHint);
-                    LOG.error((Throwable) e);
-                } catch (PortalException e) {
+                } catch (PortalException | SystemException e) {
                     LOG.error("Template with key contentCopy " + name + " not found for "
                             + locationHint);
                     LOG.error((Throwable) e);
@@ -749,6 +742,7 @@ public final class ResolverUtil {
             final Class clazz) throws SystemException, PortalException {
 
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(clazz);
+
         DDMTemplate template = DDMTemplateLocalServiceUtil.getTemplate(groupId, classNameId,
                 templateKey);
         return template.getTemplateId();
