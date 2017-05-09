@@ -38,10 +38,7 @@ import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
-import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.*;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
@@ -118,6 +115,9 @@ public final class SetupPages {
                 deletePages(groupId);
             }
             addPages(publicPages.getPage(), groupId, false, 0, company, userid);
+            if (publicPages.getVirtualHost() != null) {
+                LayoutSetLocalServiceUtil.updateVirtualHost(groupId, false, publicPages.getVirtualHost());
+            }
         }
 
         PrivatePages privatePages = organization.getPrivatePages();
@@ -129,8 +129,10 @@ public final class SetupPages {
                 LOG.info("Setup: Deleting pages from organization " + organization.getName());
                 deletePages(groupId);
             }
-
             addPages(privatePages.getPage(), groupId, true, 0, company, userid);
+            if (privatePages.getVirtualHost() != null) {
+                LayoutSetLocalServiceUtil.updateVirtualHost(groupId, true, privatePages.getVirtualHost());
+            }
         }
     }
 

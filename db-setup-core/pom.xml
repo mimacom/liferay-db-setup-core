@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mimacom.liferay</groupId>
     <version>1.0.1-SNAPSHOT</version>
     <artifactId>db-setup-core</artifactId>
     <name>Liferay Portal DB Setup core</name>
@@ -11,6 +10,12 @@
     <inceptionYear>2016</inceptionYear>
 
     <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.mimacom.liferay</groupId>
+        <artifactId>build-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
 
     <build>
         <plugins>
@@ -148,4 +153,6 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
+
 </project>
