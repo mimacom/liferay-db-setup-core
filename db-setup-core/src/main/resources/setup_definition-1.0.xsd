@@ -124,7 +124,6 @@
             <xs:attribute name="maintain-site-hierarchy" type="xs:boolean" default="false"/>
             <xs:attribute name="site-name" type="xs:string"/>
             <xs:attribute name="site-friendly-url" type="xs:string"/>
-
         </xs:complexType>
     </xs:element>
 
@@ -154,8 +153,8 @@
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
+            <xs:attribute name="virtual-host" type="xs:string"/>
         </xs:complexType>
-
     </xs:element>
 
     <xs:element name="private-pages">
@@ -165,6 +164,7 @@
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
+            <xs:attribute name="virtual-host" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,63 +26,49 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.model.AssetLinkConstants;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.asset.kernel.service.AssetLinkLocalServiceUtil;
+import com.liferay.dynamic.data.lists.model.DDLRecordSet;
+import com.liferay.dynamic.data.lists.service.DDLRecordSetLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.exception.StructureDuplicateStructureKeyException;
+import com.liferay.dynamic.data.mapping.exception.TemplateDuplicateTemplateKeyException;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
+import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
+import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalArticleConstants;
+import com.liferay.journal.model.JournalFolder;
+import com.liferay.journal.service.JournalArticleLocalServiceUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
+import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
+import com.mimacom.liferay.portal.setup.domain.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
-import org.jboss.vfs.VirtualFile;
-import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
-import com.mimacom.liferay.portal.setup.domain.Adt;
-import com.mimacom.liferay.portal.setup.domain.Article;
-import com.mimacom.liferay.portal.setup.domain.ArticleTemplate;
-import com.mimacom.liferay.portal.setup.domain.DdlRecordset;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.domain.RelatedAsset;
-import com.mimacom.liferay.portal.setup.domain.RelatedAssets;
-import com.mimacom.liferay.portal.setup.domain.Structure;
-
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.asset.model.AssetLinkConstants;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
-import com.liferay.portlet.asset.service.AssetLinkLocalServiceUtil;
-import com.liferay.portlet.dynamicdatalists.model.DDLRecordSet;
-import com.liferay.portlet.dynamicdatalists.service.DDLRecordSetLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
-import com.liferay.portlet.dynamicdatamapping.TemplateDuplicateTemplateKeyException;
-import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
-import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
-import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
-import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
-import com.liferay.portlet.journal.model.JournalArticle;
-import com.liferay.portlet.journal.model.JournalArticleConstants;
-import com.liferay.portlet.journal.model.JournalFolder;
-import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
+import java.util.*;
 
 /**
  * Created by mapa, guno..
@@ -123,7 +109,7 @@ public final class SetupArticles {
     }
 
     public static void setupOrganizationArticles(final Organization organization,
-            final long groupId, final long companyId) throws PortalException, SystemException {
+                                                 final long groupId, final long companyId) throws PortalException, SystemException {
         List<Structure> articleStructures = organization.getArticleStructure();
 
         if (articleStructures != null) {
@@ -194,8 +180,8 @@ public final class SetupArticles {
     }
 
     public static void addDDMStructure(final Structure structure, final long groupId,
-            final long classNameId)
-                    throws SystemException, PortalException, IOException, URISyntaxException {
+                                       final long classNameId)
+            throws SystemException, PortalException, IOException, URISyntaxException {
 
         LOG.info("Adding Article structure " + structure.getName());
         Map<Locale, String> nameMap = new HashMap<>();
@@ -223,7 +209,7 @@ public final class SetupArticles {
         if (ddmStructure != null) {
             LOG.info("Structure already exists and will be overwritten.");
             ddmStructure.setNameMap(nameMap);
-            ddmStructure.setXsd(xsd);
+            ddmStructure.setDefinition(xsd);
             if (structure.getParent() != null && !structure.getParent().isEmpty()) {
                 LOG.info("Setting up parent structure: " + structure.getName());
                 DDMStructure parentStructure = DDMStructureLocalServiceUtil.fetchStructure(groupId,
@@ -257,6 +243,7 @@ public final class SetupArticles {
 
         LOG.info("Adding Article template " + template.getName());
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(DDMStructure.class);
+        long resourceClassnameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
         Map<Locale, String> nameMap = new HashMap<>();
         Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(groupId);
         String name = template.getName();
@@ -266,7 +253,7 @@ public final class SetupArticles {
         nameMap.put(siteDefaultLocale, name);
         Map<Locale, String> descMap = new HashMap<>();
 
-        String script = null;
+        String script;
         try {
             script = getFileContent(template.getPath());
         } catch (IOException | URISyntaxException e) {
@@ -282,8 +269,7 @@ public final class SetupArticles {
 
         DDMTemplate ddmTemplate = null;
         try {
-            ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(groupId, classNameId,
-                    template.getKey());
+            ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(groupId, classNameId, template.getKey());
         } catch (SystemException e) {
             LOG.error("Error while trying to find template with key: " + template.getKey(), e);
         }
@@ -301,8 +287,8 @@ public final class SetupArticles {
         }
 
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
-                LiferaySetup.getRunAsUserId(), groupId, classNameId, classPK, template.getKey(),
-                nameMap, descMap, "display", null, template.getLanguage(), script, true, false,
+                LiferaySetup.getRunAsUserId(), groupId, classNameId, classPK, resourceClassnameId, template.getKey(),
+                nameMap, descMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, true, false,
                 null, null, new ServiceContext());
         LOG.info("Added Article template: " + newTemplate.getName());
     }
@@ -312,6 +298,7 @@ public final class SetupArticles {
 
         LOG.info("Adding ADT " + template.getName());
         long classNameId = PortalUtil.getClassNameId(template.getClassName());
+        long resourceClassnameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
 
         Map<Locale, String> nameMap = new HashMap<Locale, String>();
 
@@ -333,6 +320,8 @@ public final class SetupArticles {
             LOG.error("Error while trying to find ADT with key: " + template.getTemplateKey());
         }
 
+        String script = getFileContent(template.getPath());
+
         if (ddmTemplate != null) {
             LOG.info("Template already exists and will be overwritten.");
             ddmTemplate.setLanguage(template.getLanguage());
@@ -340,30 +329,22 @@ public final class SetupArticles {
             ddmTemplate.setDescriptionMap(descriptionMap);
             ddmTemplate.setClassName(template.getClassName());
             ddmTemplate.setCacheable(template.isCacheable());
-            try {
-                ddmTemplate.setScript(getFileContent(template.getPath()));
-            } catch (IOException | URISyntaxException e) {
-                LOG.error("Error Reading ADT File content for: " + ddmTemplate.getName());
-                return;
-            }
+            ddmTemplate.setScript(script);
 
             DDMTemplateLocalServiceUtil.updateDDMTemplate(ddmTemplate);
             LOG.info("ADT successfully updated: " + ddmTemplate.getName());
             return;
         }
 
-        String script = getFileContent(template.getPath());
-
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
-                LiferaySetup.getRunAsUserId(), groupId, classNameId, 0, template.getTemplateKey(),
-                nameMap, descriptionMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null,
-                template.getLanguage(), script, template.isCacheable(), false, null, null,
-                new ServiceContext());
-        LOG.info("Added ADT: " + template.getName());
+                LiferaySetup.getRunAsUserId(), groupId, classNameId, 0, resourceClassnameId, template.getTemplateKey(),
+                nameMap, descriptionMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, true, false,
+                null, null, new ServiceContext());
+        LOG.info("Added ADT: " + newTemplate.getName());
     }
 
     public static void addJournalArticle(final Article article, final long groupId,
-            final long companyId) {
+                                         final long companyId) {
         LOG.info("Adding Journal Article " + article.getTitle());
 
         String content = null;
@@ -413,7 +394,7 @@ public final class SetupArticles {
                 journalArticle = JournalArticleLocalServiceUtil.addArticle(
                         LiferaySetup.getRunAsUserId(), groupId, folderId, 0, 0,
                         article.getArticleId(), generatedId,
-                        JournalArticleConstants.VERSION_DEFAULT, titleMap, null, content, "general",
+                        JournalArticleConstants.VERSION_DEFAULT, titleMap, null, content,
                         article.getArticleStructureKey(), article.getArticleTemplateKey(),
                         StringPool.BLANK, 1, 1, ARTICLE_PUBLISH_YEAR, 0, 0, 0, 0, 0, 0, 0, true, 0,
                         0, 0, 0, 0, true, true, false, StringPool.BLANK, null, null,
@@ -487,7 +468,7 @@ public final class SetupArticles {
     }
 
     public static void processRelatedAssets(final Article article, final JournalArticle ja,
-            final long runAsUserId, final long groupId, final long companyId) {
+                                            final long runAsUserId, final long groupId, final long companyId) {
         if (article.getRelatedAssets() != null) {
             RelatedAssets ras = article.getRelatedAssets();
             AssetEntry ae = null;
@@ -561,11 +542,7 @@ public final class SetupArticles {
         URI uri = url.toURI();
 
         File file = null;
-        if (uri.getScheme().equals("vfs")) {
-            VirtualFile virtualFile = (VirtualFile) url.openConnection().getContent();
-            file = virtualFile.getPhysicalFile();
-
-        } else if (uri.getScheme().equals("file")) {
+        if (uri.getScheme().equals("file")) {
             file = new File(uri);
         }
 

@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,16 +26,15 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
+import com.liferay.expando.kernel.model.ExpandoColumn;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.model.ExpandoValue;
+import com.liferay.expando.kernel.service.ExpandoColumnLocalServiceUtil;
+import com.liferay.expando.kernel.service.ExpandoTableLocalServiceUtil;
+import com.liferay.expando.kernel.service.ExpandoValueLocalServiceUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.service.ClassNameLocalServiceUtil;
-import com.liferay.portlet.expando.model.ExpandoColumn;
-import com.liferay.portlet.expando.model.ExpandoTable;
-import com.liferay.portlet.expando.model.ExpandoValue;
-import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
-import com.liferay.portlet.expando.service.ExpandoTableLocalServiceUtil;
-import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 
 /**
  * Utility for setting a custom field.

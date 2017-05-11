@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,27 +26,26 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.ListTypeConstants;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.OrganizationConstants;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ListTypeConstants;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.OrganizationConstants;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
+import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class SetupOrganizations {
 
@@ -96,10 +95,9 @@ public final class SetupOrganizations {
 
                     long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
                     Organization newOrganization = OrganizationLocalServiceUtil.addOrganization(
-                            defaultUserId, 0, organization.getName(),
-                            OrganizationConstants.TYPE_REGULAR_ORGANIZATION, false, 0, 0,
-                            ListTypeConstants.ORGANIZATION_STATUS_DEFAULT, LiferaySetup.DESCRIPTION,
-                            true, new ServiceContext());
+                            defaultUserId, OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID, organization.getName(),
+                            "organization", 0, 0,ListTypeConstants.ORGANIZATION_STATUS_DEFAULT,
+                            LiferaySetup.DESCRIPTION,true, new ServiceContext());
                     liferayOrg = newOrganization;
                     liferayGroup = liferayOrg.getGroup();
                     groupId = newOrganization.getGroupId();
@@ -176,8 +174,8 @@ public final class SetupOrganizations {
     }
 
     private static void setCustomFields(final long runAsUserId, final long groupId,
-            final long company, final com.mimacom.liferay.portal.setup.domain.Organization org,
-            final Organization liferayOrg) {
+                                        final long company, final com.mimacom.liferay.portal.setup.domain.Organization org,
+                                        final Organization liferayOrg) {
         if (liferayOrg == null && org.getCustomFieldSetting() != null
                 && org.getCustomFieldSetting().size() > 0) {
             LOG.error("Default site or global site has not organization. Thus you may not be able"
@@ -202,44 +200,44 @@ public final class SetupOrganizations {
             final String deleteMethod) {
 
         switch (deleteMethod) {
-        case "excludeListed":
-            Map<String, com.mimacom.liferay.portal.setup.domain.Organization> toBeDeletedOrganisations = convertOrganisationListToHashMap(
-                    organizations);
-            try {
-                for (com.liferay.portal.model.Organization organisation : OrganizationLocalServiceUtil
-                        .getOrganizations(-1, -1)) {
-                    if (!toBeDeletedOrganisations.containsKey(organisation.getName())) {
-                        try {
-                            OrganizationLocalServiceUtil
-                                    .deleteOrganization(organisation.getOrganizationId());
-                            LOG.info("Deleting Organisation" + organisation.getName());
-                        } catch (Exception e) {
-                            LOG.error("Error by deleting Organisation !", e);
+            case "excludeListed":
+                Map<String, com.mimacom.liferay.portal.setup.domain.Organization> toBeDeletedOrganisations = convertOrganisationListToHashMap(
+                        organizations);
+                try {
+                    for (Organization organisation : OrganizationLocalServiceUtil
+                            .getOrganizations(-1, -1)) {
+                        if (!toBeDeletedOrganisations.containsKey(organisation.getName())) {
+                            try {
+                                OrganizationLocalServiceUtil
+                                        .deleteOrganization(organisation.getOrganizationId());
+                                LOG.info("Deleting Organisation" + organisation.getName());
+                            } catch (Exception e) {
+                                LOG.error("Error by deleting Organisation !", e);
+                            }
                         }
                     }
+                } catch (SystemException e) {
+                    LOG.error("Error by retrieving organisations!", e);
                 }
-            } catch (SystemException e) {
-                LOG.error("Error by retrieving organisations!", e);
-            }
-            break;
+                break;
 
-        case "onlyListed":
-            for (com.mimacom.liferay.portal.setup.domain.Organization organisation : organizations) {
-                String name = organisation.getName();
-                try {
-                    Organization o = OrganizationLocalServiceUtil.getOrganization(COMPANY_ID, name);
-                    OrganizationLocalServiceUtil.deleteOrganization(o);
-                } catch (Exception e) {
-                    LOG.error("Error by deleting Organisation !", e);
+            case "onlyListed":
+                for (com.mimacom.liferay.portal.setup.domain.Organization organisation : organizations) {
+                    String name = organisation.getName();
+                    try {
+                        Organization o = OrganizationLocalServiceUtil.getOrganization(COMPANY_ID, name);
+                        OrganizationLocalServiceUtil.deleteOrganization(o);
+                    } catch (Exception e) {
+                        LOG.error("Error by deleting Organisation !", e);
+                    }
+                    LOG.info("Deleting Organisation " + name);
                 }
-                LOG.info("Deleting Organisation " + name);
-            }
 
-            break;
+                break;
 
-        default:
-            LOG.error("Unknown delete method : " + deleteMethod);
-            break;
+            default:
+                LOG.error("Unknown delete method : " + deleteMethod);
+                break;
         }
     }
 

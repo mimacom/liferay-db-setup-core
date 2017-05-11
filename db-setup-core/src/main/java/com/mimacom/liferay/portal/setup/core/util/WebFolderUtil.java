@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,14 +26,13 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
-import java.util.List;
-
+import com.liferay.journal.model.JournalFolder;
+import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.journal.model.JournalFolder;
-import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+
+import java.util.List;
 
 public final class WebFolderUtil {
 
@@ -41,8 +40,8 @@ public final class WebFolderUtil {
     }
 
     public static JournalFolder findWebFolder(final long companyId, final long groupId,
-            final long userId, final String name, final String description,
-            final boolean createIfNotExists) {
+                                              final long userId, final String name, final String description,
+                                              final boolean createIfNotExists) {
         String[] folderPath = name.split("/");
         JournalFolder foundFolder = null;
         int count = 0;
@@ -70,7 +69,7 @@ public final class WebFolderUtil {
     public static JournalFolder findWebFolder(final Long groupId, final Long parentFolderId,
             final String name) {
         JournalFolder dir = null;
-        List<JournalFolder> dirs = null;
+        List<JournalFolder> dirs;
         try {
             dirs = JournalFolderLocalServiceUtil.getFolders(groupId, parentFolderId);
             for (JournalFolder jf : dirs) {

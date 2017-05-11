@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,29 +26,25 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import com.mimacom.liferay.portal.setup.domain.PermissionAction;
-import com.mimacom.liferay.portal.setup.domain.PortletPermissions;
-import com.mimacom.liferay.portal.setup.domain.RolePermission;
-import com.mimacom.liferay.portal.setup.domain.RolePermissions;
-import com.mimacom.liferay.portal.setup.domain.Role;
-
 import com.liferay.portal.kernel.exception.NestableException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.ResourcePermission;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.ResourcePermission;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.domain.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 
 public final class SetupPermissions {
 
@@ -73,7 +69,7 @@ public final class SetupPermissions {
                         ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
                                 portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
                                 String.valueOf(COMPANY_ID), roleId,
-                                new String[] {actionId.getName()});
+                                new String[]{actionId.getName()});
                         LOG.info("Set permission for action id " + actionId.getName() + " and role "
                                 + role.getName());
 
@@ -87,26 +83,26 @@ public final class SetupPermissions {
     }
 
     public static void addReadRight(final String roleName, final String className,
-            final String primaryKey) throws SystemException, PortalException {
+                                    final String primaryKey) throws SystemException, PortalException {
 
         addPermission(roleName, className, primaryKey, PERMISSION_RO);
     }
 
     public static void addReadWrightRight(final String roleName, final String className,
-            final String primaryKey) throws SystemException, PortalException {
+                                          final String primaryKey) throws SystemException, PortalException {
 
         addPermission(roleName, className, primaryKey, PERMISSION_RW);
     }
 
     public static void removePermission(final long companyId, final String name,
-            final String primKey) throws PortalException, SystemException {
+                                        final String primKey) throws PortalException, SystemException {
         ResourcePermissionLocalServiceUtil.deleteResourcePermissions(companyId, name,
                 ResourceConstants.SCOPE_INDIVIDUAL, primKey);
     }
 
     public static void addPermission(final String roleName, final String className,
-            final String primaryKey, final String[] permission)
-                    throws SystemException, PortalException {
+                                     final String primaryKey, final String[] permission)
+            throws SystemException, PortalException {
         try {
             long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, roleName).getRoleId();
             ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID, className,
@@ -117,8 +113,8 @@ public final class SetupPermissions {
     }
 
     public static void addPermissionToPage(final Role role,
-            final String primaryKey, final String[] actionKeys)
-                    throws PortalException, SystemException {
+                                           final String primaryKey, final String[] actionKeys)
+            throws PortalException, SystemException {
 
         long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, role.getName()).getRoleId();
         ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
@@ -149,9 +145,9 @@ public final class SetupPermissions {
     }
 
     public static void updatePermission(final String locationHint, final long groupId,
-            final long companyId, final long elementId, final Class clazz,
-            final RolePermissions rolePermissions,
-            final HashMap<String, List<String>> defaultPermissions) {
+                                        final long companyId, final long elementId, final Class clazz,
+                                        final RolePermissions rolePermissions,
+                                        final HashMap<String, List<String>> defaultPermissions) {
         boolean useDefaultPermissions = false;
         if (rolePermissions != null) {
             if (rolePermissions.isClearPermissions()) {

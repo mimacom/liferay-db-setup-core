@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,21 @@ package com.mimacom.liferay.portal.setup;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-
-import org.jboss.vfs.VirtualFile;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by mapa on 13.3.2015.
@@ -62,60 +66,22 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
         for (String fileName : fileNames) {
             LOG.info("Starting upgrade process. Filename: " + fileName);
 
-            File file = getSetupFile(fileName);
-            if (file == null) {
-                throw new UpgradeException("XML configuration not found");
+            InputStream is = BasicSetupUpgradeProcess.class.getClassLoader().getResourceAsStream(fileName);
+
+            if (is == null) {
+                throw new UpgradeException("XML configuration not found: " + fileName);
             }
-            LiferaySetup.setup(file);
+            try {
+                LiferaySetup.setup(is);
+            } catch (FileNotFoundException | ParserConfigurationException | JAXBException | SAXException e) {
+                e.printStackTrace();
+            }
             LOG.info("Finished upgrade process. Filename: " + fileName);
         }
-    }
-
-    /**
-     * checks and returns file used for setup.
-     *
-     * @param fileName
-     *            name of resource
-     * @return setup xml file
-     */
-    public final File getSetupFile(final String fileName) {
-
-        ClassLoader cl = this.getClass().getClassLoader();
-        URL url = cl.getResource(fileName);
-        if (url == null) {
-            LOG.error("XML configuration not found");
-
-            return null;
-        }
-
-        URI uri;
-        try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
-            LOG.error("Problem with reading configuration xml", e);
-            return null;
-        }
-
-        File file = null;
-        if (uri.getScheme().equals("vfs")) {
-            try {
-                VirtualFile virtualFile = (VirtualFile) url.openConnection().getContent();
-                file = virtualFile.getPhysicalFile();
-
-            } catch (IOException e) {
-                LOG.error("Couldn't open xml configuration", e);
-                return null;
-            }
-        } else if (uri.getScheme().equals("file")) {
-            file = new File(uri);
-        }
-
-        return file;
     }
 
     /**
      * @return paths to setup xml files.
      */
     protected abstract String[] getSetupFileNames();
-
 }
