@@ -45,6 +45,6 @@ Include-Resource: @db-setup-core-2.0.0-SNAPSHOT.jar
 the name of the file is the same that you will find inside the maven/gradle repository.
 
 # Compatibility
-Version 2.x.x: Liferay Portal DXP/7.0.x
-Version 1.x.x: Liferay Portal EE/CE 6.2.x
+* Version 2.x.x: Liferay Portal DXP/7.0.x
+* Version 1.x.x: Liferay Portal EE/CE 6.2.x
 
