@@ -14,7 +14,7 @@ We didn't publish binary yet so you'll need to build the jar yourself. Here are 
 <dependency>
     <groupId>com.mimacom.liferay</groupId>
     <artifactId>db-setup-core</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -40,9 +40,11 @@ Run <code>com.mimacom.liferay.portal.setup.LiferaySetup#setup(java.io.File)</cod
 ```
 When adding the library to a liferay OSGI module it will be necessary to specify the dependency into the bnd file:
 ```java
-Include-Resource: @db-setup-core-1.0.1-SNAPSHOT.jar
+Include-Resource: @db-setup-core-2.0.0-SNAPSHOT.jar
 ```
 the name of the file is the same that you will find inside the maven/gradle repository.
 
 # Compatibility
-Liferay Portal CE/EE 7.0.x
+Version 2.x.x: Liferay Portal DXP/7.0.x
+Version 1.x.x: Liferay Portal EE/CE 6.2.x
+
