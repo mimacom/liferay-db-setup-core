@@ -236,6 +236,8 @@
                     </li>
                     <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
+                    <li>{{$PUB-PAGE-UUID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
+                    </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
                     <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
@@ -494,6 +496,8 @@
                     <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page &gt;$}}
                     </li>
                     <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
+                    </li>
+                    <li>{{$PUB-PAGE-UUID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>

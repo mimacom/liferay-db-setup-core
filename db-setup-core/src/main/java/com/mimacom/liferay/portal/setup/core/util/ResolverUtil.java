@@ -26,7 +26,6 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
@@ -47,7 +46,11 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.service.*;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserGroupLocalServiceUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -123,6 +126,8 @@ public final class ResolverUtil {
      * friendly url of the private page &gt;$}}</li>
      * <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt;
      * friendly url of the public page &gt;$}}</li>
+     * <li>{{$PUB-PAGE-UUID-BY-FRIENDLY_URL=[:: name of the site ::]&lt;
+     * friendly url of the public page &gt;$}}</li>
      * <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL
      * record set &gt; $}}</li>
      * <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
@@ -132,23 +137,19 @@ public final class ResolverUtil {
      * </li>
      * </ul>
      *
-     * @param runAsUserId
-     *            The user id under which the look up is done.
-     * @param groupId
-     *            the group id which is used by default for the look up.
-     * @param company
-     *            the company id that is used for the default look up.
-     * @param value
-     *            the value string in which the occurance of any above resolve
-     *            expression is resolved.
-     * @param resolverHint
-     *            the resovler hint textually specifies where the value is from
-     *            and is used for logging problems or infos on the resolution.
+     * @param runAsUserId  The user id under which the look up is done.
+     * @param groupId      the group id which is used by default for the look up.
+     * @param company      the company id that is used for the default look up.
+     * @param value        the value string in which the occurance of any above resolve
+     *                     expression is resolved.
+     * @param resolverHint the resovler hint textually specifies where the value is from
+     *                     and is used for logging problems or infos on the resolution.
+     *
      * @return Returns the string value with any resolver expression resolved to
-     *         the corresponding elements.
+     * the corresponding elements.
      */
     public static String lookupAll(final long runAsUserId, final long groupId, final long company,
-            final String value, final String resolverHint) {
+                                   final String value, final String resolverHint) {
         String retVal = value;
 
         // substitute references to groups/sites
@@ -194,16 +195,22 @@ public final class ResolverUtil {
         retVal = ResolverUtil.getClassIdByName(retVal, resolverHint);
         // Substitute private page friendly urls to layout ids
         retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
-                true, false);
+                true, IdMode.ID);
         // Substitute public page friendly urls to layout ids
         retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
-                false, false);
+                false, IdMode.ID);
         // Substitute private page friendly urls to plids
         retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
-                true, true);
+                true, IdMode.PLID);
         // Substitute public page friendly urls to plids
         retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
-                false, true);
+                false, IdMode.PLID);
+        // Substitute private page friendly urls to uuids
+        retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
+                true, IdMode.UUID);
+        // Substitute public page friendly urls to uuids
+        retVal = ResolverUtil.lookupPageIdWithFriendlyUrl(retVal, resolverHint, groupId, company,
+                false, IdMode.UUID);
         // lookup ddl record set id by key
         retVal = lookupDDLRecordSetId(retVal, resolverHint, groupId, company);
         // replace id of user groups
@@ -246,7 +253,7 @@ public final class ResolverUtil {
     }
 
     public static long getSiteGroupIdByName(final String siteName, final long company,
-            final String locationName) {
+                                            final String locationName) {
         long siteGroupId = 0;
 
         if (siteName.toLowerCase().equals("global")) {
@@ -291,24 +298,19 @@ public final class ResolverUtil {
      * filePath ::= ("/" &lt; path-segment &gt;)*<br/>
      * <br/>
      *
-     * @param content
-     *            The content of the article.
-     * @param locationHint
-     *            A location hint where the substitution is done (for logging),
-     *            eg., the file name of the article.
-     * @param groupId
-     *            The group id (site) in which scope the article is imported.
-     * @param company
-     *            The company id.
-     * @param repoId
-     *            The repository id.
-     * @param userId
-     *            The id of the importing user.
+     * @param content      The content of the article.
+     * @param locationHint A location hint where the substitution is done (for logging),
+     *                     eg., the file name of the article.
+     * @param groupId      The group id (site) in which scope the article is imported.
+     * @param company      The company id.
+     * @param repoId       The repository id.
+     * @param userId       The id of the importing user.
+     *
      * @return Returns the content with all substituted file references.
      */
     public static String substituteFileReferencesWithURL(final String content,
-            final String locationHint, final long groupId, final long company, final long repoId,
-            final long userId, final int refType) {
+                                                         final String locationHint, final long groupId, final long company, final long repoId,
+                                                         final long userId, final int refType) {
         String openingTag = FILE_REFERENCE_URL;
         if (refType == ID_TYPE_ID) {
             openingTag = FILE_REFERENCE_ID;
@@ -368,7 +370,7 @@ public final class ResolverUtil {
     }
 
     public static String lookupSiteIdWithName(final String locationHint, final String value,
-            final long company) {
+                                              final long company) {
         String valueCopy = value;
         String retVal = valueCopy;
         while (valueCopy != null && valueCopy.trim().indexOf(ID_OF_SITE_WITH_NAME_KEY) > -1) {
@@ -397,7 +399,7 @@ public final class ResolverUtil {
     }
 
     public static String lookupOrgOrUserGroupIdWithName(final String locationHint,
-            final String value, final long company, final boolean uuid, final boolean org) {
+                                                        final String value, final long company, final boolean uuid, final boolean org) {
         String valueCopy = value;
         String retVal = valueCopy;
         String searchString = ID_OF_ORG_USER_GROUP_WITH_NAME_KEY;
@@ -463,7 +465,7 @@ public final class ResolverUtil {
     }
 
     public static String lookupArticleWithArticleId(final String content, final String locationHint,
-            final long groupId, final long company, final int typeOfId) {
+                                                    final long groupId, final long company, final int typeOfId) {
         String contentCopy = content;
         String retVal = contentCopy;
         long siteGroupId = groupId;
@@ -526,8 +528,8 @@ public final class ResolverUtil {
     }
 
     public static String lookupPageIdWithFriendlyUrl(final String content,
-            final String locationHint, final long groupId, final long company,
-            final boolean isPrivate, final boolean isPLIdLookup) {
+                                                     final String locationHint, final long groupId, final long company,
+                                                     final boolean isPrivate, final IdMode mode) {
         String contentCopy = content;
         String lookUp = PAGE_ID_BY_FRIENDLY_URL;
         if (isPrivate) {
@@ -535,10 +537,16 @@ public final class ResolverUtil {
         } else {
             lookUp = lookUp.replace("%%PTYPE%%", "PUB");
         }
-        if (isPLIdLookup) {
-            lookUp = lookUp.replace("%%LAYOUTID%%", "PLID");
-        } else {
-            lookUp = lookUp.replace("%%LAYOUTID%%", "ID");
+        switch (mode) {
+            case ID:
+                lookUp = lookUp.replace("%%LAYOUTID%%", "PLID");
+                break;
+            case PLID:
+                lookUp = lookUp.replace("%%LAYOUTID%%", "ID");
+                break;
+            case UUID:
+                lookUp = lookUp.replace("%%LAYOUTID%%", "UUID");
+                break;
         }
         int pos = contentCopy.indexOf(lookUp);
         while (pos > -1) {
@@ -563,9 +571,7 @@ public final class ResolverUtil {
                 Layout l = null;
                 try {
                     l = LayoutLocalServiceUtil.getFriendlyURLLayout(siteGroupId, isPrivate, fUrl);
-                } catch (PortalException e) {
-                    e.printStackTrace();
-                } catch (SystemException e) {
+                } catch (PortalException | SystemException e) {
                     e.printStackTrace();
                 }
 
@@ -574,10 +580,16 @@ public final class ResolverUtil {
                     contentCopy = contentCopy.substring(0, pos) + " PAGE NOT FOUND!! " + contentCopy
                             .substring(pos2 + CLOSING_TAG.length(), contentCopy.length());
                 } else {
-                    if (isPLIdLookup) {
-                        pageId = Long.toString(l.getPlid());
-                    } else {
-                        pageId = Long.toString(l.getLayoutId());
+                    switch (mode) {
+                        case ID:
+                            pageId = Long.toString(l.getLayoutId());
+                            break;
+                        case PLID:
+                            pageId = Long.toString(l.getPlid());
+                            break;
+                        case UUID:
+                            pageId = l.getUuid();
+                            break;
                     }
                     contentCopy = contentCopy.substring(0, pos) + pageId + contentCopy
                             .substring(pos2 + CLOSING_TAG.length(), contentCopy.length());
@@ -591,7 +603,7 @@ public final class ResolverUtil {
     }
 
     public static String lookupDDLRecordSetId(final String content, final String locationHint,
-            final long groupId, final long company) {
+                                              final long groupId, final long company) {
         String contentCopy = content;
         String lookUp = DDL_REC_SET_BY_KEY;
 
@@ -644,8 +656,8 @@ public final class ResolverUtil {
 
     // CHECKSTYLE:OFF
     public static String lookupStructureOrTemplateIdWithKey(final String content,
-            final String locationHint, final long groupId, final long company, final boolean uuid,
-            final String commandPrefix, final boolean isTemplate, final Class referredClass) {
+                                                            final String locationHint, final long groupId, final long company, final boolean uuid,
+                                                            final String commandPrefix, final boolean isTemplate, final Class referredClass) {
         String contentCopy = content;
         String retVal = contentCopy;
         long siteGroupId = groupId;
@@ -721,7 +733,7 @@ public final class ResolverUtil {
     }
 
     public static long getStructureId(final String structureKey, final long groupId,
-            final Class clazz) throws SystemException, PortalException {
+                                      final Class clazz) throws SystemException, PortalException {
 
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(clazz);
         DDMStructure structure = DDMStructureLocalServiceUtil.getStructure(groupId, classNameId,
@@ -730,7 +742,7 @@ public final class ResolverUtil {
     }
 
     public static String getStructureUUID(final String structureKey, final long groupId,
-            final Class clazz) throws SystemException, PortalException {
+                                          final Class clazz) throws SystemException, PortalException {
 
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(clazz);
         DDMStructure structure = DDMStructureLocalServiceUtil.getStructure(groupId, classNameId,
@@ -739,7 +751,7 @@ public final class ResolverUtil {
     }
 
     public static long getTemplateId(final String templateKey, final long groupId,
-            final Class clazz) throws SystemException, PortalException {
+                                     final Class clazz) throws SystemException, PortalException {
 
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(clazz);
 
@@ -749,7 +761,7 @@ public final class ResolverUtil {
     }
 
     public static Organization getOrganization(final String name, final long companyId,
-            final String locationHint) {
+                                               final String locationHint) {
         Organization o = null;
         try {
             o = OrganizationLocalServiceUtil.getOrganization(companyId, name);
@@ -762,7 +774,7 @@ public final class ResolverUtil {
     }
 
     public static UserGroup getUserGroup(final String name, final long companyId,
-            final String locationHint) {
+                                         final String locationHint) {
         UserGroup o = null;
         try {
             o = UserGroupLocalServiceUtil.getUserGroup(companyId, name);
