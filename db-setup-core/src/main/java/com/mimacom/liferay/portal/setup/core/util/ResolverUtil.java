@@ -280,7 +280,7 @@ public final class ResolverUtil {
         if (siteName.toLowerCase().equals("default") || siteName.equals("")) {
             return DEFAULT_GROUP_NAME;
         }
-        return siteName;
+        return siteName + " LFR_ORGANIZATION";
     }
 
     /**

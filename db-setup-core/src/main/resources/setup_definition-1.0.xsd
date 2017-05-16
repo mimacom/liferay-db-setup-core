@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified" targetNamespace="http://www.mimacom.com/liferay/setup"
-           xmlns="http://www.mimacom.com/liferay/setup">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.mimacom.com/liferay/setup" xmlns="http://www.mimacom.com/liferay/setup">
 
     <xs:element name="setup">
         <xs:complexType>
@@ -94,8 +92,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="runasuser" type="xs:string">
-    </xs:element>
+    <xs:element name="runasuser" type="xs:string"></xs:element>
 
     <xs:element name="organization">
         <xs:complexType>
@@ -154,6 +151,22 @@
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
+            <xs:attribute name="defaultLayout" type="xs:NCName">
+                <xs:annotation>
+                    <xs:documentation>ID of default layout template for this public page set. Note that if the layout
+                        template is part of a Theme plugin, Theme plugin ID must be configured
+                        as the defaultLayoutContainedInThemeWithId attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="defaultLayoutContainedInThemeWithId" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>If Layout template is delivered as a part of Theme plugin, ID
+                        of this Theme plugin must be defined in this attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+
         </xs:complexType>
     </xs:element>
 
@@ -165,6 +178,21 @@
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
+            <xs:attribute name="defaultLayout" type="xs:NCName">
+                <xs:annotation>
+                    <xs:documentation>ID of layout template for this page. Note that if the layout
+                        template is part of a Theme plugin, Theme plugin ID must be configured
+                        as the layoutContainedInThemeWithId attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="defaultLayoutContainedInThemeWithId" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>If Layout template is delivered as a part of Theme plugin, ID
+                        of this Theme plugin must be defined in this attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
@@ -194,25 +222,19 @@
                     <li>{{$ART-STRUCTURE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
                     <li>{{$ADT-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
                     <li>{{$ADT-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
-                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
-                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
-                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
                     <li>{{$CLASS-ID-BY-NAME=&lt; fully qualified class name &gt;$}}</li>
-                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
-                        &gt;$}}
+                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page &gt;$}}
                     </li>
                     <li>{{$PUB-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}</li>
-                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
-                        &gt;$}}
+                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page &gt;$}}
                     </li>
-                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page
-                        &gt;$}}
+                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
@@ -459,25 +481,19 @@
                     <li>{{$ART-STRUCTURE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
                     <li>{{$ADT-TEMPLATE-ID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
                     <li>{{$ADT-TEMPLATE-UUID-BY-KEY=[:: name of the site ::]&lt; article id to look for &gt;$}}</li>
-                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-URL=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
-                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-ID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
-                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt;
-                        documents and media folder title of the file &gt;$}}
+                    <li>{{$FILE-UUID=[:: name of the site ::]&lt; documents and media folder path to the file &gt;&lt; documents and media folder title of the file &gt;$}}
                     </li>
                     <li>{{$CLASS-ID-BY-NAME=&lt; fully qualified class name &gt;$}}</li>
-                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
-                        &gt;$}}
+                    <li>{{$PRIV-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page &gt;$}}
                     </li>
                     <li>{{$PUB-PAGE-ID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}</li>
-                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page
-                        &gt;$}}
+                    <li>{{$PRIV-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the private page &gt;$}}
                     </li>
-                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page
-                        &gt;$}}
+                    <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>

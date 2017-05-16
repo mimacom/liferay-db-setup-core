@@ -59,6 +59,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
+import com.mimacom.liferay.portal.setup.core.util.ResourcesUtil;
 import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
 import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
@@ -192,8 +193,8 @@ public final class SetupArticles {
 
         String xsd = null;
         try {
-            xsd = getFileContent(structure.getPath());
-        } catch (IOException | URISyntaxException e) {
+            xsd = ResourcesUtil.getFileContent(structure.getPath());
+        } catch (IOException e) {
             LOG.error("Error Reading Structure File content for: " + structure.getName());
             return;
         }
@@ -255,8 +256,8 @@ public final class SetupArticles {
 
         String script;
         try {
-            script = getFileContent(template.getPath());
-        } catch (IOException | URISyntaxException e) {
+            script = ResourcesUtil.getFileContent(template.getPath());
+        } catch (IOException e) {
             LOG.error("Error Reading Template File content for: " + template.getName());
             return;
         }
@@ -320,7 +321,7 @@ public final class SetupArticles {
             LOG.error("Error while trying to find ADT with key: " + template.getTemplateKey());
         }
 
-        String script = getFileContent(template.getPath());
+        String script = ResourcesUtil.getFileContent(template.getPath());
 
         if (ddmTemplate != null) {
             LOG.info("Template already exists and will be overwritten.");
@@ -361,10 +362,10 @@ public final class SetupArticles {
             }
         }
         try {
-            content = getFileContent(article.getPath());
+            content = ResourcesUtil.getFileContent(article.getPath());
             content = ResolverUtil.lookupAll(LiferaySetup.getRunAsUserId(), groupId, companyId,
                     content, article.getPath());
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOG.error(
                     "Error Reading Article File content for article ID: " + article.getArticleId());
         }
@@ -523,30 +524,6 @@ public final class SetupArticles {
             }
 
         }
-    }
-
-    private static String getFileContent(final String fileName)
-            throws IOException, URISyntaxException {
-        File file = getFile(fileName);
-        return FileUtil.read(file);
-    }
-
-    private static File getFile(final String fileName) throws URISyntaxException, IOException {
-
-        ClassLoader cl = SetupArticles.class.getClassLoader();
-        URL url = cl.getResource(fileName);
-        if (url == null) {
-            throw new IOException("cannot find file: " + fileName);
-        }
-
-        URI uri = url.toURI();
-
-        File file = null;
-        if (uri.getScheme().equals("file")) {
-            file = new File(uri);
-        }
-
-        return file;
     }
 
 }

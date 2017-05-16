@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.ListTypeConstants;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.OrganizationConstants;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -98,11 +99,11 @@ public final class SetupOrganizations {
                             defaultUserId, OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID, organization.getName(),
                             "organization", 0, 0,ListTypeConstants.ORGANIZATION_STATUS_DEFAULT,
                             LiferaySetup.DESCRIPTION,true, new ServiceContext());
+                    addOrganizationUser(newOrganization, UserLocalServiceUtil.getUser(defaultUserId));
                     liferayOrg = newOrganization;
                     liferayGroup = liferayOrg.getGroup();
                     groupId = newOrganization.getGroupId();
                     LOG.info("New Organization created. Group ID: " + groupId);
-
                 }
 
                 if (liferayGroup != null && organization.getSiteName() != null
@@ -238,6 +239,17 @@ public final class SetupOrganizations {
             default:
                 LOG.error("Unknown delete method : " + deleteMethod);
                 break;
+        }
+    }
+
+    public static void addOrganizationUser(Organization organization, User user) {
+        LOG.info("Adding user with screenName: " + user.getScreenName() + "to organization with name: " + organization.getName());
+        OrganizationLocalServiceUtil.addUserOrganization(user.getUserId(), organization);
+    }
+
+    public static void addOrganizationUsers(Organization organization, User... users) {
+        for (int i = 0; i < users.length; i++) {
+            addOrganizationUser(organization, users[i]);
         }
     }
 
