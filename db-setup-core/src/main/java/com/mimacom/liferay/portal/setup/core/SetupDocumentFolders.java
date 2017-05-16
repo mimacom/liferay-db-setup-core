@@ -52,7 +52,6 @@ public final class SetupDocumentFolders {
         actionsOwner.add(ActionKeys.PERMISSIONS);
         actionsOwner.add(ActionKeys.DELETE);
         actionsOwner.add(ActionKeys.ADD_SUBFOLDER);
-        actionsOwner.add(ActionKeys.ADD_SHORTCUT);
         actionsOwner.add(ActionKeys.ADD_DOCUMENT);
         actionsOwner.add(ActionKeys.ACCESS);
 
