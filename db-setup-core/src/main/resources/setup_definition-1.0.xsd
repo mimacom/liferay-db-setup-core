@@ -146,8 +146,8 @@
     <xs:element name="public-pages">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="page"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element maxOccurs="unbounded" ref="page"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
@@ -173,8 +173,8 @@
     <xs:element name="private-pages">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="page"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element maxOccurs="unbounded" ref="page"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>

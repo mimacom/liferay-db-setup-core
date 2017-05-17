@@ -36,12 +36,11 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.DocumentUtil;
 import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
+import com.mimacom.liferay.portal.setup.core.util.ResourcesUtil;
 import com.mimacom.liferay.portal.setup.domain.Document;
 import com.mimacom.liferay.portal.setup.domain.Organization;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,47 +97,26 @@ public final class SetupDocuments {
             }
             FileEntry fe = DocumentUtil.findDocument(documentName, folderPath, groupId, company,
                     groupId, userId);
-            if (fe == null) {
-
-                fe = DocumentUtil.createDocument(company, groupId, folderId, documentName,
-                        documentTitle, userId, repoId, getDocumentContent(filenameInFilesystem));
-                LOG.info(documentName + " is not found! It will be created! ");
-            } else {
-                LOG.info(documentName + " is found! Content will be updated! ");
-                DocumentUtil.updateFile(fe, getDocumentContent(filenameInFilesystem), userId,
-                        documentName);
-            }
-            SetupPermissions.updatePermission("Document " + folderPath + "/" + documentName,
-                    groupId, company, fe.getFileEntryId(), DLFileEntry.class,
-                    doc.getRolePermissions(), DEFAULT_PERMISSIONS);
-        }
-    }
-
-    public static byte[] getDocumentContent(final String filesystemPath) {
-        byte[] content = new byte[0];
-        InputStream is = SetupDocuments.class.getClassLoader().getResourceAsStream(filesystemPath);
-        byte[] buf = new byte[BUFFER_SIZE];
-        int readBytes = 0;
-        if (is != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] fileBytes = null;
             try {
-                while ((readBytes = is.read(buf)) != -1) {
-                    baos.write(buf, 0, readBytes);
-                }
-                content = baos.toByteArray();
+                fileBytes = ResourcesUtil.getFileBytes(filenameInFilesystem);
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
-        } else {
-            // error file not found
-            LOG.error(filesystemPath + ": document in file system not found! Error in XML file! ");
+            if (fileBytes != null) {
+                if (fe == null) {
+                    fe = DocumentUtil.createDocument(company, groupId, folderId, documentName,
+                            documentTitle, userId, repoId, fileBytes);
+                    LOG.info(documentName + " is not found! It will be created! ");
+                } else {
+                    LOG.info(documentName + " is found! Content will be updated! ");
+                    DocumentUtil.updateFile(fe, fileBytes, userId,
+                            documentName);
+                }
+                SetupPermissions.updatePermission("Document " + folderPath + "/" + documentName,
+                        groupId, company, fe.getFileEntryId(), DLFileEntry.class,
+                        doc.getRolePermissions(), DEFAULT_PERMISSIONS);
+            }
         }
-        return content;
     }
 }

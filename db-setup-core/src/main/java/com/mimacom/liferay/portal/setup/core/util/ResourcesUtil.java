@@ -42,10 +42,13 @@ public class ResourcesUtil {
         return cl.getResourceAsStream(path);
     }
 
+    public static byte[] getFileBytes(String path) throws IOException {
+        return FileUtil.getBytes(getFileStream(path));
+    }
+
     public static String getFileContent(String path) throws IOException {
 
-        InputStream is = getFileStream(path);
-        byte[] bytes = FileUtil.getBytes(is);
+        byte[] bytes = getFileBytes(path);
         return new String(bytes, "UTF-8");
     }
 

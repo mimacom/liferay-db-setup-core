@@ -214,6 +214,7 @@ public final class SetupPages {
             set = group.getPublicLayoutSet();
         }
         set.setThemeId(theme.getName());
+        LayoutSetLocalServiceUtil.updateLayoutSet(set);
     }
 
     /**
