@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.model.*;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -306,7 +307,6 @@ public final class SetupPages {
             setCustomFields(userId, groupId, company, page, layout);
         }
 
-        updatePage(layout, page, groupId);
         SetupPermissions.updatePermission("Page " + page.getFriendlyURL(), groupId, company,
                 layout.getPlid(), Layout.class, page.getRolePermissions(),
                 getDefaultPermissions(isPrivate));
@@ -373,21 +373,23 @@ public final class SetupPages {
         }
     }
 
-    private static void updatePage(final Layout layout, final Page page, final long groupId) {
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(page.getTitleTranslation(), groupId,
-                page.getName(), " Page with title " + page.getFriendlyURL());
-        try {
-            if (titleMap != null) {
-                layout.setTitleMap(titleMap);
-                layout.setNameMap(titleMap);
-            }
-            LayoutLocalServiceUtil.updateLayout(layout.getGroupId(), layout.isPrivateLayout(),
-                    layout.getLayoutId(), layout.getTypeSettings());
-        } catch (SystemException e) {
-            e.printStackTrace();
-        } catch (PortalException e) {
-            e.printStackTrace();
-        }
+    private static Layout createPage(final long groupId, final Page currentPage,
+                                     final long parentLayoutId, final boolean isPrivate)
+            throws SystemException, PortalException {
+
+        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(currentPage.getTitleTranslation(), groupId,
+                currentPage.getName(), " Page with title " + currentPage.getFriendlyURL());
+
+        Locale locale = LocaleUtil.getSiteDefault();
+
+        Map<Locale, String> descriptionMap = new HashMap<>();
+        descriptionMap.put(locale, StringPool.BLANK);
+
+        Map<Locale, String> friendlyURLMap = new HashMap<>();
+        friendlyURLMap.put(locale, currentPage.getFriendlyURL());
+
+        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate, parentLayoutId, titleMap,titleMap, null,
+                null, null, currentPage.getType(), StringPool.BLANK, currentPage.isHidden(), friendlyURLMap, new ServiceContext());
     }
 
     private static void setCustomFields(final long runAsUserId, final long groupId,
@@ -602,15 +604,6 @@ public final class SetupPages {
         } catch (PortalException | SystemException e) {
             LOG.error("cannot remove pages: " + e);
         }
-    }
-
-    private static Layout createPage(final long groupId, final Page currentPage,
-                                     final long parentLayoutId, final boolean isPrivate)
-            throws SystemException, PortalException {
-
-        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate, parentLayoutId,
-                currentPage.getName(), currentPage.getName(), "", currentPage.getType(), currentPage.isHidden(),
-                currentPage.getFriendlyURL(), new ServiceContext());
     }
 
 }
