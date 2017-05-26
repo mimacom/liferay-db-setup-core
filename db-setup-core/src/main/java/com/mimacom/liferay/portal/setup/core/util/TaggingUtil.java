@@ -27,6 +27,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  */
 
 import com.liferay.asset.kernel.exception.NoSuchTagException;
+import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
@@ -36,6 +37,9 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.domain.Article;
+import com.mimacom.liferay.portal.setup.domain.Tag;
 
 import java.util.List;
 
@@ -45,9 +49,35 @@ public final class TaggingUtil {
     private TaggingUtil() {
     }
 
+    public static void associateTags(long groupId, Article article, JournalArticle journalArticle) throws PortalException {
+
+        List<Tag> tags = article.getTag();
+        String[] tagNames = null;
+        if (tags != null) {
+            tagNames = tags.stream().map(Tag::getName).toArray(String[]::new);
+        }
+        AssetEntry entry = AssetEntryLocalServiceUtil.getEntry(JournalArticle.class.getName(), journalArticle.getResourcePrimKey());
+        AssetEntryLocalServiceUtil.updateEntry(LiferaySetup.getRunAsUserId(), groupId, JournalArticle.class.getName(), entry.getClassPK(), null, tagNames);
+    }
+
+    /*
+    public static void associateCategories(long groupId, Article article, JournalArticle journalArticle) {
+
+        List<CategoryRef> categories = article.getCategoryRef();
+        String[] categoryTitles = null;
+        if (categories != null) {
+            categoryTitles = categories.stream().map(CategoryRef -> {
+                AssetCategoryLocalServiceUtil.get
+            });
+        }
+        AssetCategoryLocalServiceUtil.
+
+    }
+    */
+
     public static void associateTagsWithJournalArticle(final List<String> tags,
                                                        final List<String> categories, final long userId, final long groupId,
-                                                       final long primaryKey, final Class className) {
+                                                       final long primaryKey) {
 
         try {
             long[] catIds = new long[0];
@@ -56,9 +86,7 @@ public final class TaggingUtil {
             }
             AssetEntryLocalServiceUtil.updateEntry(userId, groupId, JournalArticle.class.getName(),
                     primaryKey, catIds, tags.toArray(new String[tags.size()]));
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
+        } catch (PortalException | SystemException e) {
             e.printStackTrace();
         }
     }
@@ -67,7 +95,6 @@ public final class TaggingUtil {
                                        final long runAsUser) {
         // The categories and tags to assign
         final long[] assetCategoryIds = new long[categories.size()];
-        final String[] tagProperties = new String[0]; // Might be null too
 
         for (int i = 0; i < categories.size(); ++i) {
             final String name = categories.get(i);
@@ -81,9 +108,7 @@ public final class TaggingUtil {
                 } catch (PortalException | SystemException e1) {
                     LOG.error("Category " + name + " not found! ", e1);
                 }
-            } catch (PortalException e) {
-                LOG.error("Category " + name + " not found! ", e);
-            } catch (SystemException e) {
+            } catch (PortalException | SystemException e) {
                 LOG.error("Category " + name + " not found! ", e);
             }
 

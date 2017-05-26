@@ -512,6 +512,7 @@
             <xs:sequence>
                 <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="related-assets"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="tag"/>
                 <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="article-structure-key" type="xs:string"/>
@@ -520,6 +521,12 @@
             <xs:attribute name="title" use="required" type="xs:string"/>
             <xs:attribute name="article-folder-path" type="xs:string"/>
             <xs:attribute name="path" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="tag">
+        <xs:complexType>
+            <xs:attribute name="name"/>
         </xs:complexType>
     </xs:element>
 
