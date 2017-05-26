@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.mimacom.liferay.portal.setup.core.SetupDocumentFolders;
 import com.mimacom.liferay.portal.setup.core.SetupPermissions;
+import com.mimacom.liferay.portal.setup.core.SetupWebFolders;
 
 public final class FolderUtil {
 
@@ -63,7 +64,7 @@ public final class FolderUtil {
                     SetupPermissions.updatePermission(
                             "Folder " + name + ", creating folder " + "segment " + folder, groupId,
                             company, foundFolder.getFolderId(), JournalFolder.class, null,
-                            SetupDocumentFolders.DEFAULT_PERMISSIONS);
+                            SetupWebFolders.DEFAULT_PERMISSIONS);
                 }
 
                 if (foundFolder == null) {

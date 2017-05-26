@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class SetupWebFolders {
-    private static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
+    public static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
 
     static {
         DEFAULT_PERMISSIONS = new HashMap<>();
@@ -52,6 +52,7 @@ public final class SetupWebFolders {
         actionsOwner.add(ActionKeys.DELETE);
         actionsOwner.add(ActionKeys.ADD_SUBFOLDER);
         actionsOwner.add(ActionKeys.ADD_ARTICLE);
+        actionsOwner.add(ActionKeys.SUBSCRIBE);
         actionsOwner.add(ActionKeys.ACCESS);
 
         DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
