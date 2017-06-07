@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.model.*;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
+import com.liferay.portal.kernel.settings.TypedSettings;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
@@ -280,6 +281,8 @@ public final class SetupPages {
             setLayoutTemplate(layout, page, userId);
         }
 
+        setPageTarget(page, layout);
+
         List<Pageportlet> portlets = page.getPageportlet();
         if (portlets != null && !portlets.isEmpty()) {
             for (Pageportlet portlet : portlets) {
@@ -403,6 +406,19 @@ public final class SetupPages {
             CustomFieldSettingUtil.setExpandoValue(
                     resolverHint.replace("%%key%%", key).replace("%%value%%", value), runAsUserId,
                     groupId, company, clazz, layout.getPlid(), key, value);
+        }
+    }
+
+    private static void setPageTarget(final Page page, final Layout layout) {
+        UnicodeProperties props = layout.getTypeSettingsProperties();
+        props.put("target", page.getTarget());
+        layout.setTypeSettingsProperties(props);
+        try {
+            LayoutLocalServiceUtil.updateLayout(layout.getGroupId(), layout.isPrivateLayout(),
+                    layout.getLayoutId(), layout.getTypeSettings());
+        } catch (PortalException e) {
+            LOG.error("Can not set target attribute value '" + page.getTarget()
+                    + "' to page with layoutId:" + layout.getLayoutId() + ".", e);
         }
     }
 
