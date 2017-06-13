@@ -151,7 +151,7 @@
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
-            <xs:attribute name="defaultLayout" type="xs:NCName">
+            <xs:attribute name="defaultLayout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of default layout template for this public page set. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured
@@ -178,7 +178,7 @@
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
-            <xs:attribute name="defaultLayout" type="xs:NCName">
+            <xs:attribute name="defaultLayout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of layout template for this page. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured
@@ -334,7 +334,7 @@
             <xs:attribute name="type" default="portlet"/>
             <xs:attribute name="target" use="optional" />
             <xs:attribute name="hidden" type="xs:boolean" default="false"/>
-            <xs:attribute name="layout" type="xs:NCName">
+            <xs:attribute name="layout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of layout template for this page. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured

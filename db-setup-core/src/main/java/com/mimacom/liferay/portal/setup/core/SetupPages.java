@@ -230,7 +230,7 @@ public final class SetupPages {
      * @throws SystemException
      * @throws PortalException
      */
-    private static void addPages(final List<Page> pages, final String defaultLayout, final String defaultLayoutContainedInThemeWithId,
+    private static void addPages(final List<Page> pages, String defaultLayout, String defaultLayoutContainedInThemeWithId,
                                  final long groupId, final boolean isPrivate, final long parentLayoutId, final long company,
                                  final long userId) throws SystemException, PortalException {
 
@@ -262,9 +262,13 @@ public final class SetupPages {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+            // If the page has not a layout set, set the default one. Otherwise set that layout as the default for the subtree
             if (page.getLayout() == null) {
                 page.setLayout(defaultLayout);
                 page.setLayoutContainedInThemeWithId(defaultLayoutContainedInThemeWithId);
+            } else {
+                defaultLayout = page.getLayout();
+                defaultLayoutContainedInThemeWithId = page.getLayoutContainedInThemeWithId();
             }
             setupLiferayPage(layout, page, defaultLayout, defaultLayoutContainedInThemeWithId, groupId, isPrivate, company, userId, null);
         }
