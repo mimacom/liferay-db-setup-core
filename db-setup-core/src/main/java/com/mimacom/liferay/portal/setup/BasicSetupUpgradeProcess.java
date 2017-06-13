@@ -80,6 +80,11 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
         }
     }
 
+    @Override
+    protected void doUpgrade() throws Exception {
+        this.upgrade();
+    }
+
     /**
      * @return paths to setup xml files.
      */
