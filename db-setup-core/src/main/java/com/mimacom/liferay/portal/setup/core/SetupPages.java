@@ -287,17 +287,6 @@ public final class SetupPages {
 
         setPageTarget(page, layout);
 
-        List<Page> subPages = page.getPage();
-        if (subPages != null && !subPages.isEmpty()) {
-            if (pageTemplateName != null && !pageTemplateName.equals("")) {
-                LOG.error("Page template " + pageTemplateName + " may not have any sub-pages! "
-                        + "Will ignore them!");
-            } else {
-                addPages(subPages, defaultLayout, defaultLayoutContainedInThemeWithId, groupId, isPrivate,
-                        layout.getLayoutId(), company, userId);
-            }
-        }
-
         List<Pageportlet> portlets = page.getPageportlet();
         if (portlets != null && !portlets.isEmpty()) {
             for (Pageportlet portlet : portlets) {
@@ -307,6 +296,17 @@ public final class SetupPages {
                 } catch (ValidatorException | IOException e) {
                     LOG.error(e);
                 }
+            }
+        }
+
+        List<Page> subPages = page.getPage();
+        if (subPages != null && !subPages.isEmpty()) {
+            if (pageTemplateName != null && !pageTemplateName.equals("")) {
+                LOG.error("Page template " + pageTemplateName + " may not have any sub-pages! "
+                        + "Will ignore them!");
+            } else {
+                addPages(subPages, defaultLayout, defaultLayoutContainedInThemeWithId, groupId, isPrivate,
+                        layout.getLayoutId(), company, userId);
             }
         }
 
