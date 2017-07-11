@@ -255,6 +255,9 @@
 
     <xs:element name="role">
         <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="define-permissions" />
+            </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:string"/>
             <xs:attribute name="type" use="optional" default="portal">
                 <xs:simpleType>
@@ -318,6 +321,63 @@
             <xs:attribute name="lastName" use="required" type="xs:string"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="define-permissions">
+        <xs:annotation>
+            <xs:appinfo>Defining Permissions for Roles</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Extract the resource permissions defined for each role:<br/>
+                <br/>
+                SELECT        resourcePermissionId, companyId, name, scope, primKey, roleId, ownerId, actionIds<br/>
+                FROM          ResourcePermission<br/>
+                WHERE        (roleId = &lt;Role_.roleId&gt;)<br/>
+                <br/>
+                and write down as XML<br/>
+                <br/>
+                &lt;define-permission define-permission-name="&lt;ResourcePermission.name&gt;"&gt;<br/>
+                ... resource actions ...<br/>
+                &lt;/define-permission&gt;<br/>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="define-permission" minOccurs="0" />
+            </xs:sequence>
+            <xs:attribute name="clear-permissions" type="xs:boolean" default="false" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="define-permission">
+        <xs:annotation>
+            <xs:appinfo>Defining Permission Actions for Roles</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Extract the resource actions that belong to the corresponding resource permission (TransactSQL Dialect):<br/>
+                <br/>
+                SELECT ra.actionId<br/>
+                FROM [dbo].[ResourcePermission] rp,<br/>
+                [dbo].[]ResourceAction ra<br/>
+                where roleid = &lt;roleid&gt; and ra.name = rp.name and ((rp.actionids &amp; ra.bitwiseValue) &lt;&gt; 0) and ra.name = '&lt;name of the resource&gt;'<br/>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="permission-action" minOccurs="1" />
+            </xs:sequence>
+            <xs:attribute name="define-permission-name" use="required" type="xs:string" />
+            <xs:attribute name="element-primary-key" type="xs:string" />
+            <xs:attribute name="scope" use="optional">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="portal" />
+                        <xs:enumeration value="site" />
+                        <xs:enumeration value="site template" />
+                        <xs:enumeration value="individual" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="page">
         <xs:complexType>

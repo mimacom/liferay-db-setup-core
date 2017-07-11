@@ -135,7 +135,7 @@ public final class LiferaySetup {
 
         if (setup.getRoles() != null) {
             LOG.info("Setting up " + setup.getRoles().getRole().size() + " roles");
-            SetupRoles.setupRoles(setup.getRoles().getRole());
+            SetupRoles.setupRoles(setup.getRoles().getRole(), runAsUserId, groupId, companyId);
         }
 
         if (setup.getPortletPermissions() != null) {
