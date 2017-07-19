@@ -2,7 +2,7 @@
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
  * Setup module for creating / updating the categorization. So far it creates
  * tree of categories. In the future also AssetTag creation feature should be
  * here.
- * <p/>
+ * <p>
  * Created by guno on 8. 6. 2015.
  */
 public final class SetupCategorization {

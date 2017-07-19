@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,16 +53,19 @@ public final class CustomFieldSettingUtil {
      * Auxiliary method that returns the expando value of a given expando field
      * with a given key.
      *
-     * @param user
-     *            The user whose expando field will be retrieved.
-     * @param key
-     *            The name of the expando field.
-     * @return Returns false, if the expando field or the value is not defined.
+     * @param resolverHint the resovler hint textually specifies where the value is from
+     *                     and is used for logging problems or infos on the resolution.
+     * @param runAsUserId  The user id under which the look up is done.
+     * @param groupId      scopes expando for a liferay site
+     * @param company      scopes expando for a liferay instance
+     * @param clazz        entity class whose expando field will be retrieved.
+     * @param id           classPK
+     * @param key          the name of the expando field.
+     * @param value        data to be set as an expando value
      */
-    // CHECKSTYLE:OFF
     public static void setExpandoValue(final String resolverHint, final long runAsUserId,
-            final long groupId, final long company, final Class clazz, final long id,
-            final String key, final String value) {
+                                       final long groupId, final long company, final Class clazz, final long id,
+                                       final String key, final String value) {
         String valueCopy = value;
         try {
 
@@ -82,7 +85,7 @@ public final class CustomFieldSettingUtil {
                 // In this we are adding MyUserColumnData for the column
                 // MyUserColumn. See the
                 // above line
-                ev = ExpandoValueLocalServiceUtil.addValue(classNameId, expandoTable.getTableId(),
+                ExpandoValueLocalServiceUtil.addValue(classNameId, expandoTable.getTableId(),
                         expandoColumn.getColumnId(), id, valueCopy);
             } else {
                 ev.setData(valueCopy);
@@ -94,5 +97,4 @@ public final class CustomFieldSettingUtil {
         }
 
     }
-    // CHECKSTYLE:ON
 }

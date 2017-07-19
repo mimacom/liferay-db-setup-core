@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,31 @@ import java.util.HashMap;
  * extensions. The tool is used as singleton.
  */
 public final class MimeTypeMapper {
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String X_WORLD_X_3DMF = "x-world/x-3dmf";
+    public static final String AUDIO_AIFF = "audio/aiff";
+    public static final String TEXT_HTML = "text/html";
+    public static final String APPLICATION_POSTSCRIPT = "application/postscript";
+    public static final String AUDIO_X_AIFF = "audio/x-aiff";
+    public static final String TEXT_PLAIN = "text/plain";
+    public static final String APPLICATION_VND_MS_POWERPOINT = "application/vnd.ms-powerpoint";
+    public static final String APPLICATION_EXCEL = "application/excel";
+    public static final String APPLICATION_X_EXCEL = "application/x-excel";
+    public static final String APPLICATION_WORDPERFECT = "application/wordperfect";
+    public static final String VIDEO_MPEG = "video/mpeg";
+    public static final String AUDIO_MPEG = "audio/mpeg";
+    public static final String APPLICATION_VND_MS_EXCEL = "application/vnd.ms-excel";
+    public static final String MIDI = ".midi";
+    public static final String VIDEO_QUICKTIME = "video/quicktime";
+    public static final String APPLICATION_X_PROJECT = "application/x-project";
+    public static final String APPLICATION_X_COMPRESSED = "application/x-compressed";
+    public static final String TEXT_X_FORTRAN = "text/x-fortran";
+    public static final String IMAGE_X_DWG = "image/x-dwg";
+    public static final String IMAGE_VND_DWG = "image/vnd.dwg";
+    public static final String APPLICATION_MSWORD = "application/msword";
+    public static final String APPLICATION_X_BSH = "application/x-bsh";
+    public static final String TEXT_X_C = "text/x-c";
+    public static final String APPLICATION_X_X509_CA_CERT = "application/x-x509-ca-cert";
     /**
      * The mapping between the mime type and the extension.
      */
@@ -43,8 +68,6 @@ public final class MimeTypeMapper {
      * The map with the mapping between the extension to the mime type.
      */
     private HashMap extensionToMimeType;
-
-    private HashMap extensionToImageName;
 
     /**
      * Reference to the singleton instance.
@@ -70,7 +93,6 @@ public final class MimeTypeMapper {
     private MimeTypeMapper() {
         mimeToExtension = new HashMap();
         extensionToMimeType = new HashMap();
-        extensionToImageName = new HashMap();
         init();
     }
 
@@ -131,33 +153,32 @@ public final class MimeTypeMapper {
     /**
      * Initializes the mappings between all known file types/mime types.
      */
-    // CHECKSTYLE:OFF
     private void init() {
         // init mime types
-        addEntry(".3dm", "x-world/x-3dmf");
-        addEntry(".3dmf", "x-world/x-3dmf");
-        addEntry(".a", "application/octet-stream");
+        addEntry(".3dm", X_WORLD_X_3DMF);
+        addEntry(".3dmf", X_WORLD_X_3DMF);
+        addEntry(".a", APPLICATION_OCTET_STREAM);
         addEntry(".aab", "application/x-authorware-bin");
         addEntry(".aam", "application/x-authorware-map");
         addEntry(".aas", "application/x-authorware-seg");
         addEntry(".abc", "text/vnd.abc");
-        addEntry(".acgi", "text/html");
+        addEntry(".acgi", TEXT_HTML);
         addEntry(".afl", "video/animaflex");
-        addEntry(".ai", "application/postscript");
-        addEntry(".aif", "audio/aiff");
-        addEntry(".aif", "audio/x-aiff");
-        addEntry(".aifc", "audio/aiff");
-        addEntry(".aifc", "audio/x-aiff");
-        addEntry(".aiff", "audio/aiff");
-        addEntry(".aiff", "audio/x-aiff");
+        addEntry(".ai", APPLICATION_POSTSCRIPT);
+        addEntry(".aif", AUDIO_AIFF);
+        addEntry(".aif", AUDIO_X_AIFF);
+        addEntry(".aifc", AUDIO_AIFF);
+        addEntry(".aifc", AUDIO_X_AIFF);
+        addEntry(".aiff", AUDIO_AIFF);
+        addEntry(".aiff", AUDIO_X_AIFF);
         addEntry(".aim", "application/x-aim");
         addEntry(".aip", "text/x-audiosoft-intra");
         addEntry(".ani", "application/x-navi-animation");
         addEntry(".aos", "application/x-nokia-9000-communicator-add-on-software");
         addEntry(".aps", "application/mime");
-        addEntry(".arc", "application/octet-stream");
+        addEntry(".arc", APPLICATION_OCTET_STREAM);
         addEntry(".arj", "application/arj");
-        addEntry(".arj", "application/octet-stream");
+        addEntry(".arj", APPLICATION_OCTET_STREAM);
         addEntry(".art", "image/x-jg");
         addEntry(".asf", "video/x-ms-asf");
         addEntry(".asm", "text/x-asm");
@@ -175,7 +196,7 @@ public final class MimeTypeMapper {
         addEntry(".bcpio", "application/x-bcpio");
         addEntry(".bin", "application/mac-binary");
         addEntry(".bin", "application/macbinary");
-        addEntry(".bin", "application/octet-stream");
+        addEntry(".bin", APPLICATION_OCTET_STREAM);
         addEntry(".bin", "application/x-binary");
         addEntry(".bin", "application/x-macbinary");
         addEntry(".bm", "image/bmp");
@@ -184,87 +205,87 @@ public final class MimeTypeMapper {
         addEntry(".boo", "application/book");
         addEntry(".book", "application/book");
         addEntry(".boz", "application/x-bzip2");
-        addEntry(".bsh", "application/x-bsh");
+        addEntry(".bsh", APPLICATION_X_BSH);
         addEntry(".bz", "application/x-bzip");
         addEntry(".bz2", "application/x-bzip2");
-        addEntry(".c", "text/plain");
-        addEntry(".c", "text/x-c");
-        addEntry(".c++", "text/plain");
+        addEntry(".c", TEXT_PLAIN);
+        addEntry(".c", TEXT_X_C);
+        addEntry(".c++", TEXT_PLAIN);
         addEntry(".cat", "application/vnd.ms-pki.seccat");
-        addEntry(".cc", "text/plain");
-        addEntry(".cc", "text/x-c");
+        addEntry(".cc", TEXT_PLAIN);
+        addEntry(".cc", TEXT_X_C);
         addEntry(".ccad", "application/clariscad");
         addEntry(".cco", "application/x-cocoa");
         addEntry(".cdf", "application/cdf");
         addEntry(".cdf", "application/x-cdf");
         addEntry(".cdf", "application/x-netcdf");
         addEntry(".cer", "application/pkix-cert");
-        addEntry(".cer", "application/x-x509-ca-cert");
+        addEntry(".cer", APPLICATION_X_X509_CA_CERT);
         addEntry(".cha", "application/x-chat");
         addEntry(".chat", "application/x-chat");
         addEntry(".class", "application/java");
         addEntry(".class", "application/java-byte-code");
         addEntry(".class", "application/x-java-class");
-        addEntry(".com", "application/octet-stream");
-        addEntry(".com", "text/plain");
-        addEntry(".conf", "text/plain");
+        addEntry(".com", APPLICATION_OCTET_STREAM);
+        addEntry(".com", TEXT_PLAIN);
+        addEntry(".conf", TEXT_PLAIN);
         addEntry(".cpio", "application/x-cpio");
-        addEntry(".cpp", "text/x-c");
+        addEntry(".cpp", TEXT_X_C);
         addEntry(".cpt", "application/mac-compactpro");
         addEntry(".cpt", "application/x-compactpro");
         addEntry(".cpt", "application/x-cpt");
         addEntry(".crl", "application/pkcs-crl");
         addEntry(".crl", "application/pkix-crl");
         addEntry(".crt", "application/pkix-cert");
-        addEntry(".crt", "application/x-x509-ca-cert");
+        addEntry(".crt", APPLICATION_X_X509_CA_CERT);
         addEntry(".crt", "application/x-x509-user-cert");
         addEntry(".csh", "application/x-csh");
         addEntry(".csh", "text/x-script.csh");
         addEntry(".css", "application/x-pointplus");
         addEntry(".css", "text/css");
         addEntry(".csv", "text/csv");
-        addEntry(".cxx", "text/plain");
+        addEntry(".cxx", TEXT_PLAIN);
         addEntry(".dcr", "application/x-director");
         addEntry(".deepv", "application/x-deepv");
-        addEntry(".def", "text/plain");
-        addEntry(".der", "application/x-x509-ca-cert");
+        addEntry(".def", TEXT_PLAIN);
+        addEntry(".der", APPLICATION_X_X509_CA_CERT);
         addEntry(".dif", "video/x-dv");
         addEntry(".dir", "application/x-director");
         addEntry(".dl", "video/dl");
         addEntry(".dl", "video/x-dl");
-        addEntry(".doc", "application/msword");
+        addEntry(".doc", APPLICATION_MSWORD);
         // addEntry(".docx","application/msword");
-        addEntry(".dot", "application/msword");
+        addEntry(".dot", APPLICATION_MSWORD);
         // addEntry(".dotx","application/msword");
         addEntry(".dp", "application/commonground");
         addEntry(".drw", "application/drafting");
-        addEntry(".dump", "application/octet-stream");
+        addEntry(".dump", APPLICATION_OCTET_STREAM);
         addEntry(".dv", "video/x-dv");
         addEntry(".dvi", "application/x-dvi");
         addEntry(".dwf", "drawing/x-dwf (old)");
         addEntry(".dwf", "model/vnd.dwf");
         addEntry(".dwg", "application/acad");
-        addEntry(".dwg", "image/vnd.dwg");
-        addEntry(".dwg", "image/x-dwg");
+        addEntry(".dwg", IMAGE_VND_DWG);
+        addEntry(".dwg", IMAGE_X_DWG);
         addEntry(".dxf", "application/dxf");
-        addEntry(".dxf", "image/vnd.dwg");
-        addEntry(".dxf", "image/x-dwg");
+        addEntry(".dxf", IMAGE_VND_DWG);
+        addEntry(".dxf", IMAGE_X_DWG);
         addEntry(".dxr", "application/x-director");
         addEntry(".el", "text/x-script.elisp");
         addEntry(".elc", "application/x-bytecode.elisp (compiled elisp)");
         addEntry(".elc", "application/x-elc");
         addEntry(".env", "application/x-envoy");
-        addEntry(".eps", "application/postscript");
+        addEntry(".eps", APPLICATION_POSTSCRIPT);
         addEntry(".es", "application/x-esrehber");
         addEntry(".etx", "text/x-setext");
         addEntry(".evy", "application/envoy");
         addEntry(".evy", "application/x-envoy");
-        addEntry(".exe", "application/octet-stream");
-        addEntry(".f", "text/plain");
-        addEntry(".f", "text/x-fortran");
-        addEntry(".f77", "text/x-fortran");
-        addEntry(".f90", "text/plain");
-        addEntry(".f90", "text/x-fortran");
+        addEntry(".exe", APPLICATION_OCTET_STREAM);
+        addEntry(".f", TEXT_PLAIN);
+        addEntry(".f", TEXT_X_FORTRAN);
+        addEntry(".f77", TEXT_X_FORTRAN);
+        addEntry(".f90", TEXT_PLAIN);
+        addEntry(".f90", TEXT_X_FORTRAN);
         addEntry(".fdf", "application/vnd.fdf");
         addEntry(".fif", "application/fractals");
         addEntry(".fif", "image/fif");
@@ -273,13 +294,13 @@ public final class MimeTypeMapper {
         addEntry(".flo", "image/florian");
         addEntry(".flx", "text/vnd.fmi.flexstor");
         addEntry(".fmf", "video/x-atomic3d-feature");
-        addEntry(".for", "text/plain");
-        addEntry(".for", "text/x-fortran");
+        addEntry(".for", TEXT_PLAIN);
+        addEntry(".for", TEXT_X_FORTRAN);
         addEntry(".fpx", "image/vnd.fpx");
         addEntry(".fpx", "image/vnd.net-fpx");
         addEntry(".frl", "application/freeloader");
         addEntry(".funk", "audio/make");
-        addEntry(".g", "text/plain");
+        addEntry(".g", TEXT_PLAIN);
         addEntry(".g3", "image/g3fax");
         addEntry(".gif", "image/gif");
         addEntry(".gl", "video/gl");
@@ -289,16 +310,16 @@ public final class MimeTypeMapper {
         addEntry(".gsp", "application/x-gsp");
         addEntry(".gss", "application/x-gss");
         addEntry(".gtar", "application/x-gtar");
-        addEntry(".gz", "application/x-compressed");
+        addEntry(".gz", APPLICATION_X_COMPRESSED);
         addEntry(".gz", "application/x-gzip");
         addEntry(".gzip", "application/x-gzip");
         addEntry(".gzip", "multipart/x-gzip");
-        addEntry(".h", "text/plain");
+        addEntry(".h", TEXT_PLAIN);
         addEntry(".h", "text/x-h");
         addEntry(".hdf", "application/x-hdf");
         addEntry(".help", "application/x-helpfile");
         addEntry(".hgl", "application/vnd.hp-hpgl");
-        addEntry(".hh", "text/plain");
+        addEntry(".hh", TEXT_PLAIN);
         addEntry(".hh", "text/x-h");
         addEntry(".hlb", "text/x-script");
         addEntry(".hlp", "application/hlp");
@@ -314,14 +335,14 @@ public final class MimeTypeMapper {
         addEntry(".hqx", "application/x-mac-binhex40");
         addEntry(".hta", "application/hta");
         addEntry(".htc", "text/x-component");
-        addEntry(".htm", "text/html");
-        addEntry(".html", "text/html");
-        addEntry(".htmls", "text/html");
+        addEntry(".htm", TEXT_HTML);
+        addEntry(".html", TEXT_HTML);
+        addEntry(".htmls", TEXT_HTML);
         addEntry(".htt", "text/webviewhtml");
-        addEntry(".htx", "text/html");
+        addEntry(".htx", TEXT_HTML);
         addEntry(".ice", "x-conference/x-cooltalk");
         addEntry(".ico", "image/x-icon");
-        addEntry(".idc", "text/plain");
+        addEntry(".idc", TEXT_PLAIN);
         addEntry(".ief", "image/ief");
         addEntry(".iefs", "image/ief");
         addEntry(".iges", "application/iges");
@@ -339,9 +360,9 @@ public final class MimeTypeMapper {
         addEntry(".ivr", "i-world/i-vrml");
         addEntry(".ivy", "application/x-livescreen");
         addEntry(".jam", "audio/x-jam");
-        addEntry(".jav", "text/plain");
+        addEntry(".jav", TEXT_PLAIN);
         addEntry(".jav", "text/x-java-source");
-        addEntry(".java", "text/plain");
+        addEntry(".java", TEXT_PLAIN);
         addEntry(".java", "text/x-java-source");
         addEntry(".jcm", "application/x-java-commerce");
         addEntry(".jfif", "image/jpeg");
@@ -365,32 +386,32 @@ public final class MimeTypeMapper {
         addEntry(".lam", "audio/x-liveaudio");
         addEntry(".latex", "application/x-latex");
         addEntry(".lha", "application/lha");
-        addEntry(".lha", "application/octet-stream");
+        addEntry(".lha", APPLICATION_OCTET_STREAM);
         addEntry(".lha", "application/x-lha");
-        addEntry(".lhx", "application/octet-stream");
-        addEntry(".list", "text/plain");
+        addEntry(".lhx", APPLICATION_OCTET_STREAM);
+        addEntry(".list", TEXT_PLAIN);
         addEntry(".lma", "audio/nspaudio");
         addEntry(".lma", "audio/x-nspaudio");
-        addEntry(".log", "text/plain");
+        addEntry(".log", TEXT_PLAIN);
         addEntry(".lsp", "application/x-lisp");
         addEntry(".lsp", "text/x-script.lisp");
-        addEntry(".lst", "text/plain");
+        addEntry(".lst", TEXT_PLAIN);
         addEntry(".lsx", "text/x-la-asf");
         addEntry(".ltx", "application/x-latex");
-        addEntry(".lzh", "application/octet-stream");
+        addEntry(".lzh", APPLICATION_OCTET_STREAM);
         addEntry(".lzh", "application/x-lzh");
         addEntry(".lzx", "application/lzx");
-        addEntry(".lzx", "application/octet-stream");
+        addEntry(".lzx", APPLICATION_OCTET_STREAM);
         addEntry(".lzx", "application/x-lzx");
-        addEntry(".m", "text/plain");
+        addEntry(".m", TEXT_PLAIN);
         addEntry(".m", "text/x-m");
-        addEntry(".m1v", "video/mpeg");
-        addEntry(".m2a", "audio/mpeg");
-        addEntry(".m2v", "video/mpeg");
+        addEntry(".m1v", VIDEO_MPEG);
+        addEntry(".m2a", AUDIO_MPEG);
+        addEntry(".m2v", VIDEO_MPEG);
         addEntry(".m3u", "audio/x-mpequrl");
         addEntry(".man", "application/x-troff-man");
         addEntry(".map", "application/x-navimap");
-        addEntry(".mar", "text/plain");
+        addEntry(".mar", TEXT_PLAIN);
         addEntry(".mbd", "application/mbedlet");
         addEntry(".mc$", "application/x-magic-cap-package-1.0");
         addEntry(".mcd", "application/mcad");
@@ -407,12 +428,12 @@ public final class MimeTypeMapper {
         addEntry(".mid", "audio/x-midi");
         addEntry(".mid", "music/crescendo");
         addEntry(".mid", "x-music/x-midi");
-        addEntry(".midi", "application/x-midi");
-        addEntry(".midi", "audio/midi");
-        addEntry(".midi", "audio/x-mid");
-        addEntry(".midi", "audio/x-midi");
-        addEntry(".midi", "music/crescendo");
-        addEntry(".midi", "x-music/x-midi");
+        addEntry(MIDI, "application/x-midi");
+        addEntry(MIDI, "audio/midi");
+        addEntry(MIDI, "audio/x-mid");
+        addEntry(MIDI, "audio/x-midi");
+        addEntry(MIDI, "music/crescendo");
+        addEntry(MIDI, "x-music/x-midi");
         addEntry(".mif", "application/x-frame");
         addEntry(".mif", "application/x-mif");
         addEntry(".mime", "message/rfc822");
@@ -424,30 +445,30 @@ public final class MimeTypeMapper {
         addEntry(".mme", "application/base64");
         addEntry(".mod", "audio/mod");
         addEntry(".mod", "audio/x-mod");
-        addEntry(".moov", "video/quicktime");
-        addEntry(".mov", "video/quicktime");
+        addEntry(".moov", VIDEO_QUICKTIME);
+        addEntry(".mov", VIDEO_QUICKTIME);
         addEntry(".movie", "video/x-sgi-movie");
-        addEntry(".mp2", "audio/mpeg");
+        addEntry(".mp2", AUDIO_MPEG);
         addEntry(".mp2", "audio/x-mpeg");
-        addEntry(".mp2", "video/mpeg");
+        addEntry(".mp2", VIDEO_MPEG);
         addEntry(".mp2", "video/x-mpeg");
         addEntry(".mp2", "video/x-mpeq2a");
         addEntry(".mp3", "audio/mpeg3");
         addEntry(".mp3", "audio/x-mpeg-3");
-        addEntry(".mp3", "video/mpeg");
+        addEntry(".mp3", VIDEO_MPEG);
         addEntry(".mp3", "video/x-mpeg");
-        addEntry(".mpa", "audio/mpeg");
-        addEntry(".mpa", "video/mpeg");
-        addEntry(".mpc", "application/x-project");
-        addEntry(".mpe", "video/mpeg");
-        addEntry(".mpeg", "video/mpeg");
-        addEntry(".mpg", "audio/mpeg");
-        addEntry(".mpg", "video/mpeg");
-        addEntry(".mpga", "audio/mpeg");
+        addEntry(".mpa", AUDIO_MPEG);
+        addEntry(".mpa", VIDEO_MPEG);
+        addEntry(".mpc", APPLICATION_X_PROJECT);
+        addEntry(".mpe", VIDEO_MPEG);
+        addEntry(".mpeg", VIDEO_MPEG);
+        addEntry(".mpg", AUDIO_MPEG);
+        addEntry(".mpg", VIDEO_MPEG);
+        addEntry(".mpga", AUDIO_MPEG);
         addEntry(".mpp", "application/vnd.ms-project");
-        addEntry(".mpt", "application/x-project");
-        addEntry(".mpv", "application/x-project");
-        addEntry(".mpx", "application/x-project");
+        addEntry(".mpt", APPLICATION_X_PROJECT);
+        addEntry(".mpv", APPLICATION_X_PROJECT);
+        addEntry(".mpx", APPLICATION_X_PROJECT);
         addEntry(".mrc", "application/marc");
         addEntry(".ms", "application/x-troff-ms");
         addEntry(".mv", "video/x-sgi-movie");
@@ -462,7 +483,7 @@ public final class MimeTypeMapper {
         addEntry(".nix", "application/x-mix-transfer");
         addEntry(".nsc", "application/x-conference");
         addEntry(".nvd", "application/x-navidoc");
-        addEntry(".o", "application/octet-stream");
+        addEntry(".o", APPLICATION_OCTET_STREAM);
         addEntry(".oda", "application/oda");
         addEntry(".omc", "application/x-omc");
         addEntry(".omcd", "application/x-omcdatamaker");
@@ -496,7 +517,7 @@ public final class MimeTypeMapper {
         addEntry(".pict", "image/pict");
         addEntry(".pkg", "application/x-newton-compatible-pkg");
         addEntry(".pko", "application/vnd.ms-pki.pko");
-        addEntry(".pl", "text/plain");
+        addEntry(".pl", TEXT_PLAIN);
         addEntry(".pl", "text/x-script.perl");
         addEntry(".plx", "application/x-pixclscript");
         addEntry(".pm", "image/x-xpixmap");
@@ -507,31 +528,31 @@ public final class MimeTypeMapper {
         addEntry(".pnm", "application/x-portable-anymap");
         addEntry(".pnm", "image/x-portable-anymap");
         addEntry(".pot", "application/mspowerpoint");
-        addEntry(".pot", "application/vnd.ms-powerpoint");
+        addEntry(".pot", APPLICATION_VND_MS_POWERPOINT);
         addEntry(".pov", "model/x-pov");
-        addEntry(".ppa", "application/vnd.ms-powerpoint");
+        addEntry(".ppa", APPLICATION_VND_MS_POWERPOINT);
         addEntry(".ppm", "image/x-portable-pixmap");
         addEntry(".pps", "application/mspowerpoint");
-        addEntry(".pps", "application/vnd.ms-powerpoint");
+        addEntry(".pps", APPLICATION_VND_MS_POWERPOINT);
         addEntry(".ppt", "application/mspowerpoint");
         addEntry(".ppt", "application/powerpoint");
         // addEntry(".pptx","application/powerpoint");
-        addEntry(".ppt", "application/vnd.ms-powerpoint");
+        addEntry(".ppt", APPLICATION_VND_MS_POWERPOINT);
         addEntry(".ppt", "application/x-mspowerpoint");
         addEntry(".ppz", "application/mspowerpoint");
         addEntry(".pre", "application/x-freelance");
         addEntry(".prt", "application/pro_eng");
-        addEntry(".ps", "application/postscript");
-        addEntry(".psd", "application/octet-stream");
+        addEntry(".ps", APPLICATION_POSTSCRIPT);
+        addEntry(".psd", APPLICATION_OCTET_STREAM);
         addEntry(".pvu", "paleovu/x-pv");
-        addEntry(".pwz", "application/vnd.ms-powerpoint");
+        addEntry(".pwz", APPLICATION_VND_MS_POWERPOINT);
         addEntry(".py", "text/x-script.phyton");
         addEntry(".pyc", "applicaiton/x-bytecode.python");
         addEntry(".qcp", "audio/vnd.qcelp");
-        addEntry(".qd3", "x-world/x-3dmf");
-        addEntry(".qd3d", "x-world/x-3dmf");
+        addEntry(".qd3", X_WORLD_X_3DMF);
+        addEntry(".qd3d", X_WORLD_X_3DMF);
         addEntry(".qif", "image/x-quicktime");
-        addEntry(".qt", "video/quicktime");
+        addEntry(".qt", VIDEO_QUICKTIME);
         addEntry(".qtc", "video/x-qtc");
         addEntry(".qti", "image/x-quicktime");
         addEntry(".qtif", "image/x-quicktime");
@@ -568,13 +589,13 @@ public final class MimeTypeMapper {
         addEntry(".rv", "video/vnd.rn-realvideo");
         addEntry(".s", "text/x-asm");
         addEntry(".s3m", "audio/s3m");
-        addEntry(".saveme", "application/octet-stream");
+        addEntry(".saveme", APPLICATION_OCTET_STREAM);
         addEntry(".sbk", "application/x-tbook");
         addEntry(".scm", "application/x-lotusscreencam");
         addEntry(".scm", "text/x-script.guile");
         addEntry(".scm", "text/x-script.scheme");
         addEntry(".scm", "video/x-scm");
-        addEntry(".sdml", "text/plain");
+        addEntry(".sdml", TEXT_PLAIN);
         addEntry(".sdp", "application/sdp");
         addEntry(".sdp", "application/x-sdp");
         addEntry(".sdr", "application/sounder");
@@ -585,13 +606,13 @@ public final class MimeTypeMapper {
         addEntry(".sgm", "text/x-sgml");
         addEntry(".sgml", "text/sgml");
         addEntry(".sgml", "text/x-sgml");
-        addEntry(".sh", "application/x-bsh");
+        addEntry(".sh", APPLICATION_X_BSH);
         addEntry(".sh", "application/x-sh");
         addEntry(".sh", "application/x-shar");
         addEntry(".sh", "text/x-script.sh");
-        addEntry(".shar", "application/x-bsh");
+        addEntry(".shar", APPLICATION_X_BSH);
         addEntry(".shar", "application/x-shar");
-        addEntry(".shtml", "text/html");
+        addEntry(".shtml", TEXT_HTML);
         addEntry(".shtml", "text/x-server-parsed-html");
         addEntry(".sid", "audio/x-psid");
         addEntry(".sit", "application/x-sit");
@@ -622,8 +643,8 @@ public final class MimeTypeMapper {
         addEntry(".stp", "application/step");
         addEntry(".sv4cpio", "application/x-sv4cpio");
         addEntry(".sv4crc", "application/x-sv4crc");
-        addEntry(".svf", "image/vnd.dwg");
-        addEntry(".svf", "image/x-dwg");
+        addEntry(".svf", IMAGE_VND_DWG);
+        addEntry(".svf", IMAGE_X_DWG);
         addEntry(".svr", "application/x-world");
         addEntry(".svr", "x-world/x-svr");
         addEntry(".swf", "application/x-shockwave-flash");
@@ -639,9 +660,9 @@ public final class MimeTypeMapper {
         addEntry(".texi", "application/x-texinfo");
         addEntry(".texinfo", "application/x-texinfo");
         addEntry(".text", "application/plain");
-        addEntry(".text", "text/plain");
+        addEntry(".text", TEXT_PLAIN);
         addEntry(".tgz", "application/gnutar");
-        addEntry(".tgz", "application/x-compressed");
+        addEntry(".tgz", APPLICATION_X_COMPRESSED);
         addEntry(".tif", "image/tiff");
         addEntry(".tif", "image/x-tiff");
         addEntry(".tiff", "image/tiff");
@@ -652,7 +673,7 @@ public final class MimeTypeMapper {
         addEntry(".tsp", "audio/tsplayer");
         addEntry(".tsv", "text/tab-separated-values");
         addEntry(".turbot", "image/florian");
-        addEntry(".txt", "text/plain");
+        addEntry(".txt", TEXT_PLAIN);
         addEntry(".uil", "text/x-uil");
         addEntry(".uni", "text/uri-list");
         addEntry(".unis", "text/uri-list");
@@ -661,7 +682,7 @@ public final class MimeTypeMapper {
         addEntry(".uris", "text/uri-list");
         addEntry(".ustar", "application/x-ustar");
         addEntry(".ustar", "multipart/x-ustar");
-        addEntry(".uu", "application/octet-stream");
+        addEntry(".uu", APPLICATION_OCTET_STREAM);
         addEntry(".uu", "text/x-uuencode");
         addEntry(".uue", "text/x-uuencode");
         addEntry(".vcd", "application/x-cdlink");
@@ -691,25 +712,25 @@ public final class MimeTypeMapper {
         addEntry(".vsw", "application/x-visio");
         addEntry(".w60", "application/wordperfect6.0");
         addEntry(".w61", "application/wordperfect6.1");
-        addEntry(".w6w", "application/msword");
+        addEntry(".w6w", APPLICATION_MSWORD);
         addEntry(".wav", "audio/wav");
         addEntry(".wav", "audio/x-wav");
         addEntry(".wb1", "application/x-qpro");
         addEntry(".wbmp", "image/vnd.wap.wbmp");
         addEntry(".web", "application/vnd.xara");
-        addEntry(".wiz", "application/msword");
+        addEntry(".wiz", APPLICATION_MSWORD);
         addEntry(".wk1", "application/x-123");
         addEntry(".wmf", "windows/metafile");
         addEntry(".wml", "text/vnd.wap.wml");
         addEntry(".wmlc", "application/vnd.wap.wmlc");
         addEntry(".wmls", "text/vnd.wap.wmlscript");
         addEntry(".wmlsc", "application/vnd.wap.wmlscriptc");
-        addEntry(".word", "application/msword");
-        addEntry(".wp", "application/wordperfect");
-        addEntry(".wp5", "application/wordperfect");
+        addEntry(".word", APPLICATION_MSWORD);
+        addEntry(".wp", APPLICATION_WORDPERFECT);
+        addEntry(".wp5", APPLICATION_WORDPERFECT);
         addEntry(".wp5", "application/wordperfect6.0");
-        addEntry(".wp6", "application/wordperfect");
-        addEntry(".wpd", "application/wordperfect");
+        addEntry(".wp6", APPLICATION_WORDPERFECT);
+        addEntry(".wpd", APPLICATION_WORDPERFECT);
         addEntry(".wpd", "application/x-wpwin");
         addEntry(".wq1", "application/x-lotus");
         addEntry(".wri", "application/mswrite");
@@ -728,38 +749,38 @@ public final class MimeTypeMapper {
         addEntry(".xdr", "video/x-amt-demorun");
         addEntry(".xgz", "xgl/drawing");
         addEntry(".xif", "image/vnd.xiff");
-        addEntry(".xl", "application/excel");
-        addEntry(".xla", "application/excel");
-        addEntry(".xla", "application/x-excel");
+        addEntry(".xl", APPLICATION_EXCEL);
+        addEntry(".xla", APPLICATION_EXCEL);
+        addEntry(".xla", APPLICATION_X_EXCEL);
         addEntry(".xla", "application/x-msexcel");
-        addEntry(".xlb", "application/excel");
-        addEntry(".xlb", "application/vnd.ms-excel");
-        addEntry(".xlb", "application/x-excel");
-        addEntry(".xlc", "application/excel");
-        addEntry(".xlc", "application/vnd.ms-excel");
-        addEntry(".xlc", "application/x-excel");
-        addEntry(".xld", "application/excel");
-        addEntry(".xld", "application/x-excel");
-        addEntry(".xlk", "application/excel");
-        addEntry(".xlk", "application/x-excel");
-        addEntry(".xll", "application/excel");
-        addEntry(".xll", "application/vnd.ms-excel");
-        addEntry(".xll", "application/x-excel");
-        addEntry(".xlm", "application/excel");
-        addEntry(".xlm", "application/vnd.ms-excel");
-        addEntry(".xlm", "application/x-excel");
-        addEntry(".xls", "application/vnd.ms-excel");
-        addEntry(".xls", "application/x-excel");
+        addEntry(".xlb", APPLICATION_EXCEL);
+        addEntry(".xlb", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xlb", APPLICATION_X_EXCEL);
+        addEntry(".xlc", APPLICATION_EXCEL);
+        addEntry(".xlc", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xlc", APPLICATION_X_EXCEL);
+        addEntry(".xld", APPLICATION_EXCEL);
+        addEntry(".xld", APPLICATION_X_EXCEL);
+        addEntry(".xlk", APPLICATION_EXCEL);
+        addEntry(".xlk", APPLICATION_X_EXCEL);
+        addEntry(".xll", APPLICATION_EXCEL);
+        addEntry(".xll", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xll", APPLICATION_X_EXCEL);
+        addEntry(".xlm", APPLICATION_EXCEL);
+        addEntry(".xlm", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xlm", APPLICATION_X_EXCEL);
+        addEntry(".xls", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xls", APPLICATION_X_EXCEL);
         addEntry(".xls", "application/x-msexcel");
-        addEntry(".xls", "application/excel");
+        addEntry(".xls", APPLICATION_EXCEL);
         // addEntry(".xlsx","application/excel");
-        addEntry(".xlt", "application/excel");
-        addEntry(".xlt", "application/x-excel");
-        addEntry(".xlv", "application/excel");
-        addEntry(".xlv", "application/x-excel");
-        addEntry(".xlw", "application/excel");
-        addEntry(".xlw", "application/vnd.ms-excel");
-        addEntry(".xlw", "application/x-excel");
+        addEntry(".xlt", APPLICATION_EXCEL);
+        addEntry(".xlt", APPLICATION_X_EXCEL);
+        addEntry(".xlv", APPLICATION_EXCEL);
+        addEntry(".xlv", APPLICATION_X_EXCEL);
+        addEntry(".xlw", APPLICATION_EXCEL);
+        addEntry(".xlw", APPLICATION_VND_MS_EXCEL);
+        addEntry(".xlw", APPLICATION_X_EXCEL);
         addEntry(".xlw", "application/x-msexcel");
         addEntry(".xm", "audio/xm");
         addEntry(".xml", "application/xml");
@@ -774,12 +795,12 @@ public final class MimeTypeMapper {
         addEntry(".xwd", "image/x-xwindowdump");
         addEntry(".xyz", "chemical/x-pdb");
         addEntry(".z", "application/x-compress");
-        addEntry(".z", "application/x-compressed");
-        addEntry(".zip", "application/x-compressed");
+        addEntry(".z", APPLICATION_X_COMPRESSED);
+        addEntry(".zip", APPLICATION_X_COMPRESSED);
         addEntry(".zip", "application/x-zip-compressed");
         addEntry(".zip", "application/zip");
         addEntry(".zip", "multipart/x-zip");
-        addEntry(".zoo", "application/octet-stream");
+        addEntry(".zoo", APPLICATION_OCTET_STREAM);
         addEntry(".zsh", "text/x-script.zsh");
 
         addEntry(".docx",
@@ -805,7 +826,7 @@ public final class MimeTypeMapper {
 
         /*
          * .doc application/msword .dot application/msword
-         * 
+         *
          * .xls application/vnd.ms-excel .xlt application/vnd.ms-excel .xla
          * application/vnd.ms-excel . .ppt application/vnd.ms-powerpoint .pot
          * application/vnd.ms-powerpoint .pps application/vnd.ms-powerpoint .ppa
@@ -813,6 +834,5 @@ public final class MimeTypeMapper {
          */
 
     }
-    // CHECKSTYLE:ON
 
 }

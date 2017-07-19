@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,9 +85,7 @@ public final class FolderUtil {
             dir = DLAppLocalServiceUtil.getFolder(groupId, parentFolderId, name);
         } catch (NoSuchFolderException nsfe) {
             LOG.info("Folder not found: " + name);
-        } catch (PortalException e) {
-            LOG.error("Error while trying to get folder: " + name, e);
-        } catch (SystemException e) {
+        } catch (PortalException|SystemException e) {
             LOG.error("Error while trying to get folder: " + name, e);
         }
         return dir;
@@ -95,8 +93,6 @@ public final class FolderUtil {
 
     public static Folder createDocumentFolder(final long companyId, final long groupId,
             final long repoId, final long userId, final Long pFolderId, final String folderName) {
-
-        Long folderId = null;
 
         Long currentFolderId = null;
         Folder folder = null;
@@ -111,9 +107,9 @@ public final class FolderUtil {
                             folderName, new ServiceContext());
 
                 }
-                folderId = folder.getFolderId();
+                folder.getFolderId();
             } catch (SystemException | PortalException e) {
-                e.printStackTrace();
+                LOG.error("Couldn't create document folder, folderName: " + folderName, e);
             }
 
         }

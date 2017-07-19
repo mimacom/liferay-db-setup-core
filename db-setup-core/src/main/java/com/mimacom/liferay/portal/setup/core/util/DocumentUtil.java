@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,9 +78,7 @@ public final class DocumentUtil {
                         documentName);
             } catch (NoSuchFileEntryException e) {
                 LOG.info("Document not found: " + documentName);
-            } catch (PortalException e) {
-                LOG.error("Error while trying to find document: " + documentName);
-            } catch (SystemException e) {
+            } catch (PortalException|SystemException e) {
                 LOG.error("Error while trying to find document: " + documentName);
             }
         }
@@ -114,10 +112,8 @@ public final class DocumentUtil {
         if (folder != null) {
             try {
                 entry = DLAppLocalServiceUtil.getFileEntry(groupId, folder.getFolderId(), title);
-            } catch (PortalException e) {
-                e.printStackTrace();
-            } catch (SystemException e) {
-                e.printStackTrace();
+            } catch (PortalException|SystemException e) {
+                LOG.error("Couldn't a document with name: " + documentName, e);
             }
         }
 
@@ -142,10 +138,8 @@ public final class DocumentUtil {
             DLAppLocalServiceUtil.updateFileEntry(userId, fe.getFileEntryId(), sourceFileName,
                     fe.getMimeType(), fe.getTitle(), fe.getDescription(), "update content", true,
                     content, new ServiceContext());
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
+        } catch (PortalException|SystemException e) {
+            LOG.error("Cannot update file, source file name: " + sourceFileName, e);
         }
     }
 
@@ -163,10 +157,8 @@ public final class DocumentUtil {
         try {
             DLAppLocalServiceUtil.moveFileEntry(userId, fe.getFolderId(), folderId,
                     new ServiceContext());
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
+        } catch (PortalException|SystemException e) {
+            LOG.error("Cannot move file to a folder with id: " + folderId, e);
         }
     }
 
@@ -192,7 +184,6 @@ public final class DocumentUtil {
      *            the content of the file file to be stored.
      * @return returns the file entry of the created file.
      */
-    // CHECKSTYLE:OFF
     public static FileEntry createDocument(final long companyId, final long groupId,
             final long folderId, final String fileName, final String title, final long userId,
             final long repoId, final byte[] content) {
@@ -204,23 +195,18 @@ public final class DocumentUtil {
             fileEntry = DLAppLocalServiceUtil.getFileEntry(groupId, folderId, title);
         } catch (NoSuchFileEntryException nsfee) {
             LOG.info("Document not found: " + title);
-        } catch (PortalException e) {
-            LOG.error("Error while trying to get file: " + title, e);
-        } catch (SystemException e) {
+        } catch (PortalException|SystemException e) {
             LOG.error("Error while trying to get file: " + title, e);
         }
         if (fileEntry == null) {
             try {
                 fileEntry = DLAppLocalServiceUtil.addFileEntry(userId, repoId, folderId, fname,
                         mtype, title, title, "Mimacom import", content, new ServiceContext());
-            } catch (PortalException e) {
-                LOG.error("Error while trying to add file entry: " + title, e);
-            } catch (SystemException e) {
+            } catch (PortalException|SystemException e) {
                 LOG.error("Error while trying to add file entry: " + title, e);
             }
 
         }
         return fileEntry;
     }
-    // CHECKSTYLE:ON
 }

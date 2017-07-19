@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -129,10 +129,10 @@ public final class SetupPages {
     }
 
     /**
-     * @param organization
-     * @param groupId
-     * @param company
-     * @param userid
+     * @param organization organization entity defined in xml descriptor
+     * @param groupId liferay site scope
+     * @param company liferay instance scope
+     * @param userid run as user
      * @throws SystemException
      * @throws PortalException
      */
@@ -241,12 +241,12 @@ public final class SetupPages {
     }
 
     /**
-     * @param pages
-     * @param groupId
-     * @param isPrivate
-     * @param parentLayoutId
-     * @param company
-     * @param userId
+     * @param pages list of pages defined in xml descriptor
+     * @param groupId Liferay site scope
+     * @param isPrivate should page be added in private pages?
+     * @param parentLayoutId layout id of parent page
+     * @param company Liferay instance scope
+     * @param userId run as user
      * @throws SystemException
      * @throws PortalException
      */
@@ -280,7 +280,7 @@ public final class SetupPages {
                 }
                 LOG.info("Setup: Page " + page.getName() + " created...");
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOG.error(ex);
             }
             setupLiferayPage(layout, page, groupId, isPrivate, company, userId, null);
         }
@@ -397,7 +397,7 @@ public final class SetupPages {
             }
             LayoutLocalServiceUtil.updateLayout(layout);
         } catch (SystemException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
     }
 
@@ -586,7 +586,7 @@ public final class SetupPages {
         try {
             portlets = layoutTypePortlet.getAllPortlets();
         } catch (PortalException | SystemException e1) {
-            e1.printStackTrace();
+            LOG.error(e1);
         }
         if (portlets != null) {
             for (Portlet portlet : portlets) {
@@ -611,7 +611,7 @@ public final class SetupPages {
                         }
                     }
                 } catch (PortalException | SystemException e) {
-                    e.printStackTrace();
+                    LOG.error(e);
                 }
             }
         }

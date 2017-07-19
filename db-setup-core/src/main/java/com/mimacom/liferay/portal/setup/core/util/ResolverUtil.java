@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -253,7 +253,7 @@ public final class ResolverUtil {
             final String locationName) {
         long siteGroupId = 0;
 
-        if (siteName.toLowerCase().equals("global")) {
+        if (siteName.equalsIgnoreCase("global")) {
             try {
                 // look up global site
                 siteGroupId = GroupLocalServiceUtil.getCompanyGroup(company).getGroupId();
@@ -289,11 +289,11 @@ public final class ResolverUtil {
 
     /**
      * Substitutes all references for documents and media files. A file
-     * reference must have the following format in BNF: <br/>
-     * fileReference ::= "{{$FILE=" siteReference+ filePath "$}}"<br/>
-     * siteReference ::= "::" &lt; site-name &gt; "::"<br/>
-     * filePath ::= ("/" &lt; path-segment &gt;)*<br/>
-     * <br/>
+     * reference must have the following format in BNF: <br>
+     * fileReference ::= "{{$FILE=" siteReference+ filePath "$}}"<br>
+     * siteReference ::= "::" &lt; site-name &gt; "::"<br>
+     * filePath ::= ("/" &lt; path-segment &gt;)*<br>
+     * <br>
      *
      * @param content
      *            The content of the article.
@@ -567,10 +567,8 @@ public final class ResolverUtil {
                 Layout l = null;
                 try {
                     l = LayoutLocalServiceUtil.getFriendlyURLLayout(siteGroupId, isPrivate, fUrl);
-                } catch (PortalException e) {
-                    e.printStackTrace();
-                } catch (SystemException e) {
-                    e.printStackTrace();
+                } catch (PortalException|SystemException e) {
+                    LOG.error(e);
                 }
 
                 if (l == null) {

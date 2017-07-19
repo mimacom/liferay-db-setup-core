@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mimacom.liferay</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <artifactId>db-setup-core</artifactId>
     <name>Liferay Portal DB Setup core</name>
     <description>Library that allows to declare a set of Liferay data to be created and create them using the API.
@@ -13,12 +13,21 @@
 
     <packaging>jar</packaging>
 
+    <properties>
+        <jaxb2.plugin.version>2.2</jaxb2.plugin.version>
+        <java.version>1.7</java.version>
+        <license.plugin.version>1.13</license.plugin.version>
+        <resource.plugin.version>3.0.2</resource.plugin.version>
+        <liferay.ce.version>6.2.5</liferay.ce.version>
+        <source.plugin.version>3.0.1</source.plugin.version>
+        <javadoc.plugin.version>2.10.4</javadoc.plugin.version>
+    </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.5</version>
+                <version>${jaxb2.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>xjc</id>
@@ -29,7 +38,9 @@
                 </executions>
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/sources</outputDirectory>
-                    <schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+                    <sources>
+                        <source>${basedir}/src/main/resources/setup_definition-1.0.xsd</source>
+                    </sources>
                     <packageName>com.mimacom.liferay.portal.setup.domain</packageName>
                     <clearOutputDir>false</clearOutputDir>
                 </configuration>
@@ -40,19 +51,20 @@
                 <version>2.5</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.8</version>
+                <version>${license.plugin.version}</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/license</outputDirectory>
                     <thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
                     <licenseName>mit</licenseName>
+                    <encoding>UTF-8</encoding>
                     <excludes>
                         <exclude>**/package-info.java</exclude>
                     </excludes>
@@ -74,7 +86,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>${resource.plugin.version}</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -82,11 +94,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>${javadoc.plugin.version}</version>
                 <configuration>
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${source.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -95,7 +128,7 @@
         <dependency>
             <groupId>com.liferay.portal</groupId>
             <artifactId>portal-service</artifactId>
-            <version>6.2.5</version>
+            <version>${liferay.ce.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -124,7 +157,9 @@
         </dependency>
     </dependencies>
     <scm>
-        <url>https://github.com/mimacom/liferay-db-setup-core</url>
+        <connection>scm:git:git://github.com/mimacom/liferay-db-setup-core.git</connection>
+        <developerConnection>scm:git:ssh://github.com:mimacom/liferay-db-setup-core.git</developerConnection>
+        <url>https://github.com/mimacom/liferay-db-setup-core/tree/1.x</url>
     </scm>
     <organization>
         <name>mimacom ag</name>
@@ -139,4 +174,12 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+    <developers>
+        <developer>
+            <name>Pawel Kruszewski</name>
+            <email>pawel.kruszewski@mimacom.com</email>
+            <organization>mimacom</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
+    </developers>
 </project>

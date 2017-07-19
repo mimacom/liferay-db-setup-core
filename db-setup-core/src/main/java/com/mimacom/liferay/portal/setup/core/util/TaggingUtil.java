@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,10 +57,8 @@ public final class TaggingUtil {
             }
             AssetEntryLocalServiceUtil.updateEntry(userId, groupId, JournalArticle.class.getName(),
                     primaryKey, catIds, tags.toArray(new String[tags.size()]));
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
+        } catch (PortalException|SystemException e) {
+            LOG.error(e);
         }
     }
 

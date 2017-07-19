@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,11 +31,15 @@ import java.util.List;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 
 public final class WebFolderUtil {
+
+    private final static Log LOGGER = LogFactoryUtil.getLog(WebFolderUtil.class);
 
     private WebFolderUtil() {
     }
@@ -80,7 +84,7 @@ public final class WebFolderUtil {
                 }
             }
         } catch (SystemException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to find web folder, name: " + name, e);
         }
         return dir;
     }
@@ -97,10 +101,8 @@ public final class WebFolderUtil {
             folder = JournalFolderLocalServiceUtil.addFolder(userId, groupId, parentFolderId, name,
                     description, serviceContext);
 
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
+        } catch (PortalException|SystemException e) {
+            LOGGER.error("Failed to create web folder, name: " + name, e);
         }
         return folder;
     }

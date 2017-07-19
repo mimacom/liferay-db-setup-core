@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 mimacom ag
+ * Copyright (C) 2016 - 2017 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -112,7 +112,7 @@ public final class SetupPermissions {
             ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID, className,
                     ResourceConstants.SCOPE_INDIVIDUAL, primaryKey, roleId, permission);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error(ex);
         }
     }
 
