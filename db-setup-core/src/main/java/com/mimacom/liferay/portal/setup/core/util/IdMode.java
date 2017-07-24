@@ -26,30 +26,19 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
-import com.liferay.portal.kernel.util.FileUtil;
+public enum IdMode {
+    ID("ID"),
+    PLID("PLID"),
+    UUID("UUID");
 
-import java.io.IOException;
-import java.io.InputStream;
+    private final String text;
 
-/**
- * Created by ntrp on 5/15/17.
- */
-public class ResourcesUtil {
-
-    public static InputStream getFileStream(String path) {
-
-        ClassLoader cl = ResourcesUtil.class.getClassLoader();
-        return cl.getResourceAsStream(path);
+    private IdMode(String text) {
+        this.text = text;
     }
 
-    public static byte[] getFileBytes(String path) throws IOException {
-        return FileUtil.getBytes(getFileStream(path));
+    @Override
+    public String toString() {
+        return this.text;
     }
-
-    public static String getFileContent(String path) throws IOException {
-
-        byte[] bytes = getFileBytes(path);
-        return new String(bytes, "UTF-8");
-    }
-
 }

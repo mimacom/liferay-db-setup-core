@@ -146,12 +146,12 @@
     <xs:element name="public-pages">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="page"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element maxOccurs="unbounded" ref="page"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
-            <xs:attribute name="defaultLayout" type="xs:NCName">
+            <xs:attribute name="defaultLayout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of default layout template for this public page set. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured
@@ -173,12 +173,12 @@
     <xs:element name="private-pages">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="page"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="theme"/>
+                <xs:element maxOccurs="unbounded" ref="page"/>
             </xs:sequence>
             <xs:attribute name="deleteExistingPages" default="false" type="xs:boolean"/>
             <xs:attribute name="virtual-host" type="xs:string"/>
-            <xs:attribute name="defaultLayout" type="xs:NCName">
+            <xs:attribute name="defaultLayout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of layout template for this page. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured
@@ -236,6 +236,8 @@
                     </li>
                     <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
+                    <li>{{$PUB-PAGE-UUID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
+                    </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
                     <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
@@ -253,6 +255,9 @@
 
     <xs:element name="role">
         <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="define-permissions" />
+            </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:string"/>
             <xs:attribute name="type" use="optional" default="portal">
                 <xs:simpleType>
@@ -317,6 +322,63 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="define-permissions">
+        <xs:annotation>
+            <xs:appinfo>Defining Permissions for Roles</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Extract the resource permissions defined for each role:<br/>
+                <br/>
+                SELECT        resourcePermissionId, companyId, name, scope, primKey, roleId, ownerId, actionIds<br/>
+                FROM          ResourcePermission<br/>
+                WHERE        (roleId = &lt;Role_.roleId&gt;)<br/>
+                <br/>
+                and write down as XML<br/>
+                <br/>
+                &lt;define-permission define-permission-name="&lt;ResourcePermission.name&gt;"&gt;<br/>
+                ... resource actions ...<br/>
+                &lt;/define-permission&gt;<br/>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="define-permission" minOccurs="0" />
+            </xs:sequence>
+            <xs:attribute name="clear-permissions" type="xs:boolean" default="false" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="define-permission">
+        <xs:annotation>
+            <xs:appinfo>Defining Permission Actions for Roles</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Extract the resource actions that belong to the corresponding resource permission (TransactSQL Dialect):<br/>
+                <br/>
+                SELECT ra.actionId<br/>
+                FROM [dbo].[ResourcePermission] rp,<br/>
+                [dbo].[]ResourceAction ra<br/>
+                where roleid = &lt;roleid&gt; and ra.name = rp.name and ((rp.actionids &amp; ra.bitwiseValue) &lt;&gt; 0) and ra.name = '&lt;name of the resource&gt;'<br/>
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="permission-action" minOccurs="1" />
+            </xs:sequence>
+            <xs:attribute name="define-permission-name" use="required" type="xs:string" />
+            <xs:attribute name="element-primary-key" type="xs:string" />
+            <xs:attribute name="scope" use="optional">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="portal" />
+                        <xs:enumeration value="site" />
+                        <xs:enumeration value="site template" />
+                        <xs:enumeration value="individual" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+
     <xs:element name="page">
         <xs:complexType>
             <xs:sequence>
@@ -330,8 +392,9 @@
             <xs:attribute name="name" use="required"/>
             <xs:attribute name="friendlyURL" use="required"/>
             <xs:attribute name="type" default="portlet"/>
+            <xs:attribute name="target" use="optional" />
             <xs:attribute name="hidden" type="xs:boolean" default="false"/>
-            <xs:attribute name="layout" type="xs:NCName">
+            <xs:attribute name="layout" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>ID of layout template for this page. Note that if the layout
                         template is part of a Theme plugin, Theme plugin ID must be configured
@@ -495,6 +558,8 @@
                     </li>
                     <li>{{$PUB-PAGE-PLID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
                     </li>
+                    <li>{{$PUB-PAGE-UUID-BY-FRIENDLY_URL=[:: name of the site ::]&lt; friendly url of the public page &gt;$}}
+                    </li>
                     <li>{{$DDL-REC-SET-ID-BY-KEYL=[:: name of the site ::]&lt; key of the DDL record set &gt;$}}</li>
                     <li>{{ID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
                     <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
@@ -508,6 +573,7 @@
             <xs:sequence>
                 <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="related-assets"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="tag"/>
                 <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="article-structure-key" type="xs:string"/>
@@ -516,6 +582,12 @@
             <xs:attribute name="title" use="required" type="xs:string"/>
             <xs:attribute name="article-folder-path" type="xs:string"/>
             <xs:attribute name="path" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="tag">
+        <xs:complexType>
+            <xs:attribute name="name"/>
         </xs:complexType>
     </xs:element>
 

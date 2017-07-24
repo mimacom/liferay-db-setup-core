@@ -55,6 +55,7 @@ public final class SetupDocumentFolders {
         actionsOwner.add(ActionKeys.ADD_SHORTCUT);
         actionsOwner.add(ActionKeys.ADD_DOCUMENT);
         actionsOwner.add(ActionKeys.ACCESS);
+        actionsOwner.add(ActionKeys.SUBSCRIBE);
 
         DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
 

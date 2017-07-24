@@ -53,23 +53,24 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
 import com.mimacom.liferay.portal.setup.core.util.ResourcesUtil;
+import com.mimacom.liferay.portal.setup.core.util.TaggingUtil;
 import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
 import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by mapa, guno..
@@ -422,6 +423,7 @@ public final class SetupArticles {
                 }
                 LOG.info("Updated JournalArticle: " + journalArticle.getTitle());
             }
+            TaggingUtil.associateTags(groupId, article, journalArticle);
             processRelatedAssets(article, journalArticle, LiferaySetup.getRunAsUserId(), groupId,
                     companyId);
             SetupPermissions.updatePermission("Article " + journalArticle.getArticleId(), groupId,

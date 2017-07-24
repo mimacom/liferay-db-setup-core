@@ -100,6 +100,18 @@ public final class SetupPermissions {
                 ResourceConstants.SCOPE_INDIVIDUAL, primKey);
     }
 
+    public static void addPermission(String roleName, String name, String primaryKey, int scope,
+                                     String[] permission)
+            throws SystemException, PortalException {
+        try {
+            long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, roleName).getRoleId();
+            ResourcePermissionLocalServiceUtil
+                    .setResourcePermissions(COMPANY_ID, name, scope, primaryKey, roleId, permission);
+        } catch (Exception ex) {
+            LOG.error("Error when adding role!", ex);
+        }
+    }
+
     public static void addPermission(final String roleName, final String className,
                                      final String primaryKey, final String[] permission)
             throws SystemException, PortalException {

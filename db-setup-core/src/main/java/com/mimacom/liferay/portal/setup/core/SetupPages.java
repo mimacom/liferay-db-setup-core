@@ -37,6 +37,8 @@ import com.liferay.portal.kernel.model.*;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
+import com.liferay.portal.kernel.settings.TypedSettings;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -214,6 +216,7 @@ public final class SetupPages {
             set = group.getPublicLayoutSet();
         }
         set.setThemeId(theme.getName());
+        LayoutSetLocalServiceUtil.updateLayoutSet(set);
     }
 
     /**
@@ -227,7 +230,7 @@ public final class SetupPages {
      * @throws SystemException
      * @throws PortalException
      */
-    private static void addPages(final List<Page> pages, final String defaultLayout, final String defaultLayoutContainedInThemeWithId,
+    private static void addPages(final List<Page> pages, String defaultLayout, String defaultLayoutContainedInThemeWithId,
                                  final long groupId, final boolean isPrivate, final long parentLayoutId, final long company,
                                  final long userId) throws SystemException, PortalException {
 
@@ -259,9 +262,13 @@ public final class SetupPages {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+            // If the page has not a layout set, set the default one. Otherwise set that layout as the default for the subtree
             if (page.getLayout() == null) {
                 page.setLayout(defaultLayout);
                 page.setLayoutContainedInThemeWithId(defaultLayoutContainedInThemeWithId);
+            } else {
+                defaultLayout = page.getLayout();
+                defaultLayoutContainedInThemeWithId = page.getLayoutContainedInThemeWithId();
             }
             setupLiferayPage(layout, page, defaultLayout, defaultLayoutContainedInThemeWithId, groupId, isPrivate, company, userId, null);
         }
@@ -277,6 +284,8 @@ public final class SetupPages {
         if (page.getLayout() != null) {
             setLayoutTemplate(layout, page, userId);
         }
+
+        setPageTarget(page, layout);
 
         List<Pageportlet> portlets = page.getPageportlet();
         if (portlets != null && !portlets.isEmpty()) {
@@ -305,7 +314,6 @@ public final class SetupPages {
             setCustomFields(userId, groupId, company, page, layout);
         }
 
-        updatePage(layout, page, groupId);
         SetupPermissions.updatePermission("Page " + page.getFriendlyURL(), groupId, company,
                 layout.getPlid(), Layout.class, page.getRolePermissions(),
                 getDefaultPermissions(isPrivate));
@@ -372,21 +380,23 @@ public final class SetupPages {
         }
     }
 
-    private static void updatePage(final Layout layout, final Page page, final long groupId) {
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(page.getTitleTranslation(), groupId,
-                page.getName(), " Page with title " + page.getFriendlyURL());
-        try {
-            if (titleMap != null) {
-                layout.setTitleMap(titleMap);
-                layout.setNameMap(titleMap);
-            }
-            LayoutLocalServiceUtil.updateLayout(layout.getGroupId(), layout.isPrivateLayout(),
-                    layout.getLayoutId(), layout.getTypeSettings());
-        } catch (SystemException e) {
-            e.printStackTrace();
-        } catch (PortalException e) {
-            e.printStackTrace();
-        }
+    private static Layout createPage(final long groupId, final Page currentPage,
+                                     final long parentLayoutId, final boolean isPrivate)
+            throws SystemException, PortalException {
+
+        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(currentPage.getTitleTranslation(), groupId,
+                currentPage.getName(), " Page with title " + currentPage.getFriendlyURL());
+
+        Locale locale = LocaleUtil.getSiteDefault();
+
+        Map<Locale, String> descriptionMap = new HashMap<>();
+        descriptionMap.put(locale, StringPool.BLANK);
+
+        Map<Locale, String> friendlyURLMap = new HashMap<>();
+        friendlyURLMap.put(locale, currentPage.getFriendlyURL());
+
+        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate, parentLayoutId, titleMap,titleMap, null,
+                null, null, currentPage.getType(), StringPool.BLANK, currentPage.isHidden(), friendlyURLMap, new ServiceContext());
     }
 
     private static void setCustomFields(final long runAsUserId, final long groupId,
@@ -400,6 +410,19 @@ public final class SetupPages {
             CustomFieldSettingUtil.setExpandoValue(
                     resolverHint.replace("%%key%%", key).replace("%%value%%", value), runAsUserId,
                     groupId, company, clazz, layout.getPlid(), key, value);
+        }
+    }
+
+    private static void setPageTarget(final Page page, final Layout layout) {
+        UnicodeProperties props = layout.getTypeSettingsProperties();
+        props.put("target", page.getTarget());
+        layout.setTypeSettingsProperties(props);
+        try {
+            LayoutLocalServiceUtil.updateLayout(layout.getGroupId(), layout.isPrivateLayout(),
+                    layout.getLayoutId(), layout.getTypeSettings());
+        } catch (PortalException e) {
+            LOG.error("Can not set target attribute value '" + page.getTarget()
+                    + "' to page with layoutId:" + layout.getLayoutId() + ".", e);
         }
     }
 
@@ -601,15 +624,6 @@ public final class SetupPages {
         } catch (PortalException | SystemException e) {
             LOG.error("cannot remove pages: " + e);
         }
-    }
-
-    private static Layout createPage(final long groupId, final Page currentPage,
-                                     final long parentLayoutId, final boolean isPrivate)
-            throws SystemException, PortalException {
-
-        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate, parentLayoutId,
-                currentPage.getName(), currentPage.getName(), "", currentPage.getType(), currentPage.isHidden(),
-                currentPage.getFriendlyURL(), new ServiceContext());
     }
 
 }
