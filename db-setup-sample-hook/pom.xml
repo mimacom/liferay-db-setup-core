@@ -95,10 +95,5 @@
             <version>2.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>sk.o2.mvp</groupId>
-            <artifactId>liferay-util</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 </project>
