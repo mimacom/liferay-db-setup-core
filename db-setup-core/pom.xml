@@ -217,17 +217,6 @@
         </developer>
     </developers>
 
-    <distributionManagement>
-        <repository>
-            <id>devlab-releases</id>
-            <url>https://nexus.devlab.sk.o2/repository/maven-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>devlab-snapshopts</id>
-            <url>https://nexus.devlab.sk.o2/repository/maven-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <profiles>
         <profile>
             <id>ossrh-distribution</id>
