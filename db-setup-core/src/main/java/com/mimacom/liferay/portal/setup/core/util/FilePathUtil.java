@@ -32,7 +32,7 @@ import java.io.File;
 public final class FilePathUtil {
 
     private FilePathUtil() {
-
+        // hide default constructor
     }
 
     public static String getExtension(final String fname) {

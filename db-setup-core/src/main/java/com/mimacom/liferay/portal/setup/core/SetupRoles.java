@@ -46,20 +46,19 @@ import com.liferay.portal.util.PortalUtil;
 
 public final class SetupRoles {
     private static final Log LOG = LogFactoryUtil.getLog(SetupRoles.class);
-    private static final long COMPANY_ID = PortalUtil.getDefaultCompanyId();
 
     private SetupRoles() {
 
     }
 
-    public static void setupRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles) {
+    public static void setupRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles, long companyId) {
 
         for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
             try {
-                RoleLocalServiceUtil.getRole(COMPANY_ID, role.getName());
+                RoleLocalServiceUtil.getRole(companyId, role.getName());
                 LOG.info("Setup: Role " + role.getName() + " already exist, not creating...");
             } catch (NoSuchRoleException | ObjectNotFoundException e) {
-                addRole(role);
+                addRole(role, companyId);
 
             } catch (SystemException | PortalException e) {
                 LOG.error("error while setting up roles", e);
@@ -67,7 +66,7 @@ public final class SetupRoles {
         }
     }
 
-    private static void addRole(final com.mimacom.liferay.portal.setup.domain.Role role) {
+    private static void addRole(final com.mimacom.liferay.portal.setup.domain.Role role, long companyId) {
 
         Map<Locale, String> localeTitleMap = new HashMap<>();
         localeTitleMap.put(Locale.ENGLISH, role.getName());
@@ -82,8 +81,8 @@ public final class SetupRoles {
                 }
             }
 
-            long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
-            RoleLocalServiceUtil.addRole(defaultUserId, COMPANY_ID, role.getName(), localeTitleMap,
+            long defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId);
+            RoleLocalServiceUtil.addRole(defaultUserId, companyId, role.getName(), localeTitleMap,
                     null, roleType);
 
             LOG.info("Setup: Role " + role.getName() + " does not exist, adding...");
@@ -95,7 +94,7 @@ public final class SetupRoles {
     }
 
     public static void deleteRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles,
-            final String deleteMethod) {
+            final String deleteMethod, final long companyId) {
 
         switch (deleteMethod) {
         case "excludeListed":
@@ -107,7 +106,7 @@ public final class SetupRoles {
                     if (!toBeDeletedRoles.containsKey(name)) {
                         try {
                             RoleLocalServiceUtil
-                                    .deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
+                                    .deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
                             LOG.info("Deleting Role " + name);
 
                         } catch (Exception e) {
@@ -124,7 +123,7 @@ public final class SetupRoles {
             for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
                 String name = role.getName();
                 try {
-                    RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
+                    RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
                     LOG.info("Deleting Role " + name);
 
                 } catch (RequiredRoleException e) {

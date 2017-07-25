@@ -60,7 +60,6 @@ import java.util.List;
 
 public final class ResolverUtil {
 
-    // CHECKSTYLE:OFF
     public static final int ID_TYPE_ID = 0;
     public static final int ID_TYPE_UUID = 1;
     public static final int ID_TYPE_RESOURCE = 2;
@@ -81,8 +80,6 @@ public final class ResolverUtil {
     private static final String ID_OF_SITE_WITH_NAME_KEY = "{{$ID_OF_SITE_WITH_NAME=";
 
     private static final String ID_OF_ORG_USER_GROUP_WITH_NAME_KEY = "{{$%%IDTYPE%%_OF_%%LOOKUPTYPE%%_WITH_NAME=";
-
-    // CHECKSTYLE:ON
 
     private ResolverUtil() {
     }
@@ -643,7 +640,6 @@ public final class ResolverUtil {
         return contentCopy;
     }
 
-    // CHECKSTYLE:OFF
     public static String lookupStructureOrTemplateIdWithKey(final String content,
             final String locationHint, final long groupId, final long company, final boolean uuid,
             final String commandPrefix, final boolean isTemplate, final Class referredClass) {
@@ -713,8 +709,6 @@ public final class ResolverUtil {
         }
         return retVal;
     }
-
-    // CHECKSTYLE:ON
 
     public static JournalArticle getArticleByArticleID(final String articleId, final long groupId)
             throws SystemException {

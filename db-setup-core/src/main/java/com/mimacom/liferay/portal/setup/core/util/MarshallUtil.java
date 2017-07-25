@@ -1,4 +1,4 @@
-package com.mimacom.liferay.portal.setup;
+package com.mimacom.liferay.portal.setup.core.util;
 
 /*
  * #%L
@@ -73,13 +73,13 @@ public final class MarshallUtil {
     }
 
     private static Unmarshaller getUnmarshaller() throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance("org.mimacom.liferay.portal.setup.domain");
+        JAXBContext jc = JAXBContext.newInstance("com.mimacom.liferay.portal.setup.domain");
         return jc.createUnmarshaller();
     }
 
     public static boolean validateAgainstXSD(final InputStream xml) throws IOException {
         ClassLoader cl = MarshallUtil.class.getClassLoader();
-        URL url = cl.getResource("setup_definition-1.0.xsd");
+        URL url = cl.getResource("setup_definition-2.0.xsd");
         if (url == null) {
             throw new IOException("XSD configuration not found");
         }

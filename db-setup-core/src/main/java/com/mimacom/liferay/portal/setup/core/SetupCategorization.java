@@ -31,7 +31,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.mimacom.liferay.portal.setup.domain.Category;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.domain.Organization;
 import com.mimacom.liferay.portal.setup.domain.Vocabulary;
 
@@ -60,7 +59,7 @@ public final class SetupCategorization {
 
     }
 
-    public static void setupVocabularies(final Organization organization, final long groupId)
+    public static void setupVocabularies(final Organization organization, final long groupId, long runAsUserId)
             throws SystemException, PortalException {
         List<Vocabulary> vocabularies = organization.getVocabulary();
 
@@ -69,12 +68,11 @@ public final class SetupCategorization {
         LOG.info("Setting up vocabularies");
 
         for (Vocabulary vocabulary : vocabularies) {
-            setupVocabulary(vocabulary, organization, groupId, siteDefaultLocale);
+            setupVocabulary(vocabulary, groupId, siteDefaultLocale, runAsUserId);
         }
     }
 
-    private static void setupVocabulary(final Vocabulary vocabulary,
-            final Organization organization, final long groupId, final Locale defaultLocale) {
+    private static void setupVocabulary(final Vocabulary vocabulary, final long groupId, final Locale defaultLocale, long runAsUserId) {
 
         LOG.info("Setting up vocabulary with title: " + vocabulary.getTitle());
 
@@ -107,7 +105,7 @@ public final class SetupCategorization {
             }
 
             setupCategories(assetVocabulary.getVocabularyId(), groupId, 0L,
-                    vocabulary.getCategory(), defaultLocale);
+                    vocabulary.getCategory(), defaultLocale, runAsUserId);
             return;
         }
 
@@ -116,11 +114,11 @@ public final class SetupCategorization {
             serviceContext.setCompanyId(PortalUtil.getDefaultCompanyId());
             serviceContext.setScopeGroupId(groupId);
             assetVocabulary = AssetVocabularyLocalServiceUtil.addVocabulary(
-                    LiferaySetup.getRunAsUserId(), null, titleMap, descMap, null, serviceContext);
+                    runAsUserId, null, titleMap, descMap, null, serviceContext);
             LOG.info("AssetVocabulary successfuly added. ID:" + assetVocabulary.getVocabularyId()
                     + ", group:" + assetVocabulary.getGroupId());
             setupCategories(assetVocabulary.getVocabularyId(), groupId, 0L,
-                    vocabulary.getCategory(), defaultLocale);
+                    vocabulary.getCategory(), defaultLocale, runAsUserId);
         } catch (PortalException | SystemException | NullPointerException e) {
             LOG.error("Error while trying to create vocabulary with title: "
                     + assetVocabulary.getTitle(), e);
@@ -128,18 +126,18 @@ public final class SetupCategorization {
     }
 
     private static void setupCategories(final long vocabularyId, final long groupId,
-                                        final long parentId, final List<Category> categories, final Locale defaultLocale) {
+                                        final long parentId, final List<Category> categories, final Locale defaultLocale, long runAsUserId) {
         LOG.info("Setting up categories for parentId:" + parentId);
 
         if (categories != null && !categories.isEmpty()) {
             for (Category category : categories) {
-                setupCategory(category, vocabularyId, groupId, defaultLocale, parentId);
+                setupCategory(category, vocabularyId, groupId, defaultLocale, parentId, runAsUserId);
             }
         }
     }
 
     private static void setupCategory(final Category category, final long vocabularyId,
-            final long groupId, final Locale defaultLocale, final long parentCategoryId) {
+                                      final long groupId, final Locale defaultLocale, final long parentCategoryId, long runAsUserId) {
 
         LOG.info("Setting up category with title:" + category.getTitle());
 
@@ -185,17 +183,17 @@ public final class SetupCategorization {
             }
 
             setupCategories(vocabularyId, groupId, assetCategory.getCategoryId(),
-                    category.getCategory(), defaultLocale);
+                    category.getCategory(), defaultLocale, runAsUserId);
             return;
         }
 
         try {
-            assetCategory = AssetCategoryLocalServiceUtil.addCategory(LiferaySetup.getRunAsUserId(),
+            assetCategory = AssetCategoryLocalServiceUtil.addCategory(runAsUserId,
                     parentCategoryId, titleMap, descMap, vocabularyId, null, serviceContext);
             LOG.info("Category successfully added with title: " + assetCategory.getTitle());
 
             setupCategories(vocabularyId, groupId, assetCategory.getCategoryId(),
-                    category.getCategory(), defaultLocale);
+                    category.getCategory(), defaultLocale, runAsUserId);
 
         } catch (PortalException | SystemException e) {
             LOG.error("Error in creating category with title: " + category.getTitle(), e);

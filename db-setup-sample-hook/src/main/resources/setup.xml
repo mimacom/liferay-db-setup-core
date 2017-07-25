@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<setup xmlns="https://raw.githubusercontent.com/mimacom/liferay-db-setup-core/1.x/db-setup-core/src/main/resources/setup_definition-1.1.xsd">
+
+    <configuration>
+        <runasuser>test@liferay.com</runasuser>
+    </configuration>
+
+    <roles>
+        <role name="Portal Admin"/>
+    </roles>
+
+    <users>
+        <user password="portaladmin" lastName="Admin" screenName="portaladmin"
+              firstName="Portal" emailAddress="portaladmin@mimacom.com">
+            <role name="Portal Admin" type="site" site="Guest"/>
+            <custom-field-setting key="" value=""></custom-field-setting>
+        </user>
+    </users>
+
+    <organizations>
+        <organization name="Portal Testers">
+            <public-pages deleteExistingPages="true">
+                <page name="startpage" friendlyURL="/example-page">
+                    <pageportlet portletId="47" column="column-2"/>
+                </page>
+            </public-pages>
+        </organization>
+    </organizations>
+
+    <customFields>
+        <field name="footer_article_id" type="string" className="com.liferay.portal.model.Layout" indexed="text">
+            <role-permission role-name="Guest" permission="view"/>
+        </field>
+    </customFields>
+
+    <deleteLiferayObjects>
+        <objectsToBeDeleted deleteMethod="onlyListed">
+            <users>
+                <user screenName="" emailAddress="portaladmin@mimacom.com" password="" firstName="" lastName="">
+                    <role name=""/>
+                </user>
+            </users>
+        </objectsToBeDeleted>
+    </deleteLiferayObjects>
+
+
+</setup>

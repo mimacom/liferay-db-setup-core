@@ -27,18 +27,16 @@ package com.mimacom.liferay.portal.setup.core;
  */
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
-import com.mimacom.liferay.portal.setup.domain.ArticleFolder;
-
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portlet.journal.model.JournalFolder;
+import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
+import com.mimacom.liferay.portal.setup.domain.ArticleFolder;
+import com.mimacom.liferay.portal.setup.domain.Organization;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public final class SetupWebFolders {
     private static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
@@ -71,13 +69,13 @@ public final class SetupWebFolders {
     }
 
     public static void setupWebFolders(
-        final Organization org, final long groupId,
-        final long companyId) {
+            final Organization org, final long groupId,
+            final long companyId, long runAsUserId) {
         for (ArticleFolder af : org.getArticleFolder()) {
             String webFolderPath = af.getFolderPath();
             String description = af.getDescription();
             JournalFolder jf = WebFolderUtil.findWebFolder(companyId, groupId,
-                    LiferaySetup.getRunAsUserId(), webFolderPath, description, true);
+                    runAsUserId, webFolderPath, description, true);
             SetupPermissions.updatePermission("Folder " + af.getFolderPath(), groupId, companyId,
                     jf.getFolderId(), JournalFolder.class, af.getRolePermissions(),
                     DEFAULT_PERMISSIONS);

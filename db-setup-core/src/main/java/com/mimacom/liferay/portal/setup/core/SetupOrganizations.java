@@ -60,7 +60,7 @@ public final class SetupOrganizations {
 
     public static void setupOrganizations(
             final List<com.mimacom.liferay.portal.setup.domain.Organization> organizations,
-            final Organization parentOrg, final Group parentGroup) {
+            final Organization parentOrg, final Group parentGroup, long runAsUserId) {
 
         for (com.mimacom.liferay.portal.setup.domain.Organization organization : organizations) {
             try {
@@ -141,32 +141,32 @@ public final class SetupOrganizations {
 
                 LOG.info("Setting organization content...");
 
-                SetupDocumentFolders.setupDocumentFolders(organization, groupId, COMPANY_ID);
+                SetupDocumentFolders.setupDocumentFolders(organization, groupId, COMPANY_ID, runAsUserId);
                 LOG.info("Document Folders setting finished.");
 
-                SetupDocuments.setupOrganizationDocuments(organization, groupId, COMPANY_ID);
+                SetupDocuments.setupOrganizationDocuments(organization, groupId, COMPANY_ID, runAsUserId);
                 LOG.info("Documents setting finished.");
 
                 SetupPages.setupOrganizationPages(organization, groupId, COMPANY_ID,
-                        LiferaySetup.getRunAsUserId());
+                        runAsUserId, runAsUserId);
                 LOG.info("Organization Pages setting finished.");
 
-                SetupWebFolders.setupWebFolders(organization, groupId, COMPANY_ID);
+                SetupWebFolders.setupWebFolders(organization, groupId, COMPANY_ID, runAsUserId);
                 LOG.info("Web folders setting finished.");
 
-                SetupCategorization.setupVocabularies(organization, groupId);
+                SetupCategorization.setupVocabularies(organization, groupId, runAsUserId);
                 LOG.info("Organization Categories setting finished.");
 
-                SetupArticles.setupOrganizationArticles(organization, groupId, COMPANY_ID);
+                SetupArticles.setupOrganizationArticles(organization, groupId, COMPANY_ID, runAsUserId);
                 LOG.info("Organization Articles setting finished.");
 
-                setCustomFields(LiferaySetup.getRunAsUserId(), groupId, COMPANY_ID, organization,
+                setCustomFields(runAsUserId, groupId, COMPANY_ID, organization,
                         liferayOrg);
                 LOG.info("Organization custom fields set up.");
 
                 List<com.mimacom.liferay.portal.setup.domain.Organization> orgs = organization
                         .getOrganization();
-                setupOrganizations(orgs, liferayOrg, liferayGroup);
+                setupOrganizations(orgs, liferayOrg, liferayGroup, runAsUserId);
 
             } catch (Exception e) {
                 LOG.error("Error by setting up organization " + organization.getName(), e);

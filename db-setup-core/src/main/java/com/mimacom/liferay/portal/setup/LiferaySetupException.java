@@ -1,6 +1,6 @@
 package com.mimacom.liferay.portal.setup;
 
-/*
+/*-
  * #%L
  * Liferay Portal DB Setup core
  * %%
@@ -25,24 +25,12 @@ package com.mimacom.liferay.portal.setup;
  * THE SOFTWARE.
  * #L%
  */
-
-
-/**
- * Basic class for upgrade process.
- */
-public abstract class SetupUpgradeProcess extends BasicSetupUpgradeProcess {
-
-    /**
-     * @return paths to setup xml files.
-     */
-    protected final String[] getSetupFileNames() {
-        String[] retVal = new String[1];
-        retVal[0] = getSetupFileName();
-        return retVal;
+public class LiferaySetupException extends Exception {
+    public LiferaySetupException(String message) {
+        super(message);
     }
 
-    /**
-     * @return path to setup xml file.
-     */
-    protected abstract String getSetupFileName();
+    public LiferaySetupException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

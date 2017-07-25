@@ -133,11 +133,12 @@ public final class SetupPages {
      * @param groupId liferay site scope
      * @param company liferay instance scope
      * @param userid run as user
+     * @param runAsUserId
      * @throws SystemException
      * @throws PortalException
      */
     public static void setupOrganizationPages(final Organization organization, final long groupId,
-            final long company, final long userid) throws SystemException, PortalException {
+                                              final long company, final long userid, long runAsUserId) throws SystemException, PortalException {
 
         PublicPages publicPages = organization.getPublicPages();
         if (publicPages != null) {
@@ -148,7 +149,7 @@ public final class SetupPages {
                 LOG.info("Setup: Deleting pages from organization " + organization.getName());
                 deletePages(groupId);
             }
-            addPages(publicPages.getPage(), groupId, false, 0, company, userid);
+            addPages(publicPages.getPage(), groupId, false, 0, company, userid, runAsUserId);
         }
 
         PrivatePages privatePages = organization.getPrivatePages();
@@ -161,24 +162,23 @@ public final class SetupPages {
                 deletePages(groupId);
             }
 
-            addPages(privatePages.getPage(), groupId, true, 0, company, userid);
+            addPages(privatePages.getPage(), groupId, true, 0, company, userid, runAsUserId);
         }
     }
 
     /**
      * Set the page templates up. As this is heavily based on page (layout).
-     *
-     * @param pageTemplates
+     *  @param pageTemplates
      *            The page template definitions that are imported.
      * @param groupId
      *            The group id of the site where to import the
      * @param company
-     *            The id of the company to which the templates are imported.
+ *            The id of the company to which the templates are imported.
      * @param userid
-     *            The user id of the importing user.
+     * @param runAsUserId
      */
     public static void setupPageTemplates(final PageTemplates pageTemplates, final long groupId,
-            final long company, final long userid) {
+                                          final long company, final long userid, long runAsUserId) {
         try {
             for (PageTemplate pageTemplate : pageTemplates.getPageTemplate()) {
                 String name = pageTemplate.getName();
@@ -207,7 +207,7 @@ public final class SetupPages {
                                 LOG.error("The page of page template " + name + " may not have a "
                                         + "friendly URL! Will ignore it!");
                             }
-                            setupLiferayPage(layout, page, groupId, false, company, userid, name);
+                            setupLiferayPage(layout, page, groupId, false, company, userid, name, runAsUserId);
                         }
                     } else {
                         LOG.error("Could not create or find the page template " + name);
@@ -247,12 +247,13 @@ public final class SetupPages {
      * @param parentLayoutId layout id of parent page
      * @param company Liferay instance scope
      * @param userId run as user
+     * @param runAsUserId
      * @throws SystemException
      * @throws PortalException
      */
     private static void addPages(final List<Page> pages, final long groupId,
-            final boolean isPrivate, final long parentLayoutId, final long company,
-            final long userId) throws SystemException, PortalException {
+                                 final boolean isPrivate, final long parentLayoutId, final long company,
+                                 final long userId, long runAsUserId) throws SystemException, PortalException {
 
         for (Page page : pages) {
 
@@ -264,7 +265,7 @@ public final class SetupPages {
                 if (layout != null && page.isDeleteExistingPages()) {
                     LayoutLocalServiceUtil.deleteLayout(layout);
                     if (page.getLinkToURL() == null || page.getLinkToURL().equals("")) {
-                        layout = createPage(groupId, page, parentLayoutId, isPrivate);
+                        layout = createPage(groupId, page, parentLayoutId, isPrivate, runAsUserId);
                     } else {
                         layout = createLinkPage(page, groupId, parentLayoutId, userId);
                     }
@@ -274,7 +275,7 @@ public final class SetupPages {
                 }
             } catch (NoSuchLayoutException e) {
                 if (page.getLinkToURL() == null || page.getLinkToURL().equals("")) {
-                    layout = createPage(groupId, page, parentLayoutId, isPrivate);
+                    layout = createPage(groupId, page, parentLayoutId, isPrivate, runAsUserId);
                 } else {
                     layout = createLinkPage(page, groupId, parentLayoutId, userId);
                 }
@@ -282,13 +283,13 @@ public final class SetupPages {
             } catch (Exception ex) {
                 LOG.error(ex);
             }
-            setupLiferayPage(layout, page, groupId, isPrivate, company, userId, null);
+            setupLiferayPage(layout, page, groupId, isPrivate, company, userId, null, runAsUserId);
         }
     }
 
     private static void setupLiferayPage(final Layout layout, final Page page, final long groupId,
-            final boolean isPrivate, final long company, final long userId,
-            final String pageTemplateName) throws SystemException, PortalException {
+                                         final boolean isPrivate, final long company, final long userId,
+                                         final String pageTemplateName, long runAsUserId) throws SystemException, PortalException {
         if (page.getTheme() != null) {
             setPageTheme(layout, page);
         }
@@ -300,7 +301,7 @@ public final class SetupPages {
         if (portlets != null && !portlets.isEmpty()) {
             for (Pageportlet portlet : portlets) {
                 try {
-                    addPortletIntoPage(page, layout, portlet, company, groupId);
+                    addPortletIntoPage(page, layout, portlet, company, groupId, runAsUserId);
 
                 } catch (ValidatorException | IOException e) {
                     LOG.error(e);
@@ -314,7 +315,7 @@ public final class SetupPages {
                 LOG.error("Page template " + pageTemplateName + " may not have any sub-pages! "
                         + "Will ignore them!");
             } else {
-                addPages(subPages, groupId, isPrivate, layout.getLayoutId(), company, userId);
+                addPages(subPages, groupId, isPrivate, layout.getLayoutId(), company, userId, runAsUserId);
             }
         }
 
@@ -427,7 +428,7 @@ public final class SetupPages {
     }
 
     private static void addPortletIntoPage(final Page page, final Layout layout,
-            final Pageportlet portlet, final long company, final long groupId)
+                                           final Pageportlet portlet, final long company, final long groupId, long runAsUserId)
                     throws SystemException, ValidatorException, IOException, PortalException {
         if (page.getLinkToURL() != null && !page.getLinkToURL().equals("")) {
             LOG.error("This is a link page! It cannot be cleared. If you intend to use this page "
@@ -436,7 +437,6 @@ public final class SetupPages {
         } else {
             long plid = layout.getPlid();
             int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
-            long runAsUserId = LiferaySetup.getRunAsUserId();
 
             LayoutTypePortlet layoutTypePortlet = (LayoutTypePortlet) layout.getLayoutType();
 
@@ -629,10 +629,10 @@ public final class SetupPages {
     }
 
     private static Layout createPage(final long groupId, final Page currentPage,
-            final long parentLayoutId, final boolean isPrivate)
+                                     final long parentLayoutId, final boolean isPrivate, long runAsUserId)
                     throws SystemException, PortalException {
 
-        return LayoutLocalServiceUtil.addLayout(LiferaySetup.getRunAsUserId(), groupId, isPrivate,
+        return LayoutLocalServiceUtil.addLayout(runAsUserId, groupId, isPrivate,
                 parentLayoutId, currentPage.getName(), currentPage.getName(),
                 LiferaySetup.DESCRIPTION, currentPage.getType(), currentPage.isHidden(),
                 currentPage.getFriendlyURL(), new ServiceContext());

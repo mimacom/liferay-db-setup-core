@@ -3,8 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.mimacom.liferay</groupId>
+        <artifactId>build-parent</artifactId>
+        <version>1.1.0</version>
+    </parent>
     <groupId>com.mimacom.liferay</groupId>
-    <version>1.0.1</version>
+    <version>1.1.0-SNAPSHOT</version>
     <artifactId>db-setup-core</artifactId>
     <name>Liferay Portal DB Setup core</name>
     <description>Library that allows to declare a set of Liferay data to be created and create them using the API.
@@ -18,7 +23,6 @@
         <java.version>1.7</java.version>
         <license.plugin.version>1.13</license.plugin.version>
         <resource.plugin.version>3.0.2</resource.plugin.version>
-        <liferay.ce.version>6.2.5</liferay.ce.version>
         <source.plugin.version>3.0.1</source.plugin.version>
         <javadoc.plugin.version>2.10.4</javadoc.plugin.version>
     </properties>
@@ -39,13 +43,12 @@
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/sources</outputDirectory>
                     <sources>
-                        <source>${basedir}/src/main/resources/setup_definition-1.0.xsd</source>
+                        <source>${basedir}/src/main/resources/setup_definition-1.1.xsd</source>
                     </sources>
                     <packageName>com.mimacom.liferay.portal.setup.domain</packageName>
                     <clearOutputDir>false</clearOutputDir>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.5</version>
@@ -55,7 +58,6 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -82,7 +84,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -156,11 +157,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <scm>
         <connection>scm:git:git://github.com/mimacom/liferay-db-setup-core.git</connection>
         <developerConnection>scm:git:ssh://github.com:mimacom/liferay-db-setup-core.git</developerConnection>
         <url>https://github.com/mimacom/liferay-db-setup-core/tree/1.x</url>
     </scm>
+
     <organization>
         <name>mimacom ag</name>
         <url>http://www.mimacom.com</url>
@@ -174,12 +177,99 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
     <developers>
+        <developer>
+            <name>Silvio Meier</name>
+            <email>silvio.meier@empa.ch</email>
+            <organization>Empa</organization>
+            <organizationUrl>http://www.empa.ch</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ivan Greguric Ortolan</name>
+            <email>ivan.g.ortolan@mimacom.com</email>
+            <organization>mimacom ag</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Gustav Novotny</name>
+            <email>gustav.novotny@mimacom.com</email>
+            <organization>mimacom ag</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ludovit Hajzer</name>
+            <email>ludovit.hajzer@mimacom.com</email>
+            <organization>mimacom ag</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Marek Palenik</name>
+            <email>marek.palenik@mimacom.com</email>
+            <organization>mimacom ag</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
         <developer>
             <name>Pawel Kruszewski</name>
             <email>pawel.kruszewski@mimacom.com</email>
-            <organization>mimacom</organization>
+            <organization>mimacom ag</organization>
             <organizationUrl>http://www.mimacom.com</organizationUrl>
         </developer>
     </developers>
+
+    <distributionManagement>
+        <repository>
+            <id>devlab-releases</id>
+            <url>https://nexus.devlab.sk.o2/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>devlab-snapshopts</id>
+            <url>https://nexus.devlab.sk.o2/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>ossrh-distribution</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
