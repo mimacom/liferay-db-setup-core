@@ -12,10 +12,10 @@ package com.mimacom.liferay.portal.setup;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
@@ -69,6 +68,8 @@ public final class LiferaySetup {
 
         Configuration configuration = setup.getConfiguration();
         String runAsUserEmail = configuration.getRunasuser();
+        final String principalName = PrincipalThreadLocal.getName();
+        final PermissionChecker permissionChecker = PermissionThreadLocal.getPermissionChecker();
 
         try {
             // iterate over companies or choose default
@@ -81,9 +82,10 @@ public final class LiferaySetup {
                             companyId = CompanyLocalServiceUtil.getCompanyByWebId(companyWebId).getCompanyId();
                         } catch (PortalException | SystemException e) {
                             LOG.error("Couldn't find company with webId: " + companyWebId);
+                            continue;
                         }
                     }
-                    long runAsUserId = configureThreadPermission(runAsUserEmail, companyId.longValue());
+                    long runAsUserId = configureThreadPermission(runAsUserEmail, companyId);
 
                     setupPortalInstance(setup, companyId, runAsUserId);
 
@@ -110,8 +112,8 @@ public final class LiferaySetup {
             LOG.error("An error occured while executing the portal setup");
             return false;
         } finally {
-            PrincipalThreadLocal.setName(null);
-            PermissionThreadLocal.setPermissionChecker(null);
+            PrincipalThreadLocal.setName(principalName);
+            PermissionThreadLocal.setPermissionChecker(permissionChecker);
         }
         return true;
     }
@@ -127,7 +129,7 @@ public final class LiferaySetup {
                     .getUserByEmailAddress(PortalUtil.getDefaultCompanyId(), runAsUserEmail);
             runAsUserId = user.getUserId();
             PrincipalThreadLocal.setName(runAsUserId);
-            PermissionChecker permissionChecker = null;
+            PermissionChecker permissionChecker;
             try {
                 permissionChecker = PermissionCheckerFactoryUtil.create(user);
             } catch (Exception e) {
@@ -173,7 +175,7 @@ public final class LiferaySetup {
         }
 
         if (setup.getPortletPermissions() != null) {
-            LOG.info("Setting up " + setup.getPortletPermissions().getPortlet().size() + " roles");
+            LOG.info("Setting up " + setup.getPortletPermissions().getPortlet().size() + " portlet/model resource");
             SetupPermissions.setupPortletPermissions(setup.getPortletPermissions(), companyId);
         }
 
@@ -246,7 +248,7 @@ public final class LiferaySetup {
      * custom fields.
      *
      * @param companyId company ID
-     * @throws Exception if cannot set permission checker
+     * @throws LiferaySetupException if cannot set permission checker
      */
     private static void setAdminPermissionCheckerForThread(final long companyId) throws LiferaySetupException {
 
