@@ -26,17 +26,6 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import com.mimacom.liferay.portal.setup.domain.PermissionAction;
-import com.mimacom.liferay.portal.setup.domain.PortletPermissions;
-import com.mimacom.liferay.portal.setup.domain.RolePermission;
-import com.mimacom.liferay.portal.setup.domain.RolePermissions;
-import com.mimacom.liferay.portal.setup.domain.Role;
-
 import com.liferay.portal.kernel.exception.NestableException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -48,32 +37,36 @@ import com.liferay.portal.model.ResourcePermission;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
+import com.mimacom.liferay.portal.setup.domain.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public final class SetupPermissions {
 
     public static final String[] PERMISSION_RO = {ActionKeys.VIEW};
     public static final String[] PERMISSION_RW = {ActionKeys.VIEW, ActionKeys.UPDATE};
     private static final Log LOG = LogFactoryUtil.getLog(SetupPermissions.class);
-    private static final long COMPANY_ID = PortalUtil.getDefaultCompanyId();
 
     private SetupPermissions() {
 
     }
 
-    public static void setupPortletPermissions(final PortletPermissions portletPermissions) {
+    public static void setupPortletPermissions(final PortletPermissions portletPermissions, long companyId) {
 
         for (PortletPermissions.Portlet portlet : portletPermissions.getPortlet()) {
-            deleteAllPortletPermissions(portlet);
+            deleteAllPortletPermissions(portlet, companyId);
             for (PortletPermissions.Portlet.ActionId actionId : portlet.getActionId()) {
                 for (Role role : actionId.getRole()) {
                     try {
                         String name = role.getName();
-                        long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, name).getRoleId();
-                        ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
+                        long roleId = RoleLocalServiceUtil.getRole(companyId, name).getRoleId();
+                        ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId,
                                 portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
-                                String.valueOf(COMPANY_ID), roleId,
-                                new String[] {actionId.getName()});
+                                String.valueOf(companyId), roleId,
+                                new String[]{actionId.getName()});
                         LOG.info("Set permission for action id " + actionId.getName() + " and role "
                                 + role.getName());
 
@@ -87,29 +80,29 @@ public final class SetupPermissions {
     }
 
     public static void addReadRight(final String roleName, final String className,
-            final String primaryKey) throws SystemException, PortalException {
+                                    final String primaryKey, long companyId) throws SystemException, PortalException {
 
-        addPermission(roleName, className, primaryKey, PERMISSION_RO);
+        addPermission(roleName, className, primaryKey, PERMISSION_RO, companyId);
     }
 
     public static void addReadWrightRight(final String roleName, final String className,
-            final String primaryKey) throws SystemException, PortalException {
+                                          final String primaryKey, long companyId) throws SystemException, PortalException {
 
-        addPermission(roleName, className, primaryKey, PERMISSION_RW);
+        addPermission(roleName, className, primaryKey, PERMISSION_RW, companyId);
     }
 
     public static void removePermission(final long companyId, final String name,
-            final String primKey) throws PortalException, SystemException {
+                                        final String primKey) throws PortalException, SystemException {
         ResourcePermissionLocalServiceUtil.deleteResourcePermissions(companyId, name,
                 ResourceConstants.SCOPE_INDIVIDUAL, primKey);
     }
 
     public static void addPermission(final String roleName, final String className,
-            final String primaryKey, final String[] permission)
-                    throws SystemException, PortalException {
+                                     final String primaryKey, final String[] permission, long companyId)
+            throws SystemException, PortalException {
         try {
-            long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, roleName).getRoleId();
-            ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID, className,
+            long roleId = RoleLocalServiceUtil.getRole(companyId, roleName).getRoleId();
+            ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId, className,
                     ResourceConstants.SCOPE_INDIVIDUAL, primaryKey, roleId, permission);
         } catch (Exception ex) {
             LOG.error(ex);
@@ -117,21 +110,21 @@ public final class SetupPermissions {
     }
 
     public static void addPermissionToPage(final Role role,
-            final String primaryKey, final String[] actionKeys)
-                    throws PortalException, SystemException {
+                                           final String primaryKey, final String[] actionKeys, long companyId)
+            throws PortalException, SystemException {
 
-        long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, role.getName()).getRoleId();
-        ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
+        long roleId = RoleLocalServiceUtil.getRole(companyId, role.getName()).getRoleId();
+        ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId,
                 Layout.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL,
                 String.valueOf(primaryKey), roleId, actionKeys);
     }
 
-    private static void deleteAllPortletPermissions(final PortletPermissions.Portlet portlet) {
+    private static void deleteAllPortletPermissions(final PortletPermissions.Portlet portlet, long companyId) {
 
         try {
             List<ResourcePermission> resourcePermissions = ResourcePermissionLocalServiceUtil
-                    .getResourcePermissions(COMPANY_ID, portlet.getPortletId(),
-                            ResourceConstants.SCOPE_COMPANY, String.valueOf(COMPANY_ID));
+                    .getResourcePermissions(companyId, portlet.getPortletId(),
+                            ResourceConstants.SCOPE_COMPANY, String.valueOf(companyId));
             for (ResourcePermission resourcePermission : resourcePermissions) {
                 ResourcePermissionLocalServiceUtil.deleteResourcePermission(resourcePermission);
             }
@@ -140,18 +133,18 @@ public final class SetupPermissions {
         }
     }
 
-    public static void clearPagePermissions(final String primaryKey)
+    public static void clearPagePermissions(final String primaryKey, long companyId)
             throws PortalException, SystemException {
 
-        ResourcePermissionLocalServiceUtil.deleteResourcePermissions(COMPANY_ID,
+        ResourcePermissionLocalServiceUtil.deleteResourcePermissions(companyId,
                 Layout.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL,
                 String.valueOf(primaryKey));
     }
 
     public static void updatePermission(final String locationHint, final long groupId,
-            final long companyId, final long elementId, final Class clazz,
-            final RolePermissions rolePermissions,
-            final HashMap<String, List<String>> defaultPermissions) {
+                                        final long companyId, final long elementId, final Class clazz,
+                                        final RolePermissions rolePermissions,
+                                        final HashMap<String, List<String>> defaultPermissions) {
         boolean useDefaultPermissions = false;
         if (rolePermissions != null) {
             if (rolePermissions.isClearPermissions()) {
@@ -178,7 +171,7 @@ public final class SetupPermissions {
                     try {
                         SetupPermissions.addPermission(roleName, clazz.getName(),
                                 Long.toString(elementId),
-                                actions.toArray(new String[actions.size()]));
+                                actions.toArray(new String[actions.size()]), companyId);
                     } catch (SystemException e) {
                         LOG.error("Permissions for " + roleName + " for " + locationHint + " "
                                 + "could not be set. ", e);
@@ -203,7 +196,7 @@ public final class SetupPermissions {
                 actions = defaultPermissions.get(r);
                 try {
                     SetupPermissions.addPermission(r, clazz.getName(), Long.toString(elementId),
-                            actions.toArray(new String[actions.size()]));
+                            actions.toArray(new String[actions.size()]), companyId);
                 } catch (SystemException e) {
                     LOG.error("Permissions for " + r + " for " + locationHint + " could not be "
                             + "set. ", e);

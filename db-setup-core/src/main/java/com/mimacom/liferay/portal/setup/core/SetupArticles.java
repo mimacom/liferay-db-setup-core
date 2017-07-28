@@ -27,31 +27,6 @@ package com.mimacom.liferay.portal.setup.core;
  */
 
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
-import org.jboss.vfs.VirtualFile;
-import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
-import com.mimacom.liferay.portal.setup.domain.Adt;
-import com.mimacom.liferay.portal.setup.domain.Article;
-import com.mimacom.liferay.portal.setup.domain.ArticleTemplate;
-import com.mimacom.liferay.portal.setup.domain.DdlRecordset;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.domain.RelatedAsset;
-import com.mimacom.liferay.portal.setup.domain.RelatedAssets;
-import com.mimacom.liferay.portal.setup.domain.Structure;
-
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -83,6 +58,18 @@ import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
+import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
+import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
+import com.mimacom.liferay.portal.setup.domain.*;
+import org.jboss.vfs.VirtualFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Created by mapa, guno..
@@ -123,14 +110,14 @@ public final class SetupArticles {
     }
 
     public static void setupOrganizationArticles(final Organization organization,
-            final long groupId, final long companyId) throws PortalException, SystemException {
+                                                 final long groupId, final long companyId, long runAsUserId) throws PortalException, SystemException {
         List<Structure> articleStructures = organization.getArticleStructure();
 
         if (articleStructures != null) {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
             for (Structure structure : articleStructures) {
                 try {
-                    addDDMStructure(structure, groupId, classNameId);
+                    addDDMStructure(structure, groupId, classNameId, runAsUserId);
                 } catch (StructureDuplicateStructureKeyException | IOException
                         | URISyntaxException e) {
                     LOG.error(e);
@@ -145,7 +132,7 @@ public final class SetupArticles {
             for (Structure structure : ddlStructures) {
                 LOG.info("Adding DDL structure " + structure.getName());
                 try {
-                    addDDMStructure(structure, groupId, classNameId);
+                    addDDMStructure(structure, groupId, classNameId, runAsUserId);
                 } catch (StructureDuplicateStructureKeyException | IOException
                         | URISyntaxException e) {
                     LOG.error(e);
@@ -157,7 +144,7 @@ public final class SetupArticles {
         if (articleTemplates != null) {
             for (ArticleTemplate template : articleTemplates) {
                 try {
-                    addDDMTemplate(template, groupId);
+                    addDDMTemplate(template, groupId, runAsUserId);
                 } catch (TemplateDuplicateTemplateKeyException | IOException
                         | URISyntaxException e) {
                     LOG.error(e);
@@ -167,14 +154,14 @@ public final class SetupArticles {
         List<Article> articles = organization.getArticle();
         if (articles != null) {
             for (Article article : articles) {
-                addJournalArticle(article, groupId, companyId);
+                addJournalArticle(article, groupId, companyId, runAsUserId);
             }
         }
         List<Adt> adts = organization.getAdt();
         if (adts != null) {
             for (Adt template : adts) {
                 try {
-                    addDDMTemplate(template, groupId);
+                    addDDMTemplate(template, groupId, runAsUserId);
                 } catch (TemplateDuplicateTemplateKeyException | URISyntaxException
                         | IOException e) {
                     LOG.error("Error in adding ADT: " + template.getName(), e);
@@ -185,7 +172,7 @@ public final class SetupArticles {
         if (recordSets != null) {
             for (DdlRecordset recordSet : recordSets) {
                 try {
-                    addDDLRecordSet(recordSet, groupId);
+                    addDDLRecordSet(recordSet, groupId, runAsUserId);
                 } catch (TemplateDuplicateTemplateKeyException e) {
                     LOG.error("Error in adding DDLRecordSet: " + recordSet.getName(), e);
                 }
@@ -194,8 +181,8 @@ public final class SetupArticles {
     }
 
     public static void addDDMStructure(final Structure structure, final long groupId,
-            final long classNameId)
-                    throws SystemException, PortalException, IOException, URISyntaxException {
+                                       final long classNameId, long runAsUserId)
+            throws SystemException, PortalException, IOException, URISyntaxException {
 
         LOG.info("Adding Article structure " + structure.getName());
         Map<Locale, String> nameMap = new HashMap<>();
@@ -240,7 +227,7 @@ public final class SetupArticles {
         }
 
         DDMStructure newStructure = DDMStructureLocalServiceUtil.addStructure(
-                LiferaySetup.getRunAsUserId(), groupId, structure.getParent(), classNameId,
+                runAsUserId, groupId, structure.getParent(), classNameId,
                 structure.getKey(), nameMap, descMap, xsd, "xml", 0, new ServiceContext());
         LOG.info("Added Article structure: " + newStructure.getName());
     }
@@ -252,7 +239,7 @@ public final class SetupArticles {
         return structure.getKey();
     }
 
-    public static void addDDMTemplate(final ArticleTemplate template, final long groupId)
+    public static void addDDMTemplate(final ArticleTemplate template, final long groupId, long runAsUserId)
             throws SystemException, PortalException, IOException, URISyntaxException {
 
         LOG.info("Adding Article template " + template.getName());
@@ -301,13 +288,13 @@ public final class SetupArticles {
         }
 
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
-                LiferaySetup.getRunAsUserId(), groupId, classNameId, classPK, template.getKey(),
+                runAsUserId, groupId, classNameId, classPK, template.getKey(),
                 nameMap, descMap, "display", null, template.getLanguage(), script, true, false,
                 null, null, new ServiceContext());
         LOG.info("Added Article template: " + newTemplate.getName());
     }
 
-    public static void addDDMTemplate(final Adt template, final long groupId)
+    public static void addDDMTemplate(final Adt template, final long groupId, long runAsUserId)
             throws SystemException, PortalException, IOException, URISyntaxException {
 
         LOG.info("Adding ADT " + template.getName());
@@ -355,7 +342,7 @@ public final class SetupArticles {
         String script = getFileContent(template.getPath());
 
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
-                LiferaySetup.getRunAsUserId(), groupId, classNameId, 0, template.getTemplateKey(),
+                runAsUserId, groupId, classNameId, 0, template.getTemplateKey(),
                 nameMap, descriptionMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null,
                 template.getLanguage(), script, template.isCacheable(), false, null, null,
                 new ServiceContext());
@@ -363,14 +350,14 @@ public final class SetupArticles {
     }
 
     public static void addJournalArticle(final Article article, final long groupId,
-            final long companyId) {
+                                         final long companyId, long runAsUserId) {
         LOG.info("Adding Journal Article " + article.getTitle());
 
         String content = null;
         long folderId = 0L;
         if (article.getArticleFolderPath() != null && !article.getArticleFolderPath().equals("")) {
             JournalFolder jf = WebFolderUtil.findWebFolder(companyId, groupId,
-                    LiferaySetup.getRunAsUserId(), article.getArticleFolderPath(), "", true);
+                    runAsUserId, article.getArticleFolderPath(), "", true);
             if (jf == null) {
                 LOG.warn("Specified webfolder " + article.getArticleFolderPath() + " of article "
                         + article.getTitle()
@@ -381,7 +368,7 @@ public final class SetupArticles {
         }
         try {
             content = getFileContent(article.getPath());
-            content = ResolverUtil.lookupAll(LiferaySetup.getRunAsUserId(), groupId, companyId,
+            content = ResolverUtil.lookupAll(runAsUserId, groupId, companyId,
                     content, article.getPath());
         } catch (IOException | URISyntaxException e) {
             LOG.error(
@@ -411,7 +398,7 @@ public final class SetupArticles {
         try {
             if (journalArticle == null) {
                 journalArticle = JournalArticleLocalServiceUtil.addArticle(
-                        LiferaySetup.getRunAsUserId(), groupId, folderId, 0, 0,
+                        runAsUserId, groupId, folderId, 0, 0,
                         article.getArticleId(), generatedId,
                         JournalArticleConstants.VERSION_DEFAULT, titleMap, null, content, "general",
                         article.getArticleStructureKey(), article.getArticleTemplateKey(),
@@ -440,7 +427,7 @@ public final class SetupArticles {
                 }
                 LOG.info("Updated JournalArticle: " + journalArticle.getTitle());
             }
-            processRelatedAssets(article, journalArticle, LiferaySetup.getRunAsUserId(), groupId,
+            processRelatedAssets(article, journalArticle, runAsUserId, groupId,
                     companyId);
             SetupPermissions.updatePermission("Article " + journalArticle.getArticleId(), groupId,
                     companyId, journalArticle.getResourcePrimKey(), JournalArticle.class,
@@ -451,7 +438,7 @@ public final class SetupArticles {
         }
     }
 
-    private static void addDDLRecordSet(final DdlRecordset recordSet, final long groupId)
+    private static void addDDLRecordSet(final DdlRecordset recordSet, final long groupId, long runAsUserId)
             throws SystemException, PortalException {
         LOG.info("Adding DDLRecordSet " + recordSet.getName());
         Map<Locale, String> nameMap = new HashMap<>();
@@ -478,7 +465,7 @@ public final class SetupArticles {
         }
 
         DDLRecordSet newDDLRecordSet = DDLRecordSetLocalServiceUtil.addRecordSet(
-                LiferaySetup.getRunAsUserId(), groupId,
+                runAsUserId, groupId,
                 ResolverUtil.getStructureId(recordSet.getDdlStructureKey(), groupId,
                         DDLRecordSet.class),
                 recordSet.getDdlStructureKey(), nameMap, descMap, MIN_DISPLAY_ROWS, 0,
@@ -487,7 +474,7 @@ public final class SetupArticles {
     }
 
     public static void processRelatedAssets(final Article article, final JournalArticle ja,
-            final long runAsUserId, final long groupId, final long companyId) {
+                                            final long runAsUserId, final long groupId, final long companyId) {
         if (article.getRelatedAssets() != null) {
             RelatedAssets ras = article.getRelatedAssets();
             AssetEntry ae = null;

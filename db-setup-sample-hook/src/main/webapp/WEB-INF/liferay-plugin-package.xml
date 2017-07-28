@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin-package PUBLIC "-//Liferay//DTD Plugin Package 6.2.0//EN"
+        "http://www.liferay.com/dtd/liferay-plugin-package_6_2_0.dtd">
+<plugin-package>
+    <name>${project.name}</name>
+    <module-id>${project.groupId}/${project.artifactId}/${project.version}/${project.packaging}</module-id>
+    <types>
+        <type>hooks</type>
+    </types>
+    <short-description>
+        Liferay DB Setup Sample Hook plugin - uses all available configurations to setup sample portal from scratch
+    </short-description>
+    <long-description><![CDATA[
+    <h1>Features:</h1>
+
+    <h2>Creating new objects:</h2>
+    <ol>
+        <li>Roles</li>
+    </ol>
+
+    <h2>Configuring relationships:</h2>
+    <ol>
+        <li></li>
+    </ol>
+
+    <h2>Deleting existing objects:</h2>
+    <ol>
+        <li></li>
+    </ol>
+    ]]></long-description>
+    <change-log>
+        Use all available configurations to setup sample portal from scratch
+    </change-log>
+    <page-url>https://github.com/mimacom/liferay-db-setup-core</page-url>
+    <author>mimacom ag</author>
+    <licenses>
+        <license osi-approved="true">MIT</license>
+    </licenses>
+    <liferay-versions>
+        <liferay-version>6.2.0+</liferay-version>
+    </liferay-versions>
+</plugin-package>

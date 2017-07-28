@@ -1,6 +1,6 @@
-package com.mimacom.liferay.portal.setup;
+package com.mimacom.liferay.portal.setup.core.util;
 
-/*
+/*-
  * #%L
  * Liferay Portal DB Setup core
  * %%
@@ -25,7 +25,9 @@ package com.mimacom.liferay.portal.setup;
  * THE SOFTWARE.
  * #L%
  */
-
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import org.jboss.vfs.VirtualFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,54 +35,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.jboss.vfs.VirtualFile;
+public class FileUtil {
 
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.upgrade.UpgradeException;
-import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+    private static final Log LOG = LogFactoryUtil.getLog(FileUtil.class);
 
-/**
- * Created by mapa on 13.3.2015.
- */
-public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactoryUtil.getLog(BasicSetupUpgradeProcess.class);
-
-    /**
-     * Does upgrade.
-     *
-     * @throws com.liferay.portal.kernel.upgrade.UpgradeException
-     *             wrapped exception
-     */
-    @Override
-    public final void upgrade() throws UpgradeException {
-
-        String[] fileNames = getSetupFileNames();
-        for (String fileName : fileNames) {
-            LOG.info("Starting upgrade process. Filename: " + fileName);
-
-            File file = getSetupFile(fileName);
-            if (file == null) {
-                throw new UpgradeException("XML configuration not found");
-            }
-            LiferaySetup.setup(file);
-            LOG.info("Finished upgrade process. Filename: " + fileName);
-        }
+    private FileUtil() {
+       // hide default constructor
     }
 
     /**
      * checks and returns file used for setup.
      *
-     * @param fileName
-     *            name of resource
+     * @param fileName name of resource
      * @return setup xml file
      */
-    public final File getSetupFile(final String fileName) {
+    public static final File getSetupFileFromClassloader(ClassLoader cl, final String fileName) {
 
-        ClassLoader cl = this.getClass().getClassLoader();
         URL url = cl.getResource(fileName);
         if (url == null) {
             LOG.error("XML configuration not found");
@@ -112,10 +82,5 @@ public abstract class BasicSetupUpgradeProcess extends UpgradeProcess {
 
         return file;
     }
-
-    /**
-     * @return paths to setup xml files.
-     */
-    protected abstract String[] getSetupFileNames();
 
 }

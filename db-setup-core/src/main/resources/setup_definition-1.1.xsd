@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified" targetNamespace="http://www.mimacom.com/liferay/setup"
-           xmlns="http://www.mimacom.com/liferay/setup">
+           elementFormDefault="qualified" targetNamespace="https://raw.githubusercontent.com/mimacom/liferay-db-setup-core/1.x/db-setup-core/src/main/resources/setup_definition-1.1.xsd"
+           xmlns="https://raw.githubusercontent.com/mimacom/liferay-db-setup-core/1.x/db-setup-core/src/main/resources/setup_definition-1.1.xsd">
 
     <xs:element name="setup">
+        <xs:annotation>
+            <xs:appinfo>Liferay Setup Configuration</xs:appinfo>
+            <xs:documentation xml:lang="en">
+                This configuration is used to setup Liferay DB with desired entities. It can be applied to: default, one, many Liferay instances at once. Additionally one can specify the groups on which the setup will take place.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
-                <!-- specify the email address of user, which will be used for performing
-                    all operations within setup hook -->
                 <xs:element ref="configuration" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="roles" minOccurs="0"/>
                 <xs:element ref="users" minOccurs="0"/>
                 <xs:element ref="portletPermissions" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="organizations" minOccurs="0"/>
+                <xs:element ref="sites" minOccurs="0"/>
                 <xs:element ref="customFields" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="deleteLiferayObjects" minOccurs="0" maxOccurs="1"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="page-templates"/>
@@ -23,7 +28,9 @@
     <xs:element name="configuration">
         <xs:complexType>
             <xs:sequence>
-                <xs:element minOccurs="1" maxOccurs="1" ref="runasuser"/>
+                <xs:element minOccurs="0" maxOccurs="1" ref="runasuser"></xs:element>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="company">
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -66,6 +73,14 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="sites">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="site"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="organizations">
         <xs:complexType>
             <xs:sequence>
@@ -95,6 +110,66 @@
     </xs:element>
 
     <xs:element name="runasuser" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                Specify the email address of user, which will be used for performing all operations within setup hook or specific company. When empty: random user that has Administrator role within a company will be used.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="company">
+        <xs:annotation>
+            <xs:documentation>
+                Used to define companies and groups on whose below defined setup configuration will run. When not specified setup will only take place on default company and "Guest" group within.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="runasuser" minOccurs="0" maxOccurs="1"></xs:element>
+                <xs:choice>
+                    <xs:element name="companyid" type="xs:long"></xs:element>
+                    <xs:element name="companywebid" type="xs:string"></xs:element>
+                </xs:choice>
+                <xs:element name="groupName" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Setup configuration will be executed on every provided group or only on "Guest" group if none is provided. If you need separate setups for different groups create different configuration file per group and execute all of them.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="site">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="1" minOccurs="0" ref="public-pages"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="private-pages"/>
+                <xs:element ref="document-folder" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="document" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="article-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article-template" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article-folder" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="article" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="adt" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="vocabulary" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="default" type="xs:boolean" default="false"/>
+            <xs:attribute name="strict-web-folder-definition" type="xs:boolean" default="false"/>
+            <xs:attribute name="strict-document-folder-definition" type="xs:boolean" default="false"/>
+            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
+            <xs:attribute name="maintain-site-hierarchy" type="xs:boolean" default="false"/>
+            <xs:attribute name="site-name" type="xs:string"/>
+            <xs:attribute name="site-friendly-url" type="xs:string"/>
+
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="organization">

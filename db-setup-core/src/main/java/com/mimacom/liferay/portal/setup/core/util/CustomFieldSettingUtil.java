@@ -46,7 +46,7 @@ public final class CustomFieldSettingUtil {
     private static final Log LOG = LogFactoryUtil.getLog(CustomFieldSettingUtil.class);
 
     private CustomFieldSettingUtil() {
-
+        // hide default constructor
     }
 
     /**

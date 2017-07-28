@@ -27,19 +27,17 @@ package com.mimacom.liferay.portal.setup.core;
  */
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.mimacom.liferay.portal.setup.LiferaySetup;
-import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
-import com.mimacom.liferay.portal.setup.domain.DocumentFolder;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
+import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
+import com.mimacom.liferay.portal.setup.domain.DocumentFolder;
+import com.mimacom.liferay.portal.setup.domain.Organization;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public final class SetupDocumentFolders {
     public static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
@@ -73,14 +71,14 @@ public final class SetupDocumentFolders {
     }
 
     public static void setupDocumentFolders(
-        final Organization org, final long groupId,
-        final long companyId) {
+            final Organization org, final long groupId,
+            final long companyId, long runAsUserId) {
         for (DocumentFolder df : org.getDocumentFolder()) {
             boolean create = df.isCreateIfNotExists();
             String folderName = df.getFolderName();
 
             Folder folder = FolderUtil.findFolder(companyId, groupId, groupId,
-                    LiferaySetup.getRunAsUserId(), folderName, create);
+                    runAsUserId, folderName, create);
             SetupPermissions.updatePermission("Document folder " + folderName, groupId, companyId,
                     folder.getFolderId(), DLFolder.class, df.getRolePermissions(),
                     DEFAULT_PERMISSIONS);

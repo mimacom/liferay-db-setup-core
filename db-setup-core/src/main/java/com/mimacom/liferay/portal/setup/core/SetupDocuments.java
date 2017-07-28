@@ -83,7 +83,7 @@ public final class SetupDocuments {
     }
 
     public static void setupOrganizationDocuments(final Organization organization,
-            final long groupId, final long company) {
+                                                  final long groupId, final long company, long runAsUserId) {
         for (Document doc : organization.getDocument()) {
             String folderPath = doc.getDocumentFolderName();
             String documentName = doc.getDocumentFilename();
@@ -91,23 +91,22 @@ public final class SetupDocuments {
             String extension = doc.getExtension();
             String filenameInFilesystem = doc.getFileSystemName();
             long repoId = groupId;
-            long userId = LiferaySetup.getRunAsUserId();
             Long folderId = 0L;
             Folder f = null;
             if (folderPath != null && !folderPath.equals("")) {
-                f = FolderUtil.findFolder(company, groupId, repoId, userId, folderPath, true);
+                f = FolderUtil.findFolder(company, groupId, repoId, runAsUserId, folderPath, true);
                 folderId = f.getFolderId();
             }
             FileEntry fe = DocumentUtil.findDocument(documentName, folderPath, groupId, company,
-                    groupId, userId);
+                    groupId, runAsUserId);
             if (fe == null) {
 
                 fe = DocumentUtil.createDocument(company, groupId, folderId, documentName,
-                        documentTitle, userId, repoId, getDocumentContent(filenameInFilesystem));
+                        documentTitle, runAsUserId, repoId, getDocumentContent(filenameInFilesystem));
                 LOG.info(documentName + " is not found! It will be created! ");
             } else {
                 LOG.info(documentName + " is found! Content will be updated! ");
-                DocumentUtil.updateFile(fe, getDocumentContent(filenameInFilesystem), userId,
+                DocumentUtil.updateFile(fe, getDocumentContent(filenameInFilesystem), runAsUserId,
                         documentName);
             }
             SetupPermissions.updatePermission("Document " + folderPath + "/" + documentName,
