@@ -26,11 +26,6 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.RequiredRoleException;
 import com.liferay.portal.kernel.dao.orm.ObjectNotFoundException;
@@ -42,6 +37,11 @@ import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public final class SetupRoles {
     private static final Log LOG = LogFactoryUtil.getLog(SetupRoles.class);
@@ -93,50 +93,50 @@ public final class SetupRoles {
     }
 
     public static void deleteRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles,
-            final String deleteMethod, final long companyId) {
+                                   final String deleteMethod, final long companyId) {
 
         switch (deleteMethod) {
-        case "excludeListed":
-            Map<String, com.mimacom.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
-                    roles);
-            try {
-                for (Role role : RoleLocalServiceUtil.getRoles(-1, -1)) {
-                    String name = role.getName();
-                    if (!toBeDeletedRoles.containsKey(name)) {
-                        try {
-                            RoleLocalServiceUtil
-                                    .deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
-                            LOG.info("Deleting Role " + name);
+            case "excludeListed":
+                Map<String, com.mimacom.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
+                        roles);
+                try {
+                    for (Role role : RoleLocalServiceUtil.getRoles(-1, -1)) {
+                        String name = role.getName();
+                        if (!toBeDeletedRoles.containsKey(name)) {
+                            try {
+                                RoleLocalServiceUtil
+                                        .deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
+                                LOG.info("Deleting Role " + name);
 
-                        } catch (Exception e) {
-                            LOG.info("Skipping deletion fo system role " + name);
+                            } catch (Exception e) {
+                                LOG.info("Skipping deletion fo system role " + name);
+                            }
                         }
                     }
+                } catch (SystemException e) {
+                    LOG.error("problem with deleting roles", e);
                 }
-            } catch (SystemException e) {
-                LOG.error("problem with deleting roles", e);
-            }
-            break;
+                break;
 
-        case "onlyListed":
-            for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
-                String name = role.getName();
-                try {
-                    RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
-                    LOG.info("Deleting Role " + name);
+            case "onlyListed":
+                for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
+                    String name = role.getName();
+                    try {
+                        RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(companyId, name));
+                        LOG.info("Deleting Role " + name);
 
-                } catch (RequiredRoleException e) {
-                    LOG.info("Skipping deletion fo system role " + name);
+                    } catch (RequiredRoleException e) {
+                        LOG.info("Skipping deletion fo system role " + name);
 
-                } catch (PortalException | SystemException e) {
-                    LOG.error("Unable to delete role.", e);
+                    } catch (PortalException | SystemException e) {
+                        LOG.error("Unable to delete role.", e);
+                    }
                 }
-            }
-            break;
+                break;
 
-        default:
-            LOG.error("Unknown delete method : " + deleteMethod);
-            break;
+            default:
+                LOG.error("Unknown delete method : " + deleteMethod);
+                break;
         }
 
     }

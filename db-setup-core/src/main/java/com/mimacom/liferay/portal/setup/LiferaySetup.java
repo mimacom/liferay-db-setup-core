@@ -76,8 +76,8 @@ public final class LiferaySetup {
             if (!configuration.getCompany().isEmpty()) {
                 for (Company company : configuration.getCompany()) {
                     Long companyId = company.getCompanyid();
-                    String companyWebId = company.getCompanywebid();
                     if (companyId == null) {
+                        String companyWebId = company.getCompanywebid();
                         try {
                             companyId = CompanyLocalServiceUtil.getCompanyByWebId(companyWebId).getCompanyId();
                         } catch (PortalException | SystemException e) {
@@ -86,7 +86,6 @@ public final class LiferaySetup {
                         }
                     }
                     long runAsUserId = configureThreadPermission(runAsUserEmail, companyId);
-
                     setupPortalInstance(setup, companyId, runAsUserId);
 
                     // iterate over group names or choose GUEST group for the company
@@ -102,6 +101,7 @@ public final class LiferaySetup {
                 }
             } else {
                 long companyId = PortalUtil.getDefaultCompanyId();
+
                 long runAsUserId = configureThreadPermission(runAsUserEmail, companyId);
                 setupPortalInstance(setup, companyId, runAsUserId);
 

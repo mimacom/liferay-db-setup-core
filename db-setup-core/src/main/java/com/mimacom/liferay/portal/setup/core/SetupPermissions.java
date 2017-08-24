@@ -12,10 +12,10 @@ package com.mimacom.liferay.portal.setup.core;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,10 +39,7 @@ import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public final class SetupPermissions {
 
@@ -57,26 +54,48 @@ public final class SetupPermissions {
     public static void setupPortletPermissions(final PortletPermissions portletPermissions, long companyId) {
 
         for (PortletPermissions.Portlet portlet : portletPermissions.getPortlet()) {
-            deleteAllPortletPermissions(portlet, companyId);
-            for (PortletPermissions.Portlet.ActionId actionId : portlet.getActionId()) {
-                for (Role role : actionId.getRole()) {
-                    try {
-                        String name = role.getName();
-                        long roleId = RoleLocalServiceUtil.getRole(companyId, name).getRoleId();
-                        ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId,
-                                portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
-                                String.valueOf(companyId), roleId,
-                                new String[]{actionId.getName()});
-                        LOG.info("Set permission for action id " + actionId.getName() + " and role "
-                                + role.getName());
 
-                    } catch (NestableException e) {
-                        LOG.error("could not set permission to portlet :" + portlet.getPortletId(),
-                                e);
-                    }
+            deleteAllPortletPermissions(portlet, companyId);
+
+            Map<String, Set<String>> actionsPerRole = getActionsPerRole(portlet);
+            for (String roleName : actionsPerRole.keySet()) {
+                try {
+                    long roleId = RoleLocalServiceUtil.getRole(companyId, roleName).getRoleId();
+                    final Set<String> actionStrings = actionsPerRole.get(roleName);
+                    final String[] actionIds = actionStrings.toArray(new String[actionStrings.size()]);
+
+                    ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId,
+                            portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
+                            String.valueOf(companyId), roleId, actionIds);
+                    LOG.info("Set permission for role: " + roleName + " for action ids: " + actionIds);
+                } catch (NestableException e) {
+                    LOG.error("Could not set permission to portlet :" + portlet.getPortletId(),
+                            e);
                 }
             }
         }
+    }
+
+    /**
+     * @param portlet
+     * @return mapping of role name to action ids for the portlet
+     */
+    private static Map<String, Set<String>> getActionsPerRole(PortletPermissions.Portlet portlet) {
+        Map<String, Set<String>> result = new HashMap<>();
+
+        for (PortletPermissions.Portlet.ActionId actionId : portlet.getActionId()) {
+            for (Role role : actionId.getRole()) {
+                final String roleName = role.getName();
+                Set<String> actions = result.get(roleName);
+                if (actions == null) {
+                    actions = new HashSet<>();
+                    result.put(roleName, actions);
+                }
+                actions.add(actionId.getName());
+            }
+        }
+
+        return result;
     }
 
     public static void addReadRight(final String roleName, final String className,

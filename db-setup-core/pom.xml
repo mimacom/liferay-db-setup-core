@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mimacom.liferay</groupId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <artifactId>db-setup-core</artifactId>
 
     <name>Liferay Portal DB Setup core</name>
@@ -179,6 +179,18 @@
     </licenses>
 
     <developers>
+        <developer>
+            <name>Ivan Mrva</name>
+            <email>ivan.mrva@mimacom.com</email>
+            <organization>mimacom ag</organization>
+            <organizationUrl>http://www.mimacom.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Martin Ronckevic</name>
+            <email>martin.ronky@gmail.com</email>
+            <organization>http://ronky.net</organization>
+            <organizationUrl>http://ronky.net</organizationUrl>
+        </developer>
         <developer>
             <name>Silvio Meier</name>
             <email>silvio.meier@empa.ch</email>
