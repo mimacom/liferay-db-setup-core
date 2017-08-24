@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.mimacom.liferay</groupId>
             <artifactId>db-setup-core</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.liferay.portal</groupId>
