@@ -1,4 +1,4 @@
-# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/mimacom/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/mimacom/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/mimacom/liferay-db-setup-core.png)](https://gitter.im/mimacom/liferay-db-setup-core)
+# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/mimacom/liferay-db-setup-core.svg?branch=1.x)](https://travis-ci.org/mimacom/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/mimacom/liferay-db-setup-core.png)](https://gitter.im/mimacom/liferay-db-setup-core)
 Library that allows to setup a number of Liferay artifacts in the DB. It uses xml configuration and Liferay APIs to add all configured artifacts.
 
 # Usage
@@ -14,7 +14,7 @@ We didn't publish binary yet so you'll need to build the jar yourself. Here are 
 <dependency>
     <groupId>com.mimacom.liferay</groupId>
     <artifactId>db-setup-core</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.2</version>
 </dependency>
 ```
 
