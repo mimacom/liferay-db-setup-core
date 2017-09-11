@@ -34,11 +34,10 @@ import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.service.DDLRecordSetLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.exception.StructureDuplicateStructureKeyException;
 import com.liferay.dynamic.data.mapping.exception.TemplateDuplicateTemplateKeyException;
-import com.liferay.dynamic.data.mapping.model.DDMStructure;
-import com.liferay.dynamic.data.mapping.model.DDMTemplate;
-import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
+import com.liferay.dynamic.data.mapping.model.*;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFolder;
@@ -53,6 +52,8 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -192,12 +193,23 @@ public final class SetupArticles {
         nameMap.put(siteDefaultLocale, name);
         Map<Locale, String> descMap = new HashMap<>();
 
-        String xsd = null;
+        String content = null;
+        DDMForm ddmForm = null;
+        DDMFormLayout ddmFormLayout = null;
         try {
-            xsd = ResourcesUtil.getFileContent(structure.getPath());
+            content = ResourcesUtil.getFileContent(structure.getPath());
+            ddmForm = DDMUtil.getDDMForm(content);
+            ddmFormLayout = DDMUtil.getDefaultDDMFormLayout(ddmForm);
         } catch (IOException e) {
             LOG.error("Error Reading Structure File content for: " + structure.getName());
             return;
+        } catch (PortalException e) {
+            LOG.error("Can not parse given structure JSON content into Liferay DDMForm.", e);
+        }
+
+        Locale contentDefaultLocale = ddmForm.getDefaultLocale();
+        if (!contentDefaultLocale.equals(siteDefaultLocale)) {
+            nameMap.put(contentDefaultLocale, name);
         }
 
         DDMStructure ddmStructure = null;
@@ -210,8 +222,6 @@ public final class SetupArticles {
 
         if (ddmStructure != null) {
             LOG.info("Structure already exists and will be overwritten.");
-            ddmStructure.setNameMap(nameMap);
-            ddmStructure.setDefinition(xsd);
             if (structure.getParent() != null && !structure.getParent().isEmpty()) {
                 LOG.info("Setting up parent structure: " + structure.getName());
                 DDMStructure parentStructure = DDMStructureLocalServiceUtil.fetchStructure(groupId,
@@ -222,14 +232,16 @@ public final class SetupArticles {
                     LOG.info("Parent structure not found: " + structure.getName());
                 }
             }
-            DDMStructureLocalServiceUtil.updateDDMStructure(ddmStructure);
+
+            DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
+                    ddmStructure.getParentStructureId(), nameMap, descMap, ddmForm, ddmFormLayout, new ServiceContext());
             LOG.info("Template successfully updated: " + structure.getName());
             return;
         }
 
         DDMStructure newStructure = DDMStructureLocalServiceUtil.addStructure(
                 LiferaySetup.getRunAsUserId(), groupId, structure.getParent(), classNameId,
-                structure.getKey(), nameMap, descMap, xsd, "xml", 0, new ServiceContext());
+                structure.getKey(), nameMap, descMap, ddmForm, ddmFormLayout, "json", 0, new ServiceContext());
         LOG.info("Added Article structure: " + newStructure.getName());
     }
 
@@ -372,6 +384,12 @@ public final class SetupArticles {
         }
         Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(article.getTitleTranslation(),
                 groupId, article.getTitle(), " Article with title " + article.getArticleId());
+
+        Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
+                LocalizationUtil.getDefaultLanguageId(content));
+        if (!titleMap.containsKey(articleDefaultLocale)) {
+            titleMap.put(articleDefaultLocale, article.getTitle());
+        }
 
         ServiceContext serviceContext = new ServiceContext();
         serviceContext.setScopeGroupId(groupId);
