@@ -199,12 +199,17 @@ public final class SetupArticles {
         try {
             content = ResourcesUtil.getFileContent(structure.getPath());
             ddmForm = DDMUtil.getDDMForm(content);
+            if (ddmForm == null) {
+                LOG.error("Can not parse given structure JSON content into Liferay DDMForm.");
+                return;
+            }
             ddmFormLayout = DDMUtil.getDefaultDDMFormLayout(ddmForm);
         } catch (IOException e) {
             LOG.error("Error Reading Structure File content for: " + structure.getName());
             return;
         } catch (PortalException e) {
             LOG.error("Can not parse given structure JSON content into Liferay DDMForm.", e);
+            return;
         }
 
         Locale contentDefaultLocale = ddmForm.getDefaultLocale();
@@ -499,13 +504,11 @@ public final class SetupArticles {
                     ae = AssetEntryLocalServiceUtil.getEntry(JournalArticle.class.getName(),
                             ja.getResourcePrimKey());
                     AssetLinkLocalServiceUtil.deleteLinks(ae.getEntryId());
-                } catch (PortalException e) {
-                    LOG.error("Problem clearing related assets of article " + ja.getArticleId(), e);
-                } catch (SystemException e) {
+                } catch (PortalException | SystemException e) {
                     LOG.error("Problem clearing related assets of article " + ja.getArticleId(), e);
                 }
             }
-            if (ras.getRelatedAsset() != null && ras.getRelatedAsset().size() > 0) {
+            if (ras.getRelatedAsset() != null && !ras.getRelatedAsset().isEmpty()) {
                 List<RelatedAsset> ra = ras.getRelatedAsset();
                 for (RelatedAsset r : ra) {
                     String clazz = r.getAssetClass();
@@ -519,7 +522,7 @@ public final class SetupArticles {
                     try {
                         id = Long.parseLong(clazzPrimKey);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LOG.error("Class primary key is not parseable as long value.", ex);
                     }
 
                     try {
@@ -527,17 +530,10 @@ public final class SetupArticles {
                         AssetEntry ae2 = AssetEntryLocalServiceUtil.getEntry(clazz, id);
                         AssetLinkLocalServiceUtil.addLink(runAsUserId, ae.getEntryId(),
                                 ae2.getEntryId(), AssetLinkConstants.TYPE_RELATED, 1);
-                        // JournalArticleLocalServiceUtil.getArticle(0).geta
-                    } catch (PortalException e) {
+                    } catch (PortalException | SystemException e) {
                         LOG.error(
                                 "Problem resolving related asset of article " + ja.getArticleId()
-                                        + " with clazz " + clazz + " primary key " + clazzPrimKey,
-                                e);
-                    } catch (SystemException e) {
-                        LOG.error(
-                                "Problem resolving related asset of article " + ja.getArticleId()
-                                        + " with clazz " + clazz + " primary key " + clazzPrimKey,
-                                e);
+                                        + " with clazz " + clazz + " primary key " + clazzPrimKey, e);
                     }
 
                 }
