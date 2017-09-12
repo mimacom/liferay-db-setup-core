@@ -111,9 +111,9 @@ public final class SetupArticles {
 
     }
 
-    public static void setupOrganizationArticles(final Organization organization,
-                                                 final long groupId, final long companyId) throws PortalException, SystemException {
-        List<Structure> articleStructures = organization.getArticleStructure();
+    public static void setupSiteArticles(final Site site,
+                                         final long groupId, final long companyId) throws PortalException, SystemException {
+        List<Structure> articleStructures = site.getArticleStructure();
 
         if (articleStructures != null) {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
@@ -127,7 +127,7 @@ public final class SetupArticles {
             }
         }
 
-        List<Structure> ddlStructures = organization.getDdlStructure();
+        List<Structure> ddlStructures = site.getDdlStructure();
 
         if (articleStructures != null) {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(DDLRecordSet.class);
@@ -142,7 +142,7 @@ public final class SetupArticles {
             }
         }
 
-        List<ArticleTemplate> articleTemplates = organization.getArticleTemplate();
+        List<ArticleTemplate> articleTemplates = site.getArticleTemplate();
         if (articleTemplates != null) {
             for (ArticleTemplate template : articleTemplates) {
                 try {
@@ -153,13 +153,13 @@ public final class SetupArticles {
                 }
             }
         }
-        List<Article> articles = organization.getArticle();
+        List<Article> articles = site.getArticle();
         if (articles != null) {
             for (Article article : articles) {
                 addJournalArticle(article, groupId, companyId);
             }
         }
-        List<Adt> adts = organization.getAdt();
+        List<Adt> adts = site.getAdt();
         if (adts != null) {
             for (Adt template : adts) {
                 try {
@@ -170,7 +170,7 @@ public final class SetupArticles {
                 }
             }
         }
-        List<DdlRecordset> recordSets = organization.getDdlRecordset();
+        List<DdlRecordset> recordSets = site.getDdlRecordset();
         if (recordSets != null) {
             for (DdlRecordset recordSet : recordSets) {
                 try {

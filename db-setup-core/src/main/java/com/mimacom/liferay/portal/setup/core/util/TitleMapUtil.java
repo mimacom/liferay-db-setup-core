@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.mimacom.liferay.portal.setup.domain.TitleTranslation;
@@ -127,5 +128,13 @@ public final class TitleMapUtil {
                     + "titles: " + titles + "", e);
         }
         return xmlTitleStructure;
+    }
+
+    public static Map<Locale, String> getLocalizationMap(final String value) {
+        Map<Locale, String> map = new HashMap<>();
+
+        map.put(LocaleUtil.getDefault(), value);
+
+        return map;
     }
 }

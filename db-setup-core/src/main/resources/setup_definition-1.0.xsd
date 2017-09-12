@@ -10,6 +10,7 @@
                 <xs:element ref="roles" minOccurs="0"/>
                 <xs:element ref="users" minOccurs="0"/>
                 <xs:element ref="portletPermissions" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="sites" minOccurs="0"/>
                 <xs:element ref="organizations" minOccurs="0"/>
                 <xs:element ref="customFields" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="deleteLiferayObjects" minOccurs="0" maxOccurs="1"/>
@@ -72,12 +73,21 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="sites">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="site"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="objectsToBeDeleted">
         <xs:complexType>
             <xs:choice minOccurs="1" maxOccurs="1">
                 <xs:element ref="roles"/>
                 <xs:element ref="users"/>
                 <xs:element ref="organizations"/>
+                <xs:element ref="sites"/>
                 <xs:element ref="customFields"/>
             </xs:choice>
 
@@ -97,6 +107,18 @@
     <xs:element name="organization">
         <xs:complexType>
             <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="site"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="site">
+        <xs:complexType>
+            <xs:sequence>
                 <xs:element maxOccurs="1" minOccurs="0" ref="public-pages"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="private-pages"/>
                 <xs:element ref="document-folder" minOccurs="0" maxOccurs="unbounded"/>
@@ -110,16 +132,14 @@
                 <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
-                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="site" minOccurs="0" maxOccurs="unbounded"/>
 
             </xs:sequence>
             <xs:attribute name="name" type="xs:string"/>
             <xs:attribute name="default" type="xs:boolean" default="false"/>
             <xs:attribute name="strict-web-folder-definition" type="xs:boolean" default="false"/>
             <xs:attribute name="strict-document-folder-definition" type="xs:boolean" default="false"/>
-            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
             <xs:attribute name="maintain-site-hierarchy" type="xs:boolean" default="false"/>
-            <xs:attribute name="site-name" type="xs:string"/>
             <xs:attribute name="site-friendly-url" type="xs:string"/>
         </xs:complexType>
     </xs:element>

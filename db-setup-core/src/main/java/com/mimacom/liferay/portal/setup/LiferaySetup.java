@@ -143,9 +143,14 @@ public final class LiferaySetup {
             SetupPermissions.setupPortletPermissions(setup.getPortletPermissions());
         }
 
+        if (setup.getSites() != null) {
+            LOG.info("Setting up " + setup.getSites().getSite().size() + " sites");
+            SetupSites.setupSites(setup.getSites().getSite(), null);
+        }
+
         if (setup.getOrganizations() != null) {
-            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size() + " "
-                    + "organizations");
+            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size()
+                    + " organizations");
             SetupOrganizations.setupOrganizations(setup.getOrganizations().getOrganization(), null,
                     null);
         }

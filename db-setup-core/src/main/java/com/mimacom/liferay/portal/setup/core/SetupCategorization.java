@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.domain.Category;
 import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Site;
 import com.mimacom.liferay.portal.setup.domain.Vocabulary;
 
 import java.util.HashMap;
@@ -60,21 +61,21 @@ public final class SetupCategorization {
 
     }
 
-    public static void setupVocabularies(final Organization organization, final long groupId)
+    public static void setupVocabularies(final Site site, final long groupId)
             throws SystemException, PortalException {
-        List<Vocabulary> vocabularies = organization.getVocabulary();
+        List<Vocabulary> vocabularies = site.getVocabulary();
 
         Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(groupId);
 
         LOG.info("Setting up vocabularies");
 
         for (Vocabulary vocabulary : vocabularies) {
-            setupVocabulary(vocabulary, organization, groupId, siteDefaultLocale);
+            setupVocabulary(vocabulary, site, groupId, siteDefaultLocale);
         }
     }
 
     private static void setupVocabulary(final Vocabulary vocabulary,
-                                        final Organization organization, final long groupId, final Locale defaultLocale) {
+                                        final Site site, final long groupId, final Locale defaultLocale) {
 
         LOG.info("Setting up vocabulary with title: " + vocabulary.getTitle());
 

@@ -102,7 +102,7 @@ public final class SetupPages {
     }
 
     /**
-     * @param organization
+     * @param site
      * @param groupId
      * @param company
      * @param userid
@@ -110,16 +110,16 @@ public final class SetupPages {
      * @throws SystemException
      * @throws PortalException
      */
-    public static void setupOrganizationPages(final Organization organization, final long groupId,
-                                              final long company, final long userid) throws SystemException, PortalException {
+    public static void setupSitePages(final Site site, final long groupId,
+                                      final long company, final long userid) throws SystemException, PortalException {
 
-        PublicPages publicPages = organization.getPublicPages();
+        PublicPages publicPages = site.getPublicPages();
         if (publicPages != null) {
             if (publicPages.getTheme() != null) {
                 setupTheme(groupId, publicPages.getTheme(), false);
             }
             if (publicPages.isDeleteExistingPages()) {
-                LOG.info("Setup: Deleting pages from organization " + organization.getName());
+                LOG.info("Setup: Deleting pages from site " + site.getName());
                 deletePages(groupId);
             }
             addPages(publicPages.getPage(), publicPages.getDefaultLayout(), publicPages.getDefaultLayoutContainedInThemeWithId(),
@@ -129,13 +129,13 @@ public final class SetupPages {
             }
         }
 
-        PrivatePages privatePages = organization.getPrivatePages();
+        PrivatePages privatePages = site.getPrivatePages();
         if (privatePages != null) {
             if (privatePages.getTheme() != null) {
                 setupTheme(groupId, privatePages.getTheme(), true);
             }
             if (privatePages.isDeleteExistingPages()) {
-                LOG.info("Setup: Deleting pages from organization " + organization.getName());
+                LOG.info("Setup: Deleting pages from site " + site.getName());
                 deletePages(groupId);
             }
             addPages(privatePages.getPage(), privatePages.getDefaultLayout(), privatePages.getDefaultLayoutContainedInThemeWithId(),

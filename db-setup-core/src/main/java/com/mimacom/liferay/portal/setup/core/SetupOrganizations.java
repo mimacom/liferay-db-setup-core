@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
+import com.mimacom.liferay.portal.setup.domain.Site;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,33 +62,24 @@ public final class SetupOrganizations {
     public static void setupOrganizations(
             final List<com.mimacom.liferay.portal.setup.domain.Organization> organizations,
             final Organization parentOrg, final Group parentGroup) {
+            final long userId = LiferaySetup.getRunAsUserId();
 
         for (com.mimacom.liferay.portal.setup.domain.Organization organization : organizations) {
             try {
                 Organization liferayOrg = null;
                 Group liferayGroup = null;
                 long groupId = -1;
-                if (organization.isDefault()) {
-                    liferayGroup = GroupLocalServiceUtil.getGroup(COMPANY_ID, DEFAULT_GROUP_NAME);
-                    groupId = liferayGroup.getGroupId();
-                    LOG.info("Setup: default site. Group ID: " + groupId);
-                } else if (organization.getName() == null) {
-                    liferayGroup = GroupLocalServiceUtil.getCompanyGroup(COMPANY_ID);
-                    groupId = liferayGroup.getGroupId();
-                    LOG.info("Setup: global site. Group ID: " + groupId);
-                } else {
-                    try {
-                        Organization org = OrganizationLocalServiceUtil.getOrganization(COMPANY_ID,
-                                organization.getName());
-                        liferayGroup = org.getGroup();
-                        groupId = org.getGroupId();
-                        liferayOrg = org;
-                        LOG.info("Setup: Organization " + organization.getName()
-                                + " already exist in system, not creating...");
+                try {
+                    Organization org = OrganizationLocalServiceUtil.getOrganization(COMPANY_ID,
+                            organization.getName());
+                    liferayGroup = org.getGroup();
+                    groupId = org.getGroupId();
+                    liferayOrg = org;
+                    LOG.info("Setup: Organization " + organization.getName()
+                            + " already exist in system, not creating...");
 
-                    } catch (PortalException | SystemException e) {
-                        LOG.debug("Organization does not exist.", e);
-                    }
+                } catch (PortalException | SystemException e) {
+                    LOG.debug("Organization does not exist.", e);
                 }
 
                 if (groupId == -1) {
@@ -98,26 +90,13 @@ public final class SetupOrganizations {
                     Organization newOrganization = OrganizationLocalServiceUtil.addOrganization(
                             defaultUserId, OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID, organization.getName(),
                             "organization", 0, 0,ListTypeConstants.ORGANIZATION_STATUS_DEFAULT,
-                            LiferaySetup.DESCRIPTION,true, new ServiceContext());
+                            LiferaySetup.DESCRIPTION,false, new ServiceContext());
                     addOrganizationUser(newOrganization, UserLocalServiceUtil.getUser(defaultUserId));
                     liferayOrg = newOrganization;
                     liferayGroup = liferayOrg.getGroup();
                     groupId = newOrganization.getGroupId();
+
                     LOG.info("New Organization created. Group ID: " + groupId);
-                }
-
-                if (liferayGroup != null && organization.getSiteName() != null
-                        && !organization.getSiteName().equals("")) {
-                    liferayGroup.setName(organization.getSiteName());
-                    GroupLocalServiceUtil.updateGroup(liferayGroup);
-                    liferayGroup = liferayOrg.getGroup();
-                }
-
-                if (liferayGroup != null && organization.getSiteFriendlyUrl() != null
-                        && !organization.getSiteFriendlyUrl().equals("")) {
-                    liferayGroup.setFriendlyURL(organization.getSiteFriendlyUrl());
-                    GroupLocalServiceUtil.updateGroup(liferayGroup);
-                    liferayGroup = liferayOrg.getGroup();
                 }
 
                 if (parentOrg != null && liferayOrg != null
@@ -129,39 +108,64 @@ public final class SetupOrganizations {
                     OrganizationLocalServiceUtil.updateOrganization(liferayOrg);
                 }
 
-                if (parentGroup != null && liferayGroup != null
-                        && organization.isMaintainSiteHierarchy()) {
-                    liferayGroup.setParentGroupId(parentGroup.getGroupId());
-                    GroupLocalServiceUtil.updateGroup(liferayGroup);
-                } else if (liferayGroup != null && organization.isMaintainSiteHierarchy()) {
-                    liferayGroup.setParentGroupId(0);
-                    GroupLocalServiceUtil.updateGroup(liferayGroup);
-                }
 
-                LOG.info("Setting organization content...");
-
-                SetupDocumentFolders.setupDocumentFolders(organization, groupId, COMPANY_ID);
-                LOG.info("Document Folders setting finished.");
-
-                SetupDocuments.setupOrganizationDocuments(organization, groupId, COMPANY_ID);
-                LOG.info("Documents setting finished.");
-
-                SetupPages.setupOrganizationPages(organization, groupId, COMPANY_ID,
-                        LiferaySetup.getRunAsUserId());
-                LOG.info("Organization Pages setting finished.");
-
-                SetupWebFolders.setupWebFolders(organization, groupId, COMPANY_ID);
-                LOG.info("Web folders setting finished.");
-
-                SetupCategorization.setupVocabularies(organization, groupId);
-                LOG.info("Organization Categories setting finished.");
-
-                SetupArticles.setupOrganizationArticles(organization, groupId, COMPANY_ID);
-                LOG.info("Organization Articles setting finished.");
-
-                setCustomFields(LiferaySetup.getRunAsUserId(), groupId, COMPANY_ID, organization,
+                setCustomFields(userId, groupId, COMPANY_ID, organization,
                         liferayOrg);
                 LOG.info("Organization custom fields set up.");
+
+                Site orgSite = organization.getSite();
+
+                if (orgSite == null) {
+                    LOG.info("Organization has no site defined. All is set.");
+                } else if (orgSite.isDefault() || orgSite.getName() == null || orgSite.getName().isEmpty()) {
+                    LOG.error("It is not possible to set global or default within organization. Skipping site setup.");
+                } else {
+                    LOG.info("Setting up site for organization.");
+                    liferayGroup.setSite(true);
+                    liferayGroup.setName(orgSite.getName());
+                    GroupLocalServiceUtil.updateGroup(liferayGroup);
+                    liferayGroup = liferayOrg.getGroup();
+
+                    if (liferayGroup != null && orgSite.getSiteFriendlyUrl() != null
+                            && !orgSite.getSiteFriendlyUrl().isEmpty()) {
+                        liferayGroup.setFriendlyURL(orgSite.getSiteFriendlyUrl());
+                        GroupLocalServiceUtil.updateGroup(liferayGroup);
+                        liferayGroup = liferayOrg.getGroup();
+                    }
+
+                    if (parentGroup != null && liferayGroup != null
+                            && orgSite.isMaintainSiteHierarchy()) {
+                        liferayGroup.setParentGroupId(parentGroup.getGroupId());
+                        GroupLocalServiceUtil.updateGroup(liferayGroup);
+                    } else if (liferayGroup != null && orgSite.isMaintainSiteHierarchy()) {
+                        liferayGroup.setParentGroupId(0);
+                        GroupLocalServiceUtil.updateGroup(liferayGroup);
+                    }
+
+                    LOG.info("Setting organization site content...");
+
+                    SetupDocumentFolders.setupDocumentFolders(orgSite, groupId, COMPANY_ID);
+                    LOG.info("Document Folders setting finished.");
+
+                    SetupDocuments.setupSiteDocuments(orgSite, groupId, COMPANY_ID);
+                    LOG.info("Documents setting finished.");
+
+                    SetupPages.setupSitePages(orgSite, groupId, COMPANY_ID, userId);
+                    LOG.info("Organization Pages setting finished.");
+
+                    SetupWebFolders.setupWebFolders(orgSite, groupId, COMPANY_ID);
+                    LOG.info("Web folders setting finished.");
+
+                    SetupCategorization.setupVocabularies(orgSite, groupId);
+                    LOG.info("Organization Categories setting finished.");
+
+                    SetupArticles.setupSiteArticles(orgSite, groupId, COMPANY_ID);
+                    LOG.info("Organization Articles setting finished.");
+
+                    SetupSites.setCustomFields(userId, groupId, COMPANY_ID, orgSite);
+                    LOG.info("Organization site custom fields set up.");
+
+                }
 
                 List<com.mimacom.liferay.portal.setup.domain.Organization> orgs = organization
                         .getOrganization();
@@ -177,11 +181,7 @@ public final class SetupOrganizations {
     private static void setCustomFields(final long runAsUserId, final long groupId,
                                         final long company, final com.mimacom.liferay.portal.setup.domain.Organization org,
                                         final Organization liferayOrg) {
-        if (liferayOrg == null && org.getCustomFieldSetting() != null
-                && org.getCustomFieldSetting().size() > 0) {
-            LOG.error("Default site or global site has not organization. Thus you may not be able"
-                    + " to set custom field" + " values for the organiaztion!");
-        } else {
+
             Class clazz = Organization.class;
             String resolverHint = "Resolving customized value for page " + org.getName() + " "
                     + "failed for key %%key%% " + "and value %%value%%";
@@ -193,7 +193,6 @@ public final class SetupOrganizations {
                         runAsUserId, groupId, company, clazz, liferayOrg.getOrganizationId(), key,
                         value);
             }
-        }
     }
 
     public static void deleteOrganization(

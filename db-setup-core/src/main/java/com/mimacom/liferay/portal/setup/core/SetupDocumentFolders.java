@@ -34,7 +34,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
 import com.mimacom.liferay.portal.setup.domain.DocumentFolder;
-import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Site;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,8 +72,8 @@ public final class SetupDocumentFolders {
 
     }
 
-    public static void setupDocumentFolders(final Organization org, final long groupId, final long companyId) {
-        for (DocumentFolder df : org.getDocumentFolder()) {
+    public static void setupDocumentFolders(final Site group, final long groupId, final long companyId) {
+        for (DocumentFolder df : group.getDocumentFolder()) {
             boolean create = df.isCreateIfNotExists();
             String folderName = df.getFolderName();
 
