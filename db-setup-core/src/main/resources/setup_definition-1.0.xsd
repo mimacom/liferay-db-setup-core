@@ -129,6 +129,7 @@
                 <xs:element ref="article" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="adt" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="vocabulary" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="staging" minOccurs="0" maxOccurs="1"/>
                 <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
@@ -670,6 +671,111 @@
             <xs:attribute name="title" use="required" type="xs:string"/>
             <xs:attribute name="description" type="xs:string" default=""/>
             <xs:attribute name="multi-valued" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="staging">
+        <xs:annotation>
+            <xs:documentation>If this element is present for site, it sets the staging environment. If not present, the staging is untouched.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+
+            </xs:sequence>
+            <xs:attribute name="type" use="optional" default="local">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="local"/>
+                        <xs:enumeration value="remote"/>
+                        <xs:enumeration value="none"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="branching-public" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>If this attribute is set to true site variations will be switched on for public pages.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="branching-private" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>If this attribute is set to true site variations will be switched on for private pages.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-polls" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Polls.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-blogs" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Blogs.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+
+            <xs:attribute name="stage-message-boards" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Message Boards.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-document-library" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of documents (Document and Media library).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-ddl" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Dynamic Data Lists.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-forms" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of DDL Forms.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-calendar" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of calendar.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-mobile-rules" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Mobile Device Rules.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-adt" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Application (Portlet) Display Templates.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-web-content" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Web Content (Journal Articles).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-wiki" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Wiki.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-bookmarks" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Bookmarks.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 

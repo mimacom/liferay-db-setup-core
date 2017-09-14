@@ -26,26 +26,32 @@ package com.mimacom.liferay.portal.setup.core;
  * #L%
  */
 
-import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
+import com.liferay.exportimport.kernel.service.StagingLocalServiceUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.*;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
-import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
+import com.mimacom.liferay.portal.setup.core.util.PortletConstants;
 import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
 import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
 import com.mimacom.liferay.portal.setup.domain.Site;
+import com.mimacom.liferay.portal.setup.domain.Staging;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by gustavnovotny on 28.08.17.
@@ -62,6 +68,8 @@ public class SetupSites {
 
     public static void setupSites(final List<com.mimacom.liferay.portal.setup.domain.Site> groups, final Group parentGroup) {
 
+
+        CompanyThreadLocal.setCompanyId(COMPANY_ID);
         for (com.mimacom.liferay.portal.setup.domain.Site site : groups) {
             try {
                 Group liferayGroup = null;
@@ -92,7 +100,6 @@ public class SetupSites {
 
                     long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
 
-                    long newGroupId = CounterLocalServiceUtil.increment();
                     ServiceContext serviceContext = new ServiceContext();
 
                     com.liferay.portal.kernel.model.Group newGroup = GroupLocalServiceUtil.addGroup(
@@ -102,20 +109,6 @@ public class SetupSites {
                     groupId = newGroup.getGroupId();
                     LOG.info("New Organization created. Group ID: " + groupId);
                 }
-
-//                if (liferayGroup != null && site.getSiteName() != null
-//                        && !site.getSiteName().equals("")) {
-//                    liferayGroup.setName(site.getSiteName());
-//                    liferayGroup = GroupLocalServiceUtil.updateGroup(liferayGroup);
-//                }
-//
-//                if (liferayGroup != null && site.getSiteFriendlyUrl() != null
-//                        && !site.getSiteFriendlyUrl().equals("")) {
-//                    liferayGroup.setFriendlyURL(site.getSiteFriendlyUrl());
-//                    GroupLocalServiceUtil.updateGroup(liferayGroup);
-//                    liferayGroup = liferayOrg.getGroup();
-//                }
-
 
                 if (parentGroup != null && liferayGroup != null
                         && site.isMaintainSiteHierarchy()) {
@@ -128,14 +121,15 @@ public class SetupSites {
 
                 LOG.info("Setting site content...");
 
+                long userId = LiferaySetup.getRunAsUserId();
+
                 SetupDocumentFolders.setupDocumentFolders(site, groupId, COMPANY_ID);
                 LOG.info("Document Folders setting finished.");
 
                 SetupDocuments.setupSiteDocuments(site, groupId, COMPANY_ID);
                 LOG.info("Documents setting finished.");
 
-                SetupPages.setupSitePages(site, groupId, COMPANY_ID,
-                        LiferaySetup.getRunAsUserId());
+                SetupPages.setupSitePages(site, groupId, COMPANY_ID, userId);
                 LOG.info("Organization Pages setting finished.");
 
                 SetupWebFolders.setupWebFolders(site, groupId, COMPANY_ID);
@@ -147,8 +141,10 @@ public class SetupSites {
                 SetupArticles.setupSiteArticles(site, groupId, COMPANY_ID);
                 LOG.info("Organization Articles setting finished.");
 
-                setCustomFields(LiferaySetup.getRunAsUserId(), groupId, COMPANY_ID, site);
+                setCustomFields(userId, groupId, COMPANY_ID, site);
                 LOG.info("Organization custom fields set up.");
+
+                setStaging(userId, liferayGroup, site.getStaging());
 
                 List<com.mimacom.liferay.portal.setup.domain.Site> sites = site
                         .getSite();
@@ -160,9 +156,58 @@ public class SetupSites {
         }
     }
 
+    static void setStaging(long userId, Group liveGroup, Staging staging) {
+        if (Objects.isNull(staging)) {
+            LOG.info("No staging configuration present for site.");
+            return;
+        }
+
+        // only local staging supported, yet
+        LOG.info("Setting up staging for site: " + liveGroup.getName());
+        try {
+            if (staging.getType().equals("local")) {
+                ServiceContext serviceContext = new ServiceContext();
+                serviceContext.setAttribute(PortletConstants.STAGING_PARAM_TEMPLATE.replace("#", "com_liferay_dynamic_data_mapping_web_portlet_PortletDisplayTemplatePortlet"), staging.isStageAdt());
+
+                setStagingParam(staging.isStageAdt(), PortletConstants.STAGING_PORTLET_ID_ADT, serviceContext);
+                setStagingParam(staging.isStageBlogs(), PortletConstants.STAGING_PORTLET_ID_BLOGS, serviceContext);
+                setStagingParam(staging.isStageBookmarks(), PortletConstants.STAGING_PORTLET_ID_BOOKMARKS, serviceContext);
+                setStagingParam(staging.isStageCalendar(), PortletConstants.STAGING_PORTLET_ID_CALENDAR, serviceContext);
+                setStagingParam(staging.isStageDdl(), PortletConstants.STAGING_PORTLET_ID_DDL, serviceContext);
+                setStagingParam(staging.isStageDocumentLibrary(), PortletConstants.STAGING_PORTLET_ID_DL, serviceContext);
+                setStagingParam(staging.isStageForms(), PortletConstants.STAGING_PORTLET_ID_FORMS, serviceContext);
+                setStagingParam(staging.isStageMessageBoards(), PortletConstants.STAGING_PORTLET_ID_MB, serviceContext);
+                setStagingParam(staging.isStageMobileRules(), PortletConstants.STAGING_PORTLET_ID_MDR, serviceContext);
+                setStagingParam(staging.isStagePolls(), PortletConstants.STAGING_PORTLET_ID_POLLS, serviceContext);
+                setStagingParam(staging.isStageWebContent(), PortletConstants.STAGING_PORTLET_ID_WEB_CONTENT, serviceContext);
+                setStagingParam(staging.isStageWiki(), PortletConstants.STAGING_PORTLET_ID_WIKI, serviceContext);
+
+                StagingLocalServiceUtil.enableLocalStaging(userId, liveGroup, staging.isBranchingPublic(), staging.isBranchingPrivate(), serviceContext);
+                LOG.info("Local staging switched on.");
+            }
+            if (staging.getType().equals("remote")) {
+                LOG.error("Remote staging setup is not supported, yet. Staging not set up.");
+            }
+            if (staging.getType().equals("none") && liveGroup.hasLocalOrRemoteStagingGroup()) {
+                ServiceContext serviceContext = new ServiceContext();
+                serviceContext.setUserId(userId);
+                serviceContext.setAttribute("forceDisable", true);
+                StagingLocalServiceUtil.disableStaging(liveGroup, serviceContext);
+                LOG.info("Staging switched off.");
+            }
+
+        } catch (PortalException e) {
+            LOG.error("Error while setting up staging.", e);
+        }
+    }
+
+    private static void setStagingParam(boolean isParamOn, String portletId, ServiceContext serviceContext) {
+        serviceContext.setAttribute(PortletConstants.STAGING_PARAM_TEMPLATE.replace("#", portletId), String.valueOf(isParamOn));
+    }
+
     static void setCustomFields(final long runAsUserId, final long groupId,
                                         final long company, final Site site) {
-        if (site.getCustomFieldSetting() == null || site.getCustomFieldSetting().size() == 0) {
+        if (site.getCustomFieldSetting() == null || site.getCustomFieldSetting().isEmpty()) {
             LOG.error("Site does has no Expando field settings.");
         } else {
             Class clazz = com.liferay.portal.kernel.model.Group.class;
@@ -187,20 +232,14 @@ public class SetupSites {
                 Map<String, Site> toBeDeletedOrganisations = convertSiteListToHashMap(
                         sites);
                 try {
-                    for (com.liferay.portal.kernel.model.Organization organisation : OrganizationLocalServiceUtil
-                            .getOrganizations(-1, -1)) {
-                        if (!toBeDeletedOrganisations.containsKey(organisation.getName())) {
-                            try {
-                                OrganizationLocalServiceUtil
-                                        .deleteOrganization(organisation.getOrganizationId());
-                                LOG.info("Deleting Organisation" + organisation.getName());
-                            } catch (Exception e) {
-                                LOG.error("Error by deleting Organisation !", e);
-                            }
+                    for (com.liferay.portal.kernel.model.Group siteGroup : GroupLocalServiceUtil
+                            .getGroups(QueryUtil.ALL_POS, QueryUtil.ALL_POS)) {
+                        if (!toBeDeletedOrganisations.containsKey(siteGroup.getName())) {
+                            deleteLiferayGroup(siteGroup);
                         }
                     }
                 } catch (SystemException e) {
-                    LOG.error("Error by retrieving organisations!", e);
+                    LOG.error("Error by retrieving sites!", e);
                 }
                 break;
 
@@ -211,9 +250,9 @@ public class SetupSites {
                         com.liferay.portal.kernel.model.Group o = GroupLocalServiceUtil.getGroup(COMPANY_ID, name);
                         GroupLocalServiceUtil.deleteGroup(o);
                     } catch (Exception e) {
-                        LOG.error("Error by deleting Organisation !", e);
+                        LOG.error("Error by deleting Site !", e);
                     }
-                    LOG.info("Deleting Organisation " + name);
+                    LOG.info("Deleting Site " + name);
                 }
 
                 break;
@@ -221,6 +260,15 @@ public class SetupSites {
             default:
                 LOG.error("Unknown delete method : " + deleteMethod);
                 break;
+        }
+    }
+
+    private static void deleteLiferayGroup(Group siteGroup) {
+        try {
+            GroupLocalServiceUtil.deleteGroup(siteGroup.getGroupId());
+            LOG.info("Deleting Site" + siteGroup.getName());
+        } catch (Exception e) {
+            LOG.error("Error by deleting Site !", e);
         }
     }
 
