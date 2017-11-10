@@ -34,11 +34,10 @@ import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.service.DDLRecordSetLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.exception.StructureDuplicateStructureKeyException;
 import com.liferay.dynamic.data.mapping.exception.TemplateDuplicateTemplateKeyException;
-import com.liferay.dynamic.data.mapping.model.DDMStructure;
-import com.liferay.dynamic.data.mapping.model.DDMTemplate;
-import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
+import com.liferay.dynamic.data.mapping.model.*;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFolder;
@@ -53,6 +52,8 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -110,9 +111,9 @@ public final class SetupArticles {
 
     }
 
-    public static void setupOrganizationArticles(final Organization organization,
-                                                 final long groupId, final long companyId) throws PortalException, SystemException {
-        List<Structure> articleStructures = organization.getArticleStructure();
+    public static void setupSiteArticles(final Site site,
+                                         final long groupId, final long companyId) throws PortalException, SystemException {
+        List<Structure> articleStructures = site.getArticleStructure();
 
         if (articleStructures != null) {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
@@ -126,7 +127,7 @@ public final class SetupArticles {
             }
         }
 
-        List<Structure> ddlStructures = organization.getDdlStructure();
+        List<Structure> ddlStructures = site.getDdlStructure();
 
         if (articleStructures != null) {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(DDLRecordSet.class);
@@ -141,7 +142,7 @@ public final class SetupArticles {
             }
         }
 
-        List<ArticleTemplate> articleTemplates = organization.getArticleTemplate();
+        List<ArticleTemplate> articleTemplates = site.getArticleTemplate();
         if (articleTemplates != null) {
             for (ArticleTemplate template : articleTemplates) {
                 try {
@@ -152,13 +153,13 @@ public final class SetupArticles {
                 }
             }
         }
-        List<Article> articles = organization.getArticle();
+        List<Article> articles = site.getArticle();
         if (articles != null) {
             for (Article article : articles) {
                 addJournalArticle(article, groupId, companyId);
             }
         }
-        List<Adt> adts = organization.getAdt();
+        List<Adt> adts = site.getAdt();
         if (adts != null) {
             for (Adt template : adts) {
                 try {
@@ -169,7 +170,7 @@ public final class SetupArticles {
                 }
             }
         }
-        List<DdlRecordset> recordSets = organization.getDdlRecordset();
+        List<DdlRecordset> recordSets = site.getDdlRecordset();
         if (recordSets != null) {
             for (DdlRecordset recordSet : recordSets) {
                 try {
@@ -192,12 +193,31 @@ public final class SetupArticles {
         nameMap.put(siteDefaultLocale, name);
         Map<Locale, String> descMap = new HashMap<>();
 
-        String xsd = null;
+        String content = null;
+        DDMForm ddmForm = null;
+        DDMFormLayout ddmFormLayout = null;
         try {
-            xsd = ResourcesUtil.getFileContent(structure.getPath());
+            content = ResourcesUtil.getFileContent(structure.getPath());
+            ddmForm = DDMUtil.getDDMForm(content);
+            if (ddmForm == null) {
+                LOG.error("Can not parse given structure JSON content into Liferay DDMForm.");
+                return;
+            }
+            ddmFormLayout = DDMUtil.getDefaultDDMFormLayout(ddmForm);
         } catch (IOException e) {
             LOG.error("Error Reading Structure File content for: " + structure.getName());
             return;
+        } catch (PortalException e) {
+            LOG.error("Can not parse given structure JSON content into Liferay DDMForm.", e);
+            return;
+        } catch (Exception e) {
+            LOG.error("Other error while trying to get content of the structure file. Possibly wrong filesystem path (" + structure.getPath() + ")?", e);
+            return;
+        }
+
+        Locale contentDefaultLocale = ddmForm.getDefaultLocale();
+        if (!contentDefaultLocale.equals(siteDefaultLocale)) {
+            nameMap.put(contentDefaultLocale, name);
         }
 
         DDMStructure ddmStructure = null;
@@ -210,8 +230,6 @@ public final class SetupArticles {
 
         if (ddmStructure != null) {
             LOG.info("Structure already exists and will be overwritten.");
-            ddmStructure.setNameMap(nameMap);
-            ddmStructure.setDefinition(xsd);
             if (structure.getParent() != null && !structure.getParent().isEmpty()) {
                 LOG.info("Setting up parent structure: " + structure.getName());
                 DDMStructure parentStructure = DDMStructureLocalServiceUtil.fetchStructure(groupId,
@@ -222,14 +240,16 @@ public final class SetupArticles {
                     LOG.info("Parent structure not found: " + structure.getName());
                 }
             }
-            DDMStructureLocalServiceUtil.updateDDMStructure(ddmStructure);
+
+            DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
+                    ddmStructure.getParentStructureId(), nameMap, descMap, ddmForm, ddmFormLayout, new ServiceContext());
             LOG.info("Template successfully updated: " + structure.getName());
             return;
         }
 
         DDMStructure newStructure = DDMStructureLocalServiceUtil.addStructure(
                 LiferaySetup.getRunAsUserId(), groupId, structure.getParent(), classNameId,
-                structure.getKey(), nameMap, descMap, xsd, "xml", 0, new ServiceContext());
+                structure.getKey(), nameMap, descMap, ddmForm, ddmFormLayout, "json", 0, new ServiceContext());
         LOG.info("Added Article structure: " + newStructure.getName());
     }
 
@@ -258,15 +278,19 @@ public final class SetupArticles {
         String script;
         try {
             script = ResourcesUtil.getFileContent(template.getPath());
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error Reading Template File content for: " + template.getName());
             return;
         }
 
         long classPK = 0;
         if (template.getArticleStructureKey() != null) {
-            classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId,
-                    JournalArticle.class);
+            try {
+                classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId, JournalArticle.class);
+            } catch (Exception e) {
+                LOG.error("Given article structure with ID: "+ template.getArticleStructureKey() + " can not be found. Therefore, article template can not be added/changed.", e);
+                return;
+            }
         }
 
         DDMTemplate ddmTemplate = null;
@@ -282,6 +306,7 @@ public final class SetupArticles {
             ddmTemplate.setLanguage(template.getLanguage());
             ddmTemplate.setScript(script);
             ddmTemplate.setClassPK(classPK);
+            ddmTemplate.setCacheable(template.isCacheable());
 
             DDMTemplateLocalServiceUtil.updateDDMTemplate(ddmTemplate);
             LOG.info("Template successfully updated: " + ddmTemplate.getName());
@@ -290,7 +315,7 @@ public final class SetupArticles {
 
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
                 LiferaySetup.getRunAsUserId(), groupId, classNameId, classPK, resourceClassnameId, template.getKey(),
-                nameMap, descMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, true, false,
+                nameMap, descMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, template.isCacheable(), false,
                 null, null, new ServiceContext());
         LOG.info("Added Article template: " + newTemplate.getName());
     }
@@ -372,6 +397,12 @@ public final class SetupArticles {
         }
         Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(article.getTitleTranslation(),
                 groupId, article.getTitle(), " Article with title " + article.getArticleId());
+
+        Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
+                LocalizationUtil.getDefaultLanguageId(content));
+        if (!titleMap.containsKey(articleDefaultLocale)) {
+            titleMap.put(articleDefaultLocale, article.getTitle());
+        }
 
         ServiceContext serviceContext = new ServiceContext();
         serviceContext.setScopeGroupId(groupId);
@@ -481,13 +512,11 @@ public final class SetupArticles {
                     ae = AssetEntryLocalServiceUtil.getEntry(JournalArticle.class.getName(),
                             ja.getResourcePrimKey());
                     AssetLinkLocalServiceUtil.deleteLinks(ae.getEntryId());
-                } catch (PortalException e) {
-                    LOG.error("Problem clearing related assets of article " + ja.getArticleId(), e);
-                } catch (SystemException e) {
+                } catch (PortalException | SystemException e) {
                     LOG.error("Problem clearing related assets of article " + ja.getArticleId(), e);
                 }
             }
-            if (ras.getRelatedAsset() != null && ras.getRelatedAsset().size() > 0) {
+            if (ras.getRelatedAsset() != null && !ras.getRelatedAsset().isEmpty()) {
                 List<RelatedAsset> ra = ras.getRelatedAsset();
                 for (RelatedAsset r : ra) {
                     String clazz = r.getAssetClass();
@@ -501,7 +530,7 @@ public final class SetupArticles {
                     try {
                         id = Long.parseLong(clazzPrimKey);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LOG.error("Class primary key is not parseable as long value.", ex);
                     }
 
                     try {
@@ -509,17 +538,10 @@ public final class SetupArticles {
                         AssetEntry ae2 = AssetEntryLocalServiceUtil.getEntry(clazz, id);
                         AssetLinkLocalServiceUtil.addLink(runAsUserId, ae.getEntryId(),
                                 ae2.getEntryId(), AssetLinkConstants.TYPE_RELATED, 1);
-                        // JournalArticleLocalServiceUtil.getArticle(0).geta
-                    } catch (PortalException e) {
+                    } catch (PortalException | SystemException e) {
                         LOG.error(
                                 "Problem resolving related asset of article " + ja.getArticleId()
-                                        + " with clazz " + clazz + " primary key " + clazzPrimKey,
-                                e);
-                    } catch (SystemException e) {
-                        LOG.error(
-                                "Problem resolving related asset of article " + ja.getArticleId()
-                                        + " with clazz " + clazz + " primary key " + clazzPrimKey,
-                                e);
+                                        + " with clazz " + clazz + " primary key " + clazzPrimKey, e);
                     }
 
                 }

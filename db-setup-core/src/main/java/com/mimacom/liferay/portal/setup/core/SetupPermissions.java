@@ -40,10 +40,7 @@ import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public final class SetupPermissions {
@@ -60,27 +57,50 @@ public final class SetupPermissions {
     public static void setupPortletPermissions(final PortletPermissions portletPermissions) {
 
         for (PortletPermissions.Portlet portlet : portletPermissions.getPortlet()) {
-            deleteAllPortletPermissions(portlet);
-            for (PortletPermissions.Portlet.ActionId actionId : portlet.getActionId()) {
-                for (Role role : actionId.getRole()) {
-                    try {
-                        String name = role.getName();
-                        long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, name).getRoleId();
-                        ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
-                                portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
-                                String.valueOf(COMPANY_ID), roleId,
-                                new String[]{actionId.getName()});
-                        LOG.info("Set permission for action id " + actionId.getName() + " and role "
-                                + role.getName());
 
-                    } catch (NestableException e) {
-                        LOG.error("could not set permission to portlet :" + portlet.getPortletId(),
-                                e);
-                    }
+            deleteAllPortletPermissions(portlet);
+
+            Map<String, Set<String>> actionsPerRole = getActionsPerRole(portlet);
+            for (String roleName : actionsPerRole.keySet()) {
+                try {
+                    long roleId = RoleLocalServiceUtil.getRole(COMPANY_ID, roleName).getRoleId();
+                    final Set<String> actionStrings = actionsPerRole.get(roleName);
+                    final String[] actionIds = actionStrings.toArray(new String[actionStrings.size()]);
+
+                    ResourcePermissionLocalServiceUtil.setResourcePermissions(COMPANY_ID,
+                            portlet.getPortletId(), ResourceConstants.SCOPE_COMPANY,
+                            String.valueOf(COMPANY_ID), roleId, actionIds);
+                    LOG.info("Set permission for role: " + roleName + " for action ids: " + actionIds);
+                } catch (NestableException e) {
+                    LOG.error("Could not set permission to portlet :" + portlet.getPortletId(),
+                            e);
                 }
             }
         }
     }
+
+    /**
+     * @param portlet
+     * @return mapping of role name to action ids for the portlet
+     */
+    private static Map<String, Set<String>> getActionsPerRole(PortletPermissions.Portlet portlet) {
+        Map<String, Set<String>> result = new HashMap<>();
+
+        for (PortletPermissions.Portlet.ActionId actionId : portlet.getActionId()) {
+            for (Role role : actionId.getRole()) {
+                final String roleName = role.getName();
+                Set<String> actions = result.get(roleName);
+                if (actions == null) {
+                    actions = new HashSet<>();
+                    result.put(roleName, actions);
+                }
+                actions.add(actionId.getName());
+            }
+        }
+
+        return result;
+    }
+
 
     public static void addReadRight(final String roleName, final String className,
                                     final String primaryKey) throws SystemException, PortalException {

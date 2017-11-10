@@ -137,23 +137,34 @@ public final class LiferaySetup {
             LOG.info("Setting up " + setup.getRoles().getRole().size() + " roles");
             SetupRoles.setupRoles(setup.getRoles().getRole(), runAsUserId, groupId, companyId);
         }
+        if (setup.getUsers() != null) {
+            LOG.info("Setting up " + setup.getUsers().getUser().size() + " users");
+            SetupUsers.setupUsers(setup.getUsers().getUser(), defaultUserId, groupId);
+        }
+
+        if (setup.getOrganizations() != null) {
+            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size()
+                + " organizations");
+            SetupOrganizations.setupOrganizations(setup.getOrganizations().getOrganization(), null,
+                null);
+        }
+
+        if (setup.getUserGroups() != null) {
+            LOG.info("Setting up " + setup.getUserGroups().getUserGroup().size() + " User Groups");
+            SetupUserGroups.setupUserGroups(setup.getUserGroups().getUserGroup());
+        }
+
 
         if (setup.getPortletPermissions() != null) {
             LOG.info("Setting up " + setup.getPortletPermissions().getPortlet().size() + " roles");
             SetupPermissions.setupPortletPermissions(setup.getPortletPermissions());
         }
 
-        if (setup.getOrganizations() != null) {
-            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size() + " "
-                    + "organizations");
-            SetupOrganizations.setupOrganizations(setup.getOrganizations().getOrganization(), null,
-                    null);
+        if (setup.getSites() != null) {
+            LOG.info("Setting up " + setup.getSites().getSite().size() + " sites");
+            SetupSites.setupSites(setup.getSites().getSite(), null);
         }
 
-        if (setup.getUsers() != null) {
-            LOG.info("Setting up " + setup.getUsers().getUser().size() + " users");
-            SetupUsers.setupUsers(setup.getUsers().getUser(), defaultUserId, groupId);
-        }
 
         if (setup.getPageTemplates() != null) {
             SetupPages.setupPageTemplates(setup.getPageTemplates(), groupId, companyId,

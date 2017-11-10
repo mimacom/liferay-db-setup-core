@@ -33,7 +33,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
 import com.mimacom.liferay.portal.setup.domain.ArticleFolder;
-import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Site;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,9 +71,9 @@ public final class SetupWebFolders {
     }
 
     public static void setupWebFolders(
-            final Organization org, final long groupId,
+            final Site group, final long groupId,
             final long companyId) {
-        for (ArticleFolder af : org.getArticleFolder()) {
+        for (ArticleFolder af : group.getArticleFolder()) {
             String webFolderPath = af.getFolderPath();
             String description = af.getDescription();
             JournalFolder jf = WebFolderUtil.findWebFolder(companyId, groupId,

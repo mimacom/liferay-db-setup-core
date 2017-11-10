@@ -128,10 +128,8 @@ public final class DocumentUtil {
             DLAppLocalServiceUtil.updateFileEntry(userId, fe.getFileEntryId(), sourceFileName,
                     fe.getMimeType(), fe.getTitle(), fe.getDescription(), "update content", true,
                     content, new ServiceContext());
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOG.error("Can not update Liferay Document entry with ID:" + fe.getFileEntryId(), e);
         }
     }
 

@@ -8,8 +8,10 @@
                     all operations within setup hook -->
                 <xs:element ref="configuration" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="roles" minOccurs="0"/>
+                <xs:element ref="userGroups" minOccurs="0"/>
                 <xs:element ref="users" minOccurs="0"/>
                 <xs:element ref="portletPermissions" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="sites" minOccurs="0"/>
                 <xs:element ref="organizations" minOccurs="0"/>
                 <xs:element ref="customFields" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="deleteLiferayObjects" minOccurs="0" maxOccurs="1"/>
@@ -38,6 +40,14 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" ref="user"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="userGroups">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="userGroup"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -72,12 +82,21 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="sites">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="site"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="objectsToBeDeleted">
         <xs:complexType>
             <xs:choice minOccurs="1" maxOccurs="1">
                 <xs:element ref="roles"/>
                 <xs:element ref="users"/>
                 <xs:element ref="organizations"/>
+                <xs:element ref="sites"/>
                 <xs:element ref="customFields"/>
             </xs:choice>
 
@@ -97,6 +116,18 @@
     <xs:element name="organization">
         <xs:complexType>
             <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="site"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="site">
+        <xs:complexType>
+            <xs:sequence>
                 <xs:element maxOccurs="1" minOccurs="0" ref="public-pages"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="private-pages"/>
                 <xs:element ref="document-folder" minOccurs="0" maxOccurs="unbounded"/>
@@ -107,22 +138,32 @@
                 <xs:element ref="article" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="adt" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="vocabulary" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="staging" minOccurs="0" maxOccurs="1"/>
                 <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
-                <xs:element ref="organization" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="membership" minOccurs="0" />
+                <xs:element ref="site" minOccurs="0" maxOccurs="unbounded"/>
 
             </xs:sequence>
             <xs:attribute name="name" type="xs:string"/>
             <xs:attribute name="default" type="xs:boolean" default="false"/>
             <xs:attribute name="strict-web-folder-definition" type="xs:boolean" default="false"/>
             <xs:attribute name="strict-document-folder-definition" type="xs:boolean" default="false"/>
-            <xs:attribute name="maintain-organization-hierarchy" type="xs:boolean" default="false"/>
             <xs:attribute name="maintain-site-hierarchy" type="xs:boolean" default="false"/>
-            <xs:attribute name="site-name" type="xs:string"/>
             <xs:attribute name="site-friendly-url" type="xs:string"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="membership">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="usergroup-as-member"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="user-as-member" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="page-templates">
         <xs:complexType>
@@ -197,12 +238,23 @@
     </xs:element>
 
     <xs:element name="pageportlet">
+        <xs:annotation>
+            <xs:documentation>
+                Use pageportlet element to add a portlet into the page.<br/>
+                portletId - ID of the portlet instance<br/>
+                column - id of the column in the layout where the portlet should be placed in<br/>
+                column-position - order of the portlet in the column (positive number)
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="portlet-preference"/>
             </xs:sequence>
             <xs:attribute name="portletId" type="xs:string" use="required"/>
             <xs:attribute name="column" type="xs:string" use="required"/>
+            <xs:attribute name="column-position" type="xs:int" default="-1">
+            </xs:attribute>
+
         </xs:complexType>
     </xs:element>
 
@@ -321,6 +373,45 @@
             <xs:attribute name="lastName" use="required" type="xs:string"/>
         </xs:complexType>
     </xs:element>
+
+
+    <xs:element name="userGroup">
+        <xs:complexType>
+            <xs:sequence minOccurs="0">
+                <xs:element maxOccurs="unbounded" ref="role"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="user-as-member" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="description" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="user-as-member">
+        <xs:annotation>
+            <xs:appinfo>Represents a generic reference to User as a member of other entity.</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="screen-name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="usergroup-as-member">
+        <xs:annotation>
+            <xs:appinfo>Represents a generic reference to UserGroup as a member of other entity.</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence minOccurs="0">
+                <xs:element ref="role" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="usergroup-name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="define-permissions">
         <xs:annotation>
@@ -515,6 +606,7 @@
             <xs:attribute name="path" use="required" type="xs:string"/>
             <xs:attribute name="language" default="ftl" type="xs:string"/>
             <xs:attribute name="article-structure-key" type="xs:string"/>
+            <xs:attribute name="cacheable" type="xs:boolean" default="false"/>
         </xs:complexType>
     </xs:element>
 
@@ -650,6 +742,111 @@
             <xs:attribute name="title" use="required" type="xs:string"/>
             <xs:attribute name="description" type="xs:string" default=""/>
             <xs:attribute name="multi-valued" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="staging">
+        <xs:annotation>
+            <xs:documentation>If this element is present for site, it sets the staging environment. If not present, the staging is untouched.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+
+            </xs:sequence>
+            <xs:attribute name="type" use="optional" default="local">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="local"/>
+                        <xs:enumeration value="remote"/>
+                        <xs:enumeration value="none"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="branching-public" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>If this attribute is set to true site variations will be switched on for public pages.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="branching-private" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>If this attribute is set to true site variations will be switched on for private pages.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-polls" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Polls.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-blogs" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Blogs.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+
+            <xs:attribute name="stage-message-boards" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Message Boards.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-document-library" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of documents (Document and Media library).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-ddl" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Dynamic Data Lists.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-forms" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of DDL Forms.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-calendar" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of calendar.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-mobile-rules" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Mobile Device Rules.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-adt" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Application (Portlet) Display Templates.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-web-content" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Web Content (Journal Articles).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-wiki" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Wiki.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="stage-bookmarks" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>Set true to enable staging of Bookmarks.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 

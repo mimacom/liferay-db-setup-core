@@ -38,7 +38,7 @@ import com.mimacom.liferay.portal.setup.core.util.DocumentUtil;
 import com.mimacom.liferay.portal.setup.core.util.FolderUtil;
 import com.mimacom.liferay.portal.setup.core.util.ResourcesUtil;
 import com.mimacom.liferay.portal.setup.domain.Document;
-import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Site;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,9 +79,9 @@ public final class SetupDocuments {
 
     }
 
-    public static void setupOrganizationDocuments(final Organization organization,
-                                                  final long groupId, final long company) {
-        for (Document doc : organization.getDocument()) {
+    public static void setupSiteDocuments(final Site site,
+                                          final long groupId, final long company) {
+        for (Document doc : site.getDocument()) {
             String folderPath = doc.getDocumentFolderName();
             String documentName = doc.getDocumentFilename();
             String documentTitle = doc.getDocumentTitle();
@@ -101,7 +101,8 @@ public final class SetupDocuments {
             try {
                 fileBytes = ResourcesUtil.getFileBytes(filenameInFilesystem);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Can not read file: " + filenameInFilesystem + ". Skipping file");
+                continue;
             }
             if (fileBytes != null) {
                 if (fe == null) {
