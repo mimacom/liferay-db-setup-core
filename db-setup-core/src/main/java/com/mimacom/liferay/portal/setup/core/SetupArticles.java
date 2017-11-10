@@ -306,6 +306,7 @@ public final class SetupArticles {
             ddmTemplate.setLanguage(template.getLanguage());
             ddmTemplate.setScript(script);
             ddmTemplate.setClassPK(classPK);
+            ddmTemplate.setCacheable(template.isCacheable());
 
             DDMTemplateLocalServiceUtil.updateDDMTemplate(ddmTemplate);
             LOG.info("Template successfully updated: " + ddmTemplate.getName());
@@ -314,7 +315,7 @@ public final class SetupArticles {
 
         DDMTemplate newTemplate = DDMTemplateLocalServiceUtil.addTemplate(
                 LiferaySetup.getRunAsUserId(), groupId, classNameId, classPK, resourceClassnameId, template.getKey(),
-                nameMap, descMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, true, false,
+                nameMap, descMap, DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY, null, template.getLanguage(), script, template.isCacheable(), false,
                 null, null, new ServiceContext());
         LOG.info("Added Article template: " + newTemplate.getName());
     }
