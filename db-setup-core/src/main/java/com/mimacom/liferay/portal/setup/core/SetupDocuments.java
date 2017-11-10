@@ -101,7 +101,8 @@ public final class SetupDocuments {
             try {
                 fileBytes = ResourcesUtil.getFileBytes(filenameInFilesystem);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Can not read file: " + filenameInFilesystem + ". Skipping file");
+                continue;
             }
             if (fileBytes != null) {
                 if (fe == null) {

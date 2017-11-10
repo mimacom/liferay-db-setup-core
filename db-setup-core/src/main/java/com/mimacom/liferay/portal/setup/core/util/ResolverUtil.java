@@ -287,7 +287,9 @@ public final class ResolverUtil {
         if (siteName.toLowerCase().equals("default") || siteName.equals("")) {
             return DEFAULT_GROUP_NAME;
         }
-        return siteName + " LFR_ORGANIZATION";
+        // WAS needed till version 2.0.x when Organizations were used instead of Sites
+//        return siteName + " LFR_ORGANIZATION";
+        return siteName;
     }
 
     /**

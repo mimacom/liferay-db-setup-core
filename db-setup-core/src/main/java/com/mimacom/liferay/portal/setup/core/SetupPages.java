@@ -461,7 +461,8 @@ public final class SetupPages {
 
             String portletIdInc = "";
             try {
-                portletIdInc = layoutTypePortlet.addPortletId(runAsUserId, portletId, column, -1, false);
+                int columnPos = portlet.getColumnPosition();
+                portletIdInc = layoutTypePortlet.addPortletId(runAsUserId, portletId, column, columnPos, false);
                 if (portletIdInc == null) {
                     portletIdInc = portletId;
                 }
@@ -483,7 +484,7 @@ public final class SetupPages {
             PortletPreferencesLocalServiceUtil.updatePreferences(ownerId, ownerType, plid, portletIdInc, preferences);
 
             if (Validator.isNotNull(column) && Validator.isNotNull(portletIdInc)) {
-                layoutTypePortlet.movePortletId(runAsUserId, portletIdInc, column, 2);
+                layoutTypePortlet.movePortletId(runAsUserId, portletIdInc, column, portlet.getColumnPosition());
             }
             LayoutLocalServiceUtil.updateLayout(layout.getGroupId(), layout.isPrivateLayout(),
                     layout.getLayoutId(), layout.getTypeSettings());

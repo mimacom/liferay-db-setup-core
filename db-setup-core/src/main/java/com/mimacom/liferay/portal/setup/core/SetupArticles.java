@@ -210,6 +210,9 @@ public final class SetupArticles {
         } catch (PortalException e) {
             LOG.error("Can not parse given structure JSON content into Liferay DDMForm.", e);
             return;
+        } catch (Exception e) {
+            LOG.error("Other error while trying to get content of the structure file. Possibly wrong filesystem path (" + structure.getPath() + ")?", e);
+            return;
         }
 
         Locale contentDefaultLocale = ddmForm.getDefaultLocale();
@@ -275,15 +278,19 @@ public final class SetupArticles {
         String script;
         try {
             script = ResourcesUtil.getFileContent(template.getPath());
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error Reading Template File content for: " + template.getName());
             return;
         }
 
         long classPK = 0;
         if (template.getArticleStructureKey() != null) {
-            classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId,
-                    JournalArticle.class);
+            try {
+                classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId, JournalArticle.class);
+            } catch (Exception e) {
+                LOG.error("Given article structure with ID: "+ template.getArticleStructureKey() + " can not be found. Therefore, article template can not be added/changed.", e);
+                return;
+            }
         }
 
         DDMTemplate ddmTemplate = null;

@@ -8,6 +8,7 @@
                     all operations within setup hook -->
                 <xs:element ref="configuration" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="roles" minOccurs="0"/>
+                <xs:element ref="userGroups" minOccurs="0"/>
                 <xs:element ref="users" minOccurs="0"/>
                 <xs:element ref="portletPermissions" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="sites" minOccurs="0"/>
@@ -39,6 +40,14 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" ref="user"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="userGroups">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="userGroup"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -133,6 +142,7 @@
                 <xs:element name="ddl-structure" type="structure" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="ddl-recordset" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="membership" minOccurs="0" />
                 <xs:element ref="site" minOccurs="0" maxOccurs="unbounded"/>
 
             </xs:sequence>
@@ -144,6 +154,16 @@
             <xs:attribute name="site-friendly-url" type="xs:string"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="membership">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="usergroup-as-member"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="user-as-member" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="page-templates">
         <xs:complexType>
@@ -218,12 +238,23 @@
     </xs:element>
 
     <xs:element name="pageportlet">
+        <xs:annotation>
+            <xs:documentation>
+                Use pageportlet element to add a portlet into the page.<br/>
+                portletId - ID of the portlet instance<br/>
+                column - id of the column in the layout where the portlet should be placed in<br/>
+                column-position - order of the portlet in the column (positive number)
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="portlet-preference"/>
             </xs:sequence>
             <xs:attribute name="portletId" type="xs:string" use="required"/>
             <xs:attribute name="column" type="xs:string" use="required"/>
+            <xs:attribute name="column-position" type="xs:int" default="-1">
+            </xs:attribute>
+
         </xs:complexType>
     </xs:element>
 
@@ -342,6 +373,45 @@
             <xs:attribute name="lastName" use="required" type="xs:string"/>
         </xs:complexType>
     </xs:element>
+
+
+    <xs:element name="userGroup">
+        <xs:complexType>
+            <xs:sequence minOccurs="0">
+                <xs:element maxOccurs="unbounded" ref="role"/>
+                <xs:element ref="custom-field-setting" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="user-as-member" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="description" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="user-as-member">
+        <xs:annotation>
+            <xs:appinfo>Represents a generic reference to User as a member of other entity.</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="screen-name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="usergroup-as-member">
+        <xs:annotation>
+            <xs:appinfo>Represents a generic reference to UserGroup as a member of other entity.</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence minOccurs="0">
+                <xs:element ref="role" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="usergroup-name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="define-permissions">
         <xs:annotation>

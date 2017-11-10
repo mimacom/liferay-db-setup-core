@@ -95,6 +95,7 @@ public final class SetupCategorization {
 
         if (assetVocabulary != null) {
             LOG.debug("Vocabulary already exists. Will be updated.");
+
             assetVocabulary.setTitleMap(titleMap);
             assetVocabulary.setDescriptionMap(descMap);
             try {
