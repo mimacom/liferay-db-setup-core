@@ -111,8 +111,7 @@ public final class SetupArticles {
 
     }
 
-    public static void setupSiteArticles(final Site site,
-                                         final long groupId, final long companyId) throws PortalException, SystemException {
+    public static void setupSiteStructuresAndTemplates(final Site site, final long groupId, final long companyId) throws PortalException {
         List<Structure> articleStructures = site.getArticleStructure();
 
         if (articleStructures != null) {
@@ -121,7 +120,7 @@ public final class SetupArticles {
                 try {
                     addDDMStructure(structure, groupId, classNameId);
                 } catch (StructureDuplicateStructureKeyException | IOException
-                        | URISyntaxException e) {
+                    | URISyntaxException e) {
                     LOG.error(e);
                 }
             }
@@ -136,7 +135,7 @@ public final class SetupArticles {
                 try {
                     addDDMStructure(structure, groupId, classNameId);
                 } catch (StructureDuplicateStructureKeyException | IOException
-                        | URISyntaxException e) {
+                    | URISyntaxException e) {
                     LOG.error(e);
                 }
             }
@@ -148,11 +147,16 @@ public final class SetupArticles {
                 try {
                     addDDMTemplate(template, groupId);
                 } catch (TemplateDuplicateTemplateKeyException | IOException
-                        | URISyntaxException e) {
+                    | URISyntaxException e) {
                     LOG.error(e);
                 }
             }
         }
+    }
+
+    public static void setupSiteArticles(final Site site,
+                                         final long groupId, final long companyId) throws PortalException, SystemException {
+
         List<Article> articles = site.getArticle();
         if (articles != null) {
             for (Article article : articles) {
@@ -286,7 +290,7 @@ public final class SetupArticles {
         long classPK = 0;
         if (template.getArticleStructureKey() != null) {
             try {
-                classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId, JournalArticle.class);
+                classPK = ResolverUtil.getStructureId(template.getArticleStructureKey(), groupId, JournalArticle.class, false);
             } catch (Exception e) {
                 LOG.error("Given article structure with ID: "+ template.getArticleStructureKey() + " can not be found. Therefore, article template can not be added/changed.", e);
                 return;
@@ -486,7 +490,7 @@ public final class SetupArticles {
             ddlRecordSet.setNameMap(nameMap);
             ddlRecordSet.setDescriptionMap(descMap);
             ddlRecordSet.setDDMStructureId(ResolverUtil
-                    .getStructureId(recordSet.getDdlStructureKey(), groupId, DDLRecordSet.class));
+                    .getStructureId(recordSet.getDdlStructureKey(), groupId, DDLRecordSet.class, false));
             DDLRecordSetLocalServiceUtil.updateDDLRecordSet(ddlRecordSet);
             LOG.info("DDLRecordSet successfully updated: " + recordSet.getName());
             return;
@@ -495,7 +499,7 @@ public final class SetupArticles {
         DDLRecordSet newDDLRecordSet = DDLRecordSetLocalServiceUtil.addRecordSet(
                 LiferaySetup.getRunAsUserId(), groupId,
                 ResolverUtil.getStructureId(recordSet.getDdlStructureKey(), groupId,
-                        DDLRecordSet.class),
+                        DDLRecordSet.class, false),
                 recordSet.getDdlStructureKey(), nameMap, descMap, MIN_DISPLAY_ROWS, 0,
                 new ServiceContext());
         LOG.info("Added DDLRecordSet: " + newDDLRecordSet.getName());
