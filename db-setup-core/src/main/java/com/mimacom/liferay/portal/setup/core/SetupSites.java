@@ -143,6 +143,9 @@ public class SetupSites {
                     groupId = stagingGroup.getGroupId();
                 }
 
+                SetupArticles.setupSiteStructuresAndTemplates(site, groupId, COMPANY_ID);
+                LOG.info("Site DDM structures and templates setting finished.");
+
                 SetupDocumentFolders.setupDocumentFolders(site, groupId, COMPANY_ID);
                 LOG.info("Document Folders setting finished.");
 

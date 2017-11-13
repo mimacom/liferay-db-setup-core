@@ -26,6 +26,7 @@
 package com.mimacom.liferay.portal.setup.core;
 
 import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
@@ -33,18 +34,26 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ClassName;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portlet.asset.util.AssetVocabularySettingsHelper;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
+import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
+import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.domain.AssociatedAssetType;
 import com.mimacom.liferay.portal.setup.domain.Category;
-import com.mimacom.liferay.portal.setup.domain.Organization;
 import com.mimacom.liferay.portal.setup.domain.Site;
 import com.mimacom.liferay.portal.setup.domain.Vocabulary;
-
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -74,21 +83,18 @@ public final class SetupCategorization {
         }
     }
 
-    private static void setupVocabulary(final Vocabulary vocabulary,
-                                        final Site site, final long groupId, final Locale defaultLocale) {
+    private static void setupVocabulary(final Vocabulary vocabulary, final Site site, final long groupId, final Locale defaultLocale) {
 
-        LOG.info("Setting up vocabulary with title: " + vocabulary.getTitle());
+        LOG.info("Setting up vocabulary with name: " + vocabulary.getName());
 
-        Map<Locale, String> titleMap = new HashMap<>();
-        String title = vocabulary.getTitle();
-        titleMap.put(defaultLocale, title);
+        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(vocabulary.getTitleTranslation(), groupId, vocabulary.getName(), "");
 
         Map<Locale, String> descMap = new HashMap<>();
         descMap.put(defaultLocale, vocabulary.getDescription());
 
         AssetVocabulary assetVocabulary = null;
         try {
-            assetVocabulary = AssetVocabularyLocalServiceUtil.getGroupVocabulary(groupId, title);
+            assetVocabulary = AssetVocabularyLocalServiceUtil.getGroupVocabulary(groupId, vocabulary.getName());
         } catch (PortalException | SystemException e) {
             LOG.error("Asset vocabulary was not found");
         }
@@ -96,8 +102,11 @@ public final class SetupCategorization {
         if (assetVocabulary != null) {
             LOG.debug("Vocabulary already exists. Will be updated.");
 
+            assetVocabulary.setName(vocabulary.getName());
             assetVocabulary.setTitleMap(titleMap);
             assetVocabulary.setDescriptionMap(descMap);
+            assetVocabulary.setSettings(composeVocabularySettings(vocabulary, groupId));
+
             try {
                 assetVocabulary = AssetVocabularyLocalServiceUtil
                         .updateAssetVocabulary(assetVocabulary);
@@ -118,7 +127,7 @@ public final class SetupCategorization {
             serviceContext.setCompanyId(PortalUtil.getDefaultCompanyId());
             serviceContext.setScopeGroupId(groupId);
             assetVocabulary = AssetVocabularyLocalServiceUtil.addVocabulary(
-                    LiferaySetup.getRunAsUserId(), groupId, null, titleMap, descMap, null, serviceContext);
+                    LiferaySetup.getRunAsUserId(), groupId, null, titleMap, descMap, composeVocabularySettings(vocabulary, groupId), serviceContext);
             LOG.info("AssetVocabulary successfuly added. ID:" + assetVocabulary.getVocabularyId()
                     + ", group:" + assetVocabulary.getGroupId());
             setupCategories(assetVocabulary.getVocabularyId(), groupId, 0L,
@@ -127,6 +136,64 @@ public final class SetupCategorization {
             LOG.error("Error while trying to create vocabulary with title: "
                     + assetVocabulary.getTitle(), e);
         }
+    }
+
+    private static String composeVocabularySettings(Vocabulary vocabulary, final long groupId) {
+        AssetVocabularySettingsHelper assetVocabularySettingsHelper = new AssetVocabularySettingsHelper();
+        assetVocabularySettingsHelper.setMultiValued(vocabulary.isMultiValued());
+        List<AssociatedAssetType> types = vocabulary.getAssociatedAssetType();
+
+        if (Objects.isNull(types) || types.isEmpty()) {
+            assetVocabularySettingsHelper.setClassNameIdsAndClassTypePKs(new long[] {AssetCategoryConstants.ALL_CLASS_NAME_ID},
+                new long[] {AssetCategoryConstants.ALL_CLASS_TYPE_PK}, new boolean[] {false});
+            return assetVocabularySettingsHelper.toString();
+        }
+
+        List<Long> classNameIds = new LinkedList<>();
+        List<Long> classTypePKs = new LinkedList<>();
+        List<Boolean> requireds = new LinkedList<>();
+
+        for (AssociatedAssetType type : types) {
+            ClassName className = ClassNameLocalServiceUtil.fetchClassName(type.getClassName());
+            if (className.getValue().isEmpty()) {
+                continue;
+            }
+
+            long subtypePK = -1;
+            if ( Objects.nonNull(type.getSubtypeStructureKey()) && !type.getSubtypeStructureKey().isEmpty()) { // has subtype
+                try {
+                    subtypePK = ResolverUtil.getStructureId(type.getSubtypeStructureKey(), groupId, Class.forName(type.getClassName()), true);
+                } catch (ClassNotFoundException | PortalException e) {
+                    LOG.error("Class can not be be resolved for classname: " + type.getClassName(), e);
+                    continue;
+                }
+            }
+
+            classNameIds.add(className.getClassNameId());
+            classTypePKs.add(subtypePK);
+            requireds.add(type.isRequired());
+        }
+
+        // no valid associated types case
+        if (classNameIds.isEmpty()) {
+            assetVocabularySettingsHelper.setClassNameIdsAndClassTypePKs(new long[] {AssetCategoryConstants.ALL_CLASS_NAME_ID},
+                new long[] {AssetCategoryConstants.ALL_CLASS_TYPE_PK}, new boolean[] {false});
+            return assetVocabularySettingsHelper.toString();
+        }
+
+
+        // when associated types exists
+        boolean[] requiredsArray = new boolean[requireds.size()];
+        for (int i = 0; i < requireds.size(); i++) {
+            requiredsArray[i] = requireds.get(i);
+        }
+
+        assetVocabularySettingsHelper.setClassNameIdsAndClassTypePKs(ArrayUtil.toLongArray(classNameIds), ArrayUtil.toLongArray(classTypePKs), requiredsArray);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Vocabulary settings composed for vocabulary:" + vocabulary.getName() + ". Content: " + assetVocabularySettingsHelper.toString());
+        }
+
+        return assetVocabularySettingsHelper.toString();
     }
 
     private static void setupCategories(final long vocabularyId, final long groupId,
@@ -143,12 +210,10 @@ public final class SetupCategorization {
     private static void setupCategory(final Category category, final long vocabularyId,
                                       final long groupId, final Locale defaultLocale, final long parentCategoryId) {
 
-        LOG.info("Setting up category with title:" + category.getTitle());
+        LOG.info("Setting up category with name:" + category.getName());
 
-        Map<Locale, String> titleMap = new HashMap<>();
-        String title = category.getTitle();
-        titleMap.put(defaultLocale, title);
-
+        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(category.getTitleTranslation(), groupId, category.getName(),
+            "Category with name: " + category.getName());
         Map<Locale, String> descMap = new HashMap<>();
         String description = category.getDescription();
         descMap.put(defaultLocale, description);
@@ -164,12 +229,12 @@ public final class SetupCategorization {
             List<AssetCategory> existingCategories = AssetCategoryLocalServiceUtil
                     .getChildCategories(parentCategoryId);
             for (AssetCategory ac : existingCategories) {
-                if (ac.getName().equals(category.getTitle())) {
+                if (ac.getName().equals(category.getName())) {
                     assetCategory = ac;
                 }
             }
         } catch (SystemException e) {
-            LOG.error("Error while trying to find category with name: " + category.getTitle(), e);
+            LOG.error("Error while trying to find category with name: " + category.getName(), e);
         }
 
         if (assetCategory != null) {
@@ -177,7 +242,8 @@ public final class SetupCategorization {
 
             assetCategory.setTitleMap(titleMap);
             assetCategory.setDescriptionMap(descMap);
-            assetCategory.setName(title);
+            assetCategory.setName(category.getName());
+
             try {
                 AssetCategoryLocalServiceUtil.updateAssetCategory(assetCategory);
                 LOG.info("Category successfully updated.");
@@ -200,7 +266,7 @@ public final class SetupCategorization {
                     category.getCategory(), defaultLocale);
 
         } catch (PortalException | SystemException e) {
-            LOG.error("Error in creating category with title: " + category.getTitle(), e);
+            LOG.error("Error in creating category with name: " + category.getName(), e);
         }
 
     }

@@ -701,7 +701,7 @@ public final class ResolverUtil {
                                     .toString(getTemplateId(name, siteGroupId, referredClass));
                         } else {
                             templateId = Long
-                                    .toString(getStructureId(name, siteGroupId, referredClass));
+                                    .toString(getStructureId(name, siteGroupId, referredClass, false));
                         }
                     }
                 } catch (PortalException | SystemException e) {
@@ -735,11 +735,11 @@ public final class ResolverUtil {
     }
 
     public static long getStructureId(final String structureKey, final long groupId,
-                                      final Class clazz) throws SystemException, PortalException {
+                                      final Class clazz, boolean includeAncestorStructures) throws SystemException, PortalException {
 
         long classNameId = ClassNameLocalServiceUtil.getClassNameId(clazz);
         DDMStructure structure = DDMStructureLocalServiceUtil.getStructure(groupId, classNameId,
-                structureKey);
+                structureKey, includeAncestorStructures);
         return structure.getStructureId();
     }
 

@@ -737,11 +737,21 @@
     <xs:element name="vocabulary">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="associated-asset-type" minOccurs="0" maxOccurs="unbounded" />
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="category"/>
             </xs:sequence>
-            <xs:attribute name="title" use="required" type="xs:string"/>
+            <xs:attribute name="name" use="required" type="xs:string"/>
             <xs:attribute name="description" type="xs:string" default=""/>
             <xs:attribute name="multi-valued" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="associated-asset-type">
+        <xs:complexType>
+            <xs:attribute name="class-name" use="required" type="xs:string" />
+            <xs:attribute name="subtype-structure-key" type="xs:string" />
+            <xs:attribute name="required" type="xs:boolean" default="false" />
         </xs:complexType>
     </xs:element>
 
@@ -862,9 +872,10 @@
     <xs:element name="category">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="category"/>
             </xs:sequence>
-            <xs:attribute name="title" use="required" type="xs:string"/>
+            <xs:attribute name="name" use="required" type="xs:string"/>
             <xs:attribute name="description" type="xs:string" default=""/>
         </xs:complexType>
     </xs:element>
