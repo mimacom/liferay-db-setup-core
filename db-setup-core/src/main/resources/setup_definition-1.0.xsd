@@ -92,8 +92,8 @@
 
     <xs:element name="objectsToBeDeleted">
         <xs:complexType>
-            <xs:choice minOccurs="1" maxOccurs="1">
-                <xs:element ref="roles"/>
+            <xs:choice>
+                <xs:element ref="roles" minOccurs="0"/>
                 <xs:element ref="users"/>
                 <xs:element ref="organizations"/>
                 <xs:element ref="sites"/>
