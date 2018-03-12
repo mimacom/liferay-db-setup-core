@@ -4,7 +4,7 @@ package com.mimacom.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Copyright (C) 2016 - 2017 mimacom ag
+ * Copyright (C) 2016 - 2018 mimacom ag
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,25 +37,14 @@ import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
-import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
-import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.UserGroupGroupRoleLocalServiceUtil;
-import com.liferay.portal.kernel.service.UserGroupLocalServiceUtil;
-import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
-import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.mimacom.liferay.portal.setup.core.util.PortletConstants;
 import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
-import com.mimacom.liferay.portal.setup.domain.Membership;
-import com.mimacom.liferay.portal.setup.domain.Role;
-import com.mimacom.liferay.portal.setup.domain.Site;
-import com.mimacom.liferay.portal.setup.domain.Staging;
-import com.mimacom.liferay.portal.setup.domain.UserAsMember;
-import com.mimacom.liferay.portal.setup.domain.UsergroupAsMember;
+import com.mimacom.liferay.portal.setup.domain.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +65,6 @@ public class SetupSites {
 
     public static void setupSites(final List<com.mimacom.liferay.portal.setup.domain.Site> groups, final Group parentGroup) {
 
-
         CompanyThreadLocal.setCompanyId(COMPANY_ID);
         for (com.mimacom.liferay.portal.setup.domain.Site site : groups) {
             try {
@@ -84,16 +72,13 @@ public class SetupSites {
                 long groupId = -1;
                 if (site.isDefault()) {
                     liferayGroup = GroupLocalServiceUtil.getGroup(COMPANY_ID, DEFAULT_GROUP_NAME);
-                    groupId = liferayGroup.getGroupId();
                     LOG.info("Setup: default site. Group ID: " + groupId);
                 } else if (site.getName() == null) {
                     liferayGroup = GroupLocalServiceUtil.getCompanyGroup(COMPANY_ID);
-                    groupId = liferayGroup.getGroupId();
                     LOG.info("Setup: global site. Group ID: " + groupId);
                 } else {
                     try {
                         liferayGroup = GroupLocalServiceUtil.getGroup(COMPANY_ID, site.getName());
-                        groupId = liferayGroup.getGroupId();
                         LOG.info("Setup: Site " + site.getName()
                                 + " already exists in system, not creating...");
 
@@ -101,22 +86,22 @@ public class SetupSites {
                         LOG.debug("Site does not exist.", e);
                     }
                 }
+                long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
+                ServiceContext serviceContext = new ServiceContext();
 
-                if (groupId == -1) {
+                if (liferayGroup == null) {
                     LOG.info("Setup: Group (Site) " + site.getName()
                             + " does not exist in system, creating...");
 
-                    long defaultUserId = UserLocalServiceUtil.getDefaultUserId(COMPANY_ID);
-
-                    ServiceContext serviceContext = new ServiceContext();
-
-                    com.liferay.portal.kernel.model.Group newGroup = GroupLocalServiceUtil.addGroup(
+                    liferayGroup = GroupLocalServiceUtil.addGroup(
                             defaultUserId, GroupConstants.DEFAULT_PARENT_GROUP_ID, Group.class.getName(),
                             0, 0, TitleMapUtil.getLocalizationMap(site.getName()), null, GroupConstants.TYPE_SITE_RESTRICTED, true, GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, site.getSiteFriendlyUrl(), true, true, serviceContext);
-                    liferayGroup = newGroup;
-                    groupId = newGroup.getGroupId();
                     LOG.info("New Organization created. Group ID: " + groupId);
+                } else {
+                    LOG.info("Setup: Updating " + site.getName());
+                    GroupLocalServiceUtil.updateFriendlyURL(liferayGroup.getGroupId(), site.getSiteFriendlyUrl());
                 }
+                groupId = liferayGroup.getGroupId();
 
                 if (parentGroup != null && liferayGroup != null
                         && site.isMaintainSiteHierarchy()) {
@@ -127,18 +112,14 @@ public class SetupSites {
                     GroupLocalServiceUtil.updateGroup(liferayGroup);
                 }
 
-
-
                 LOG.info("Setting site content...");
 
                 long userId = LiferaySetup.getRunAsUserId();
 
                 setStaging(userId, liferayGroup, site.getStaging());
 
-
                 // If staging group exists for present Group, add all content to staging group
-                Group siteGroup = GroupLocalServiceUtil.getGroup(groupId);
-                Group stagingGroup = siteGroup.getStagingGroup();
+                Group stagingGroup = liferayGroup.getStagingGroup();
                 if (Objects.nonNull(stagingGroup)) {
                     groupId = stagingGroup.getGroupId();
                 }
@@ -168,8 +149,7 @@ public class SetupSites {
                 LOG.info("Site custom fields set up.");
 
                 // Users and Groups should be referenced to live Group
-                setMembership(site.getMembership(), COMPANY_ID, siteGroup.getGroupId());
-
+                setMembership(site.getMembership(), COMPANY_ID, liferayGroup.getGroupId());
 
                 List<com.mimacom.liferay.portal.setup.domain.Site> sites = site
                         .getSite();
@@ -191,7 +171,6 @@ public class SetupSites {
 
         List<UserAsMember> memberUsers = membership.getUserAsMember();
         assignMemberUsers(memberUsers, companyId, groupId);
-
 
     }
 
@@ -218,7 +197,6 @@ public class SetupSites {
                 e.printStackTrace();
             }
 
-
         }
     }
 
@@ -230,20 +208,19 @@ public class SetupSites {
         for (Role membershipRole : membershipRoles) {
             try {
                 com.liferay.portal.kernel.model.Role liferayRole = RoleLocalServiceUtil.getRole(companyId, membershipRole.getName());
-                UserGroupRoleLocalServiceUtil.addUserGroupRoles(liferayUser.getUserId(), liferayGroup.getGroupId(), new long[] {liferayRole.getRoleId()});
+                UserGroupRoleLocalServiceUtil.addUserGroupRoles(liferayUser.getUserId(), liferayGroup.getGroupId(), new long[]{liferayRole.getRoleId()});
                 StringBuilder sb = new StringBuilder("Role ")
-                    .append(liferayRole.getDescriptiveName())
-                    .append(" assigned to User ")
-                    .append(liferayUser.getScreenName())
-                    .append(" for site ")
-                    .append(liferayGroup.getDescriptiveName());
+                        .append(liferayRole.getDescriptiveName())
+                        .append(" assigned to User ")
+                        .append(liferayUser.getScreenName())
+                        .append(" for site ")
+                        .append(liferayGroup.getDescriptiveName());
 
                 LOG.info(sb.toString());
             } catch (PortalException e) {
                 LOG.error("Can not add role with name" + membershipRole.getName() + " does not exists. Will not be assigned.");
             }
         }
-
 
     }
 
@@ -267,8 +244,6 @@ public class SetupSites {
         }
     }
 
-
-
     private static void assignGroupMemberRoles(List<Role> membershipRoles, long companyId, Group liferayGroup, UserGroup liferayUserGroup) {
         if (Objects.isNull(membershipRoles) || membershipRoles.isEmpty()) {
             return;
@@ -277,13 +252,13 @@ public class SetupSites {
         for (Role membershipRole : membershipRoles) {
             try {
                 com.liferay.portal.kernel.model.Role liferayRole = RoleLocalServiceUtil.getRole(companyId, membershipRole.getName());
-                UserGroupGroupRoleLocalServiceUtil.addUserGroupGroupRoles(liferayUserGroup.getUserGroupId(), liferayGroup.getGroupId(), new long[] {liferayRole.getRoleId()});
+                UserGroupGroupRoleLocalServiceUtil.addUserGroupGroupRoles(liferayUserGroup.getUserGroupId(), liferayGroup.getGroupId(), new long[]{liferayRole.getRoleId()});
                 StringBuilder sb = new StringBuilder("Role ")
-                    .append(liferayRole.getDescriptiveName())
-                    .append(" assigned to UserGroup ")
-                    .append(liferayUserGroup.getName())
-                    .append(" for site ")
-                    .append(liferayGroup.getDescriptiveName());
+                        .append(liferayRole.getDescriptiveName())
+                        .append(" assigned to UserGroup ")
+                        .append(liferayUserGroup.getName())
+                        .append(" for site ")
+                        .append(liferayGroup.getDescriptiveName());
 
                 LOG.info(sb.toString());
             } catch (PortalException e) {
@@ -342,7 +317,7 @@ public class SetupSites {
     }
 
     static void setCustomFields(final long runAsUserId, final long groupId,
-                                        final long company, final Site site) {
+                                final long company, final Site site) {
         if (site.getCustomFieldSetting() == null || site.getCustomFieldSetting().isEmpty()) {
             LOG.error("Site does has no Expando field settings.");
         } else {
