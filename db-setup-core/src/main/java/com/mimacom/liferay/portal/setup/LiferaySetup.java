@@ -76,6 +76,7 @@ public final class LiferaySetup {
     private static long runAsUserId;
     private static ServiceDependencyManager serviceDependencyManager;
     private static List<String> dependeciesFilters = new ArrayList<>();
+    private static int delayMillisecond = 0;
 
     private LiferaySetup() {
 
@@ -84,6 +85,11 @@ public final class LiferaySetup {
     public static void addDependency(String dependency) {
 
         dependeciesFilters.add(dependency);
+    }
+
+    public static void addDelay(int millis) {
+
+        delayMillisecond = millis;
     }
 
     public static void setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
@@ -100,26 +106,36 @@ public final class LiferaySetup {
 
     public static void setup(final Setup setup) {
 
-        if (!dependeciesFilters.isEmpty()) {
-            serviceDependencyManager = new ServiceDependencyManager();
-            serviceDependencyManager.addServiceDependencyListener(new ServiceDependencyListener() {
-
-                @Override
-                public void dependenciesFulfilled() {
-
-                    preSetup(setup);
+        new Thread(() -> {
+            if (delayMillisecond > 0) {
+                try {
+                    LOG.info(String.format("Deferring configurator execution by %d milliseconds", delayMillisecond));
+                    Thread.sleep(delayMillisecond);
+                } catch (InterruptedException e) {
+                    LOG.error(e);
                 }
+            }
+            if (!dependeciesFilters.isEmpty()) {
+                serviceDependencyManager = new ServiceDependencyManager();
+                serviceDependencyManager.addServiceDependencyListener(new ServiceDependencyListener() {
 
-                @Override
-                public void destroy() {
-                    // ignore
-                }
-            });
-            dependeciesFilters.stream().map(dependency -> RegistryUtil.getRegistry().getFilter(dependency))
-                              .forEach(serviceDependencyManager::registerDependencies);
-        } else {
-            preSetup(setup);
-        }
+                    @Override
+                    public void dependenciesFulfilled() {
+
+                        preSetup(setup);
+                    }
+
+                    @Override
+                    public void destroy() {
+                        // ignore
+                    }
+                });
+                dependeciesFilters.stream().map(dependency -> RegistryUtil.getRegistry().getFilter(dependency))
+                                  .forEach(serviceDependencyManager::registerDependencies);
+            } else {
+                preSetup(setup);
+            }
+        }).start();
     }
 
     private static void preSetup(final Setup setup) {
