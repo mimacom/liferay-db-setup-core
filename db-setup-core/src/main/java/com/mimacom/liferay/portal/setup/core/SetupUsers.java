@@ -76,10 +76,14 @@ public final class SetupUsers {
                 LOG.error("Error by retrieving user " + user.getEmailAddress());
             }
 
-            addUserToOrganizations(user, liferayUser);
-            addRolesToUser(user, liferayUser);
-            if (user.getCustomFieldSetting() != null && !user.getCustomFieldSetting().isEmpty()) {
-                setCustomFields(runAsUser, groupId, COMPANY_ID, liferayUser, user);
+            if( null != liferayUser ){
+                addUserToOrganizations(user, liferayUser);
+                addRolesToUser(user, liferayUser);
+                if (user.getCustomFieldSetting() != null && !user.getCustomFieldSetting().isEmpty()) {
+                    setCustomFields(runAsUser, groupId, COMPANY_ID, liferayUser, user);
+                }
+            } else {
+                LOG.warn("Could not create user with screenName '" + user.getScreenName()+"'");
             }
         }
     }
@@ -136,7 +140,7 @@ public final class SetupUsers {
             LOG.info("User " + setupUser.getEmailAddress() + " created");
 
         } catch (Exception ex) {
-            LOG.error("Error by adding user " + setupUser.getEmailAddress());
+            LOG.error("Error by adding user " + setupUser.getEmailAddress(), ex);
         }
 
         return liferayUser;
