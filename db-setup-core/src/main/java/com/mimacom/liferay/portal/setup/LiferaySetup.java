@@ -41,8 +41,22 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.mimacom.liferay.portal.setup.core.*;
-import com.mimacom.liferay.portal.setup.domain.*;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.dependency.ServiceDependencyListener;
+import com.liferay.registry.dependency.ServiceDependencyManager;
+import com.mimacom.liferay.portal.setup.core.SetupCustomFields;
+import com.mimacom.liferay.portal.setup.core.SetupOrganizations;
+import com.mimacom.liferay.portal.setup.core.SetupPages;
+import com.mimacom.liferay.portal.setup.core.SetupPermissions;
+import com.mimacom.liferay.portal.setup.core.SetupRoles;
+import com.mimacom.liferay.portal.setup.core.SetupSites;
+import com.mimacom.liferay.portal.setup.core.SetupUserGroups;
+import com.mimacom.liferay.portal.setup.core.SetupUsers;
+import com.mimacom.liferay.portal.setup.domain.Configuration;
+import com.mimacom.liferay.portal.setup.domain.CustomFields;
+import com.mimacom.liferay.portal.setup.domain.ObjectsToBeDeleted;
+import com.mimacom.liferay.portal.setup.domain.Organization;
+import com.mimacom.liferay.portal.setup.domain.Setup;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -50,6 +64,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class LiferaySetup {
@@ -59,21 +74,71 @@ public final class LiferaySetup {
     private static final Log LOG = LogFactoryUtil.getLog(LiferaySetup.class);
     private static final String ADMIN_ROLE_NAME = "Administrator";
     private static long runAsUserId;
+    private static ServiceDependencyManager serviceDependencyManager;
+    private static List<String> dependeciesFilters = new ArrayList<>();
+    private static int delayMillisecond = 0;
 
     private LiferaySetup() {
+
     }
 
-    public static boolean setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+    public static void addDependency(String dependency) {
+
+        dependeciesFilters.add(dependency);
+    }
+
+    public static void addDelay(int millis) {
+
+        delayMillisecond = millis;
+    }
+
+    public static void setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+
         Setup setup = MarshallUtil.unmarshall(file);
-        return setup(setup);
+        setup(setup);
     }
 
-    public static boolean setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+    public static void setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+
         Setup setup = MarshallUtil.unmarshall(inputStream);
-        return setup(setup);
+        setup(setup);
     }
 
-    public static boolean setup(final Setup setup) {
+    public static void setup(final Setup setup) {
+
+        new Thread(() -> {
+            if (delayMillisecond > 0) {
+                try {
+                    LOG.info(String.format("Deferring configurator execution by %d milliseconds", delayMillisecond));
+                    Thread.sleep(delayMillisecond);
+                } catch (InterruptedException e) {
+                    LOG.error(e);
+                }
+            }
+            if (!dependeciesFilters.isEmpty()) {
+                serviceDependencyManager = new ServiceDependencyManager();
+                serviceDependencyManager.addServiceDependencyListener(new ServiceDependencyListener() {
+
+                    @Override
+                    public void dependenciesFulfilled() {
+
+                        preSetup(setup);
+                    }
+
+                    @Override
+                    public void destroy() {
+                        // ignore
+                    }
+                });
+                dependeciesFilters.stream().map(dependency -> RegistryUtil.getRegistry().getFilter(dependency))
+                                  .forEach(serviceDependencyManager::registerDependencies);
+            } else {
+                preSetup(setup);
+            }
+        }).start();
+    }
+
+    private static void preSetup(final Setup setup) {
 
         try {
             Configuration configuration = setup.getConfiguration();
@@ -93,19 +158,16 @@ public final class LiferaySetup {
             }
 
             setupPortal(setup);
-            return true;
-
         } catch (Exception e) {
             LOG.error("An error occured while executing the portal setup ", e);
-            return false;
-
         } finally {
             PrincipalThreadLocal.setName(null);
             PermissionThreadLocal.setPermissionChecker(null);
         }
     }
 
-    public static void setupPortal(final Setup setup) {
+    private static void setupPortal(final Setup setup) {
+
         long defaultUserId = 0;
         long companyId = PortalUtil.getDefaultCompanyId();
         try {
@@ -123,8 +185,7 @@ public final class LiferaySetup {
         }
 
         if (setup.getDeleteLiferayObjects() != null) {
-            LOG.info("Deleting : " + setup.getDeleteLiferayObjects().getObjectsToBeDeleted().size()
-                    + " objects");
+            LOG.info("Deleting : " + setup.getDeleteLiferayObjects().getObjectsToBeDeleted().size() + " objects");
             deleteObjects(setup.getDeleteLiferayObjects().getObjectsToBeDeleted());
         }
 
@@ -143,17 +204,14 @@ public final class LiferaySetup {
         }
 
         if (setup.getOrganizations() != null) {
-            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size()
-                + " organizations");
-            SetupOrganizations.setupOrganizations(setup.getOrganizations().getOrganization(), null,
-                null);
+            LOG.info("Setting up " + setup.getOrganizations().getOrganization().size() + " organizations");
+            SetupOrganizations.setupOrganizations(setup.getOrganizations().getOrganization(), null, null);
         }
 
         if (setup.getUserGroups() != null) {
             LOG.info("Setting up " + setup.getUserGroups().getUserGroup().size() + " User Groups");
             SetupUserGroups.setupUserGroups(setup.getUserGroups().getUserGroup());
         }
-
 
         if (setup.getPortletPermissions() != null) {
             LOG.info("Setting up " + setup.getPortletPermissions().getPortlet().size() + " roles");
@@ -165,10 +223,8 @@ public final class LiferaySetup {
             SetupSites.setupSites(setup.getSites().getSite(), null);
         }
 
-
         if (setup.getPageTemplates() != null) {
-            SetupPages.setupPageTemplates(setup.getPageTemplates(), groupId, companyId,
-                    defaultUserId);
+            SetupPages.setupPageTemplates(setup.getPageTemplates(), groupId, companyId, defaultUserId);
         }
 
         LOG.info("Setup finished");
@@ -179,20 +235,17 @@ public final class LiferaySetup {
         for (ObjectsToBeDeleted otbd : objectsToBeDeleted) {
 
             if (otbd.getRoles() != null) {
-                List<com.mimacom.liferay.portal.setup.domain.Role> roles = otbd.getRoles()
-                        .getRole();
+                List<com.mimacom.liferay.portal.setup.domain.Role> roles = otbd.getRoles().getRole();
                 SetupRoles.deleteRoles(roles, otbd.getDeleteMethod());
             }
 
             if (otbd.getUsers() != null) {
-                List<com.mimacom.liferay.portal.setup.domain.User> users = otbd.getUsers()
-                        .getUser();
+                List<com.mimacom.liferay.portal.setup.domain.User> users = otbd.getUsers().getUser();
                 SetupUsers.deleteUsers(users, otbd.getDeleteMethod());
             }
 
             if (otbd.getOrganizations() != null) {
-                List<Organization> organizations = otbd
-                        .getOrganizations().getOrganization();
+                List<Organization> organizations = otbd.getOrganizations().getOrganization();
                 SetupOrganizations.deleteOrganization(organizations, otbd.getDeleteMethod());
             }
 
@@ -207,8 +260,9 @@ public final class LiferaySetup {
      * Returns Liferay user, that has Administrator role assigned.
      *
      * @param companyId company ID
-     * @return Liferay {@link com.mimacom.liferay.portal.setup.domain.User}
-     * instance, if no user is found, returns null
+     *
+     * @return Liferay {@link com.mimacom.liferay.portal.setup.domain.User} instance, if no user is found, returns null
+     *
      * @throws Exception if cannot obtain permission checker
      */
     private static User getAdminUser(final long companyId) throws Exception {
@@ -221,17 +275,16 @@ public final class LiferaySetup {
                 return null;
             }
             return adminUsers.get(0);
-
         } catch (PortalException | SystemException e) {
             throw new Exception("Cannot obtain Liferay role for role name: " + ADMIN_ROLE_NAME, e);
         }
     }
 
     /**
-     * Initializes permission checker for Liferay Admin. Used to grant access to
-     * custom fields.
+     * Initializes permission checker for Liferay Admin. Used to grant access to custom fields.
      *
      * @param companyId company ID
+     *
      * @throws Exception if cannot set permission checker
      */
     private static void setAdminPermissionCheckerForThread(final long companyId) throws Exception {
@@ -242,13 +295,13 @@ public final class LiferaySetup {
         try {
             permissionChecker = PermissionCheckerFactoryUtil.create(adminUser);
         } catch (Exception e) {
-            throw new Exception("Cannot obtain permission checker for Liferay Administrator user",
-                    e);
+            throw new Exception("Cannot obtain permission checker for Liferay Administrator user", e);
         }
         PermissionThreadLocal.setPermissionChecker(permissionChecker);
     }
 
     public static long getRunAsUserId() {
+
         return runAsUserId;
     }
 }
