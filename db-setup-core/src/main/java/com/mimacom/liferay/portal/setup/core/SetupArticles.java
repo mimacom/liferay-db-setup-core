@@ -106,7 +106,8 @@ public final class SetupArticles {
         ddmActionsOwner.add(ActionKeys.PERMISSIONS);
 
 
-        DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, ddmActionsOwner);
+        DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.OWNER, ddmActionsOwner);
 
         List<String> actionsUser = new ArrayList<String>();
         actionsUser.add(ActionKeys.VIEW);
