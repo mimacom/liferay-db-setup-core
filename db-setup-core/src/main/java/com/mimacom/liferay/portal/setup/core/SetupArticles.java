@@ -98,15 +98,25 @@ public final class SetupArticles {
         actionsOwner.add(ActionKeys.UPDATE);
         actionsOwner.add(ActionKeys.UPDATE_DISCUSSION);
 
-        DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
+        List<String> ddmActionsOwner = new ArrayList<String>();
+
+        ddmActionsOwner.add(ActionKeys.VIEW);
+        ddmActionsOwner.add(ActionKeys.DELETE);
+        ddmActionsOwner.add(ActionKeys.UPDATE);
+        ddmActionsOwner.add(ActionKeys.PERMISSIONS);
+
+
+        DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, ddmActionsOwner);
 
         List<String> actionsUser = new ArrayList<String>();
         actionsUser.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.USER, actionsUser);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.USER, actionsUser);
 
         List<String> actionsGuest = new ArrayList<String>();
         actionsGuest.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.GUEST, actionsGuest);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.GUEST, actionsGuest);
     }
 
     private SetupArticles() {
@@ -253,7 +263,7 @@ public final class SetupArticles {
             LOG.info("Template successfully updated: " + structure.getName());
 
             SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
-                    ,companyId,ddmStructureSaved.getStructureId(),DDMStructure.class.getName()+"-"+JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_PERMISSIONS);
+                    ,companyId,ddmStructureSaved.getStructureId(),DDMStructure.class.getName()+"-"+JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_DDM_PERMISSIONS);
 
             return;
         }
@@ -263,7 +273,7 @@ public final class SetupArticles {
                 structure.getKey(), nameMap, descMap, ddmForm, ddmFormLayout, "json", 0, new ServiceContext());
 
         SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
-                ,companyId,newStructure.getStructureId(),DDMStructure.class.getName()+ "-" + JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_PERMISSIONS);
+                ,companyId,newStructure.getStructureId(),DDMStructure.class.getName()+ "-" + JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_DDM_PERMISSIONS);
         LOG.info("Added Article structure: " + newStructure.getName());
     }
 
