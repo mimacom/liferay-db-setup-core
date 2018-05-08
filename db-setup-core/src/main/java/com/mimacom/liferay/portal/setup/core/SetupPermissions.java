@@ -177,14 +177,22 @@ public final class SetupPermissions {
     }
 
     public static void updatePermission(final String locationHint, final long groupId,
-                                        final long companyId, final long elementId, final Class clazz,
+            final long companyId, final long elementId, final Class clazz,
+            final RolePermissions rolePermissions,
+            final HashMap<String, List<String>> defaultPermissions) {
+
+            updatePermission(locationHint,groupId,companyId,elementId,clazz.getName(),rolePermissions,defaultPermissions);
+    }
+
+    public static void updatePermission(final String locationHint, final long groupId,
+                                        final long companyId, final long elementId, final String className,
                                         final RolePermissions rolePermissions,
                                         final HashMap<String, List<String>> defaultPermissions) {
         boolean useDefaultPermissions = false;
         if (rolePermissions != null) {
             if (rolePermissions.isClearPermissions()) {
                 try {
-                    SetupPermissions.removePermission(companyId, clazz.getName(),
+                    SetupPermissions.removePermission(companyId, className,
                             Long.toString(elementId));
                 } catch (PortalException e) {
                     LOG.error("Permissions for " + locationHint + " could not be cleared. ", e);
@@ -204,7 +212,7 @@ public final class SetupPermissions {
                         actions.add(actionName);
                     }
                     try {
-                        SetupPermissions.addPermission(roleName, clazz.getName(),
+                        SetupPermissions.addPermission(roleName, className,
                                 Long.toString(elementId),
                                 actions.toArray(new String[actions.size()]));
                     } catch (SystemException e) {
@@ -230,7 +238,7 @@ public final class SetupPermissions {
             for (String r : roles) {
                 actions = defaultPermissions.get(r);
                 try {
-                    SetupPermissions.addPermission(r, clazz.getName(), Long.toString(elementId),
+                    SetupPermissions.addPermission(r, className, Long.toString(elementId),
                             actions.toArray(new String[actions.size()]));
                 } catch (SystemException e) {
                     LOG.error("Permissions for " + r + " for " + locationHint + " could not be "

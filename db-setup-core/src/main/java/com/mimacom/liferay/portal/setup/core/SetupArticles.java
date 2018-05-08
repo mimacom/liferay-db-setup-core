@@ -80,11 +80,13 @@ public final class SetupArticles {
 
     private static final Log LOG = LogFactoryUtil.getLog(SetupArticles.class);
     private static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
+    private static final HashMap<String, List<String>> DEFAULT_DDM_PERMISSIONS;
     private static final int ARTICLE_PUBLISH_YEAR = 2008;
     private static final int MIN_DISPLAY_ROWS = 10;
 
     static {
         DEFAULT_PERMISSIONS = new HashMap<String, List<String>>();
+        DEFAULT_DDM_PERMISSIONS= new HashMap<String, List<String>>();
         List<String> actionsOwner = new ArrayList<String>();
 
         actionsOwner.add(ActionKeys.VIEW);
@@ -118,7 +120,8 @@ public final class SetupArticles {
             long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
             for (Structure structure : articleStructures) {
                 try {
-                    addDDMStructure(structure, groupId, classNameId);
+                    addDDMStructure(structure, groupId, classNameId,companyId);
+
                 } catch (StructureDuplicateStructureKeyException | IOException
                     | URISyntaxException e) {
                     LOG.error(e);
@@ -133,7 +136,7 @@ public final class SetupArticles {
             for (Structure structure : ddlStructures) {
                 LOG.info("Adding DDL structure " + structure.getName());
                 try {
-                    addDDMStructure(structure, groupId, classNameId);
+                    addDDMStructure(structure, groupId, classNameId,companyId);
                 } catch (StructureDuplicateStructureKeyException | IOException
                     | URISyntaxException e) {
                     LOG.error(e);
@@ -187,7 +190,7 @@ public final class SetupArticles {
     }
 
     public static void addDDMStructure(final Structure structure, final long groupId,
-                                       final long classNameId)
+                                       final long classNameId,final long companyId)
             throws SystemException, PortalException, IOException, URISyntaxException {
 
         LOG.info("Adding Article structure " + structure.getName());
@@ -245,15 +248,22 @@ public final class SetupArticles {
                 }
             }
 
-            DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
+            DDMStructure ddmStructureSaved=DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
                     ddmStructure.getParentStructureId(), nameMap, descMap, ddmForm, ddmFormLayout, new ServiceContext());
             LOG.info("Template successfully updated: " + structure.getName());
+
+            SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
+                    ,companyId,ddmStructureSaved.getStructureId(),DDMStructure.class.getName()+"-"+JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_PERMISSIONS);
+
             return;
         }
 
         DDMStructure newStructure = DDMStructureLocalServiceUtil.addStructure(
                 LiferaySetup.getRunAsUserId(), groupId, structure.getParent(), classNameId,
                 structure.getKey(), nameMap, descMap, ddmForm, ddmFormLayout, "json", 0, new ServiceContext());
+
+        SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
+                ,companyId,newStructure.getStructureId(),DDMStructure.class.getName()+ "-" + JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_PERMISSIONS);
         LOG.info("Added Article structure: " + newStructure.getName());
     }
 

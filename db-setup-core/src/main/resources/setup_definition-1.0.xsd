@@ -593,14 +593,17 @@
     </xs:element>
 
     <xs:complexType name="structure">
-        <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="key" use="required" type="xs:string"/>
-        <xs:attribute name="path" use="required" type="xs:string"/>
-        <xs:attribute name="parent" use="optional" type="xs:string"/>
+            <xs:sequence>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="key" use="required" type="xs:string"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="parent" use="optional" type="xs:string"/>
     </xs:complexType>
 
     <xs:element name="article-template">
-        <xs:complexType>
+        <xs:complexType >
             <xs:attribute name="name" type="xs:string"/>
             <xs:attribute name="key" use="required" type="xs:string"/>
             <xs:attribute name="path" use="required" type="xs:string"/>
