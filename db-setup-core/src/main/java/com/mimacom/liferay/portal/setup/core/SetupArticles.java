@@ -61,7 +61,7 @@ import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
 import com.mimacom.liferay.portal.setup.core.util.ResourcesUtil;
 import com.mimacom.liferay.portal.setup.core.util.TaggingUtil;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.FieldMapUtil;
 import com.mimacom.liferay.portal.setup.core.util.WebFolderUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
 
@@ -420,8 +420,8 @@ public final class SetupArticles {
             LOG.error(
                     "Error Reading Article File content for article ID: " + article.getArticleId());
         }
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(article.getTitleTranslation(),
-                groupId, article.getTitle(), " Article with title " + article.getArticleId());
+        Map<Locale, String> titleMap = FieldMapUtil.getTitleMap(article.getTitleTranslation(),
+                                                                groupId, article.getTitle(), " Article with title " + article.getArticleId());
 
         Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
                 LocalizationUtil.getDefaultLanguageId(content));
@@ -429,6 +429,15 @@ public final class SetupArticles {
             titleMap.put(articleDefaultLocale, article.getTitle());
         }
 
+
+        Map<Locale,String> descriptionMap=null;
+        if(article.getArticleDescription()!=null && !article.getArticleDescription().isEmpty()) {
+            descriptionMap=FieldMapUtil.getDescriptionMap(article.getDescriptionTranslation(), groupId, article.getArticleDescription(), " Article with description " +
+                                                                                                                          article.getArticleId());
+            if (!descriptionMap.containsKey(articleDefaultLocale)) {
+                descriptionMap.put(articleDefaultLocale, article.getArticleDescription());
+            }
+        }
         ServiceContext serviceContext = new ServiceContext();
         serviceContext.setScopeGroupId(groupId);
 
@@ -452,7 +461,7 @@ public final class SetupArticles {
                 journalArticle = JournalArticleLocalServiceUtil.addArticle(
                         LiferaySetup.getRunAsUserId(), groupId, folderId, 0, 0,
                         article.getArticleId(), generatedId,
-                        JournalArticleConstants.VERSION_DEFAULT, titleMap, null, content,
+                        JournalArticleConstants.VERSION_DEFAULT, titleMap, descriptionMap, content,
                         article.getArticleStructureKey(), article.getArticleTemplateKey(),
                         StringPool.BLANK, 1, 1, ARTICLE_PUBLISH_YEAR, 0, 0, 0, 0, 0, 0, 0, true, 0,
                         0, 0, 0, 0, true, true, false, StringPool.BLANK, null, null,
@@ -469,6 +478,7 @@ public final class SetupArticles {
                         + article.getArticleId() + " already exists. Will be overwritten.");
                 journalArticle.setTitleMap(titleMap);
                 journalArticle.setContent(content);
+                journalArticle.setDescriptionMap(descriptionMap);
 
                 JournalArticleLocalServiceUtil.updateJournalArticle(journalArticle);
 
@@ -479,9 +489,10 @@ public final class SetupArticles {
                 }
                 LOG.info("Updated JournalArticle: " + journalArticle.getTitle());
             }
-            TaggingUtil.associateTags(groupId, article, journalArticle);
+            TaggingUtil.associateTagsAndCategories(groupId, article, journalArticle);
             processRelatedAssets(article, journalArticle, LiferaySetup.getRunAsUserId(), groupId,
                     companyId);
+
             SetupPermissions.updatePermission("Article " + journalArticle.getArticleId(), groupId,
                     companyId, journalArticle.getResourcePrimKey(), JournalArticle.class,
                     article.getRolePermissions(), DEFAULT_PERMISSIONS);

@@ -38,12 +38,11 @@ import com.liferay.portal.kernel.model.ClassName;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portlet.asset.util.AssetVocabularySettingsHelper;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.FieldMapUtil;
 import com.mimacom.liferay.portal.setup.domain.AssociatedAssetType;
 import com.mimacom.liferay.portal.setup.domain.Category;
 import com.mimacom.liferay.portal.setup.domain.Site;
@@ -87,7 +86,7 @@ public final class SetupCategorization {
 
         LOG.info("Setting up vocabulary with name: " + vocabulary.getName());
 
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(vocabulary.getTitleTranslation(), groupId, vocabulary.getName(), "");
+        Map<Locale, String> titleMap = FieldMapUtil.getTitleMap(vocabulary.getTitleTranslation(), groupId, vocabulary.getName(), "");
 
         Map<Locale, String> descMap = new HashMap<>();
         descMap.put(defaultLocale, vocabulary.getDescription());
@@ -212,7 +211,7 @@ public final class SetupCategorization {
 
         LOG.info("Setting up category with name:" + category.getName());
 
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(category.getTitleTranslation(), groupId, category.getName(),
+        Map<Locale, String> titleMap = FieldMapUtil.getTitleMap(category.getTitleTranslation(), groupId, category.getName(),
             "Category with name: " + category.getName());
         Map<Locale, String> descMap = new HashMap<>();
         String description = category.getDescription();
