@@ -91,7 +91,7 @@ public final class SetupUsers {
     private static void setCustomFields(final long runAsUser, final long groupId,
             final long company, final User liferayUser,
             final com.mimacom.liferay.portal.setup.domain.User user) {
-        Class clazz = liferayUser.getClass();
+        Class clazz = User.class;
         for (CustomFieldSetting cfs : user.getCustomFieldSetting()) {
             String resolverHint = "Custom value for user " + user.getScreenName() + ", "
                     + user.getEmailAddress() + "" + " Key " + cfs.getKey() + ", value "
