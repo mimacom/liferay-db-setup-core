@@ -42,7 +42,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.mimacom.liferay.portal.setup.core.util.PortletConstants;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.FieldMapUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
 
 import java.util.HashMap;
@@ -95,7 +95,7 @@ public class SetupSites {
 
                     liferayGroup = GroupLocalServiceUtil.addGroup(
                             defaultUserId, GroupConstants.DEFAULT_PARENT_GROUP_ID, Group.class.getName(),
-                            0, 0, TitleMapUtil.getLocalizationMap(site.getName()), null, GroupConstants.TYPE_SITE_RESTRICTED, true, GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, site.getSiteFriendlyUrl(), true, true, serviceContext);
+                            0, 0, FieldMapUtil.getLocalizationMap(site.getName()), null, GroupConstants.TYPE_SITE_RESTRICTED, true, GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, site.getSiteFriendlyUrl(), true, true, serviceContext);
                     LOG.info("New Organization created. Group ID: " + groupId);
                 } else {
                     LOG.info("Setup: Updating " + site.getName());

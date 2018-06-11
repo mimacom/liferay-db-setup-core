@@ -37,8 +37,10 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.Validator;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.domain.Article;
+import com.mimacom.liferay.portal.setup.domain.Category;
 import com.mimacom.liferay.portal.setup.domain.Tag;
 
 import java.util.List;
@@ -49,15 +51,21 @@ public final class TaggingUtil {
     private TaggingUtil() {
     }
 
-    public static void associateTags(long groupId, Article article, JournalArticle journalArticle) throws PortalException {
+    public static void associateTagsAndCategories(long groupId, Article article, JournalArticle journalArticle) throws PortalException {
 
         List<Tag> tags = article.getTag();
         String[] tagNames = null;
         if (tags != null) {
             tagNames = tags.stream().map(Tag::getName).toArray(String[]::new);
         }
+
+        long[] categoryIds=article.getCategory().stream().map(category -> ResolverUtil.lookupAll(LiferaySetup.getRunAsUserId(), groupId, journalArticle.getCompanyId(),
+                                                                              category.getId(), article.getPath())).filter(categoryString-> Validator.isNumber(categoryString))
+                                                                                .mapToLong(categoryString->Long.parseLong(categoryString)).toArray();
+
+
         AssetEntry entry = AssetEntryLocalServiceUtil.getEntry(JournalArticle.class.getName(), journalArticle.getResourcePrimKey());
-        AssetEntryLocalServiceUtil.updateEntry(LiferaySetup.getRunAsUserId(), groupId, JournalArticle.class.getName(), entry.getClassPK(), null, tagNames);
+        AssetEntryLocalServiceUtil.updateEntry(LiferaySetup.getRunAsUserId(), groupId, JournalArticle.class.getName(), entry.getClassPK(), categoryIds, tagNames);
     }
 
     /*

@@ -26,7 +26,11 @@ package com.mimacom.liferay.portal.setup.core.util;
  * #L%
  */
 
+import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.model.AssetVocabulary;
+import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
+import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.service.DDLRecordSetLocalServiceUtil;
@@ -75,10 +79,10 @@ public final class ResolverUtil {
     private static final String CLASS_ID_BY_NAME = "{{$CLASS-ID-BY-NAME=";
     private static final String PAGE_ID_BY_FRIENDLY_URL = "{{$%%PTYPE%%-PAGE-%%LAYOUTID%%-BY-FRIENDLY_URL=";
     private static final String DDL_REC_SET_BY_KEY = "{{$DDL-REC-SET-ID-BY-KEY=";
-
+    private static final String TEMPLATE_CATEGORY = "{{$CATEGORY-ID-BY-VOCABULARY-AND-PATH=";
     private static final String DEFAULT_GROUP_NAME = "Guest";
     private static final String ID_OF_SITE_WITH_NAME_KEY = "{{$ID_OF_SITE_WITH_NAME=";
-
+    private static final String VALUE_SPLIT = "::";
     private static final String ID_OF_ORG_USER_GROUP_WITH_NAME_KEY = "{{$%%IDTYPE%%_OF_%%LOOKUPTYPE%%_WITH_NAME=";
 
     // CHECKSTYLE:ON
@@ -172,6 +176,9 @@ public final class ResolverUtil {
         // ID for ADT
         retVal = ResolverUtil.lookupStructureOrTemplateIdWithKey(retVal, resolverHint, groupId,
                 company, false, "ADT", true, AssetEntry.class);
+
+        //Resolve categories
+        retVal=ResolverUtil.substituteCategoryNameWithCategoryId(retVal,resolverHint,groupId,company,runAsUserId);
 
         // Substitute the article key with the primary key (id)
         retVal = ResolverUtil.lookupArticleWithArticleId(retVal, resolverHint, groupId, company,
@@ -368,6 +375,54 @@ public final class ResolverUtil {
             }
             pos = result.indexOf(openingTag, pos + 1);
         }
+        return result;
+    }
+    public static String substituteCategoryNameWithCategoryId(final String content,
+            final String locationHint, final long groupId, final long company,
+            final long userId) {
+        String openingTag = TEMPLATE_CATEGORY;
+
+        String result=content;
+
+        if (result.startsWith(openingTag)){
+
+            String[] values=result.replace(CLOSING_TAG,"").split("::");
+            if(values.length==4) {
+                long groupIdResolved=groupId;
+
+                try {
+                    groupIdResolved=ResolverUtil.getSiteGroupIdByName(values[1], company, locationHint);
+
+                    try {
+                        AssetVocabulary assetVocabulary = AssetVocabularyLocalServiceUtil.getGroupVocabulary(groupIdResolved, values[2]);
+
+                        String[] categoryIds=values[3].split("/");
+
+                        try {
+                            AssetCategory category= assetVocabulary.getCategories().stream().filter(vocabularyCategory->vocabularyCategory.getName().equals(categoryIds[0])).findFirst().orElseThrow(PortalException::new);
+
+                            for (int i = 1; i < categoryIds.length; i++) {
+                                String categoryName=categoryIds[i];
+                                category=AssetCategoryLocalServiceUtil.getChildCategories(category.getCategoryId()).stream().filter(childrenCategory->childrenCategory.getName().equals(categoryName)).findFirst().orElseThrow(PortalException::new);
+                            }
+                            return String.valueOf(category.getCategoryId());
+                        }catch (PortalException e){
+                            LOG.error("Could not resolve category path for " + locationHint, e);
+                        }
+                    }catch (PortalException e){
+                        LOG.error("Could not resolve vocabulary name for " + locationHint, e);
+                    }
+
+                }catch(Exception e){
+                    LOG.error("Could not resolve site name for " +locationHint , e);
+                }
+            }else{
+                LOG.error("Categories to be susbstited is not in correct format : SiteName::Vocabulary::CategoriesPath");
+            }
+
+        }
+
+
         return result;
     }
 
