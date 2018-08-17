@@ -52,10 +52,7 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.LocalizationUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.*;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
@@ -350,7 +347,9 @@ public final class SetupArticles {
 
         LOG.info("Adding ADT " + template.getName());
         long classNameId = PortalUtil.getClassNameId(template.getClassName());
-        long resourceClassnameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
+
+        long resourceClassnameId = Validator.isBlank(template.getResourceClassName()) ? ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class)
+                                                                                      : ClassNameLocalServiceUtil.getClassNameId(template.getResourceClassName());
 
         Map<Locale, String> nameMap = new HashMap<Locale, String>();
 
