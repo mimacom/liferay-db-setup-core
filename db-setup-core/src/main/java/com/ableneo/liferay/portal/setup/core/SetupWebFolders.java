@@ -33,8 +33,8 @@ import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.ableneo.liferay.portal.setup.LiferaySetup;
 import com.ableneo.liferay.portal.setup.core.util.WebFolderUtil;
-import com.mimacom.liferay.portal.setup.domain.ArticleFolder;
-import com.mimacom.liferay.portal.setup.domain.Site;
+import com.ableneo.liferay.portal.setup.domain.ArticleFolder;
+import com.ableneo.liferay.portal.setup.domain.Site;
 
 import java.util.ArrayList;
 import java.util.HashMap;

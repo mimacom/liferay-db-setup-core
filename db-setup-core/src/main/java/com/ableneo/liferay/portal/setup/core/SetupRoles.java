@@ -41,9 +41,9 @@ import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.ableneo.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.domain.DefinePermission;
-import com.mimacom.liferay.portal.setup.domain.DefinePermissions;
-import com.mimacom.liferay.portal.setup.domain.PermissionAction;
+import com.ableneo.liferay.portal.setup.domain.DefinePermission;
+import com.ableneo.liferay.portal.setup.domain.DefinePermissions;
+import com.ableneo.liferay.portal.setup.domain.PermissionAction;
 
 import java.util.*;
 
@@ -60,9 +60,9 @@ public final class SetupRoles {
 
     }
 
-    public static void setupRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles, long runAsUserId, long groupId, long company) {
+    public static void setupRoles(final List<com.ableneo.liferay.portal.setup.domain.Role> roles, long runAsUserId, long groupId, long company) {
 
-        for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
+        for (com.ableneo.liferay.portal.setup.domain.Role role : roles) {
             try {
                 RoleLocalServiceUtil.getRole(COMPANY_ID, role.getName());
                 LOG.info("Setup: Role " + role.getName() + " already exist, not creating...");
@@ -76,7 +76,7 @@ public final class SetupRoles {
         }
     }
 
-    private static void addRole(final com.mimacom.liferay.portal.setup.domain.Role role) {
+    private static void addRole(final com.ableneo.liferay.portal.setup.domain.Role role) {
 
         Map<Locale, String> localeTitleMap = new HashMap<>();
         localeTitleMap.put(Locale.ENGLISH, role.getName());
@@ -103,12 +103,12 @@ public final class SetupRoles {
 
     }
 
-    public static void deleteRoles(final List<com.mimacom.liferay.portal.setup.domain.Role> roles,
+    public static void deleteRoles(final List<com.ableneo.liferay.portal.setup.domain.Role> roles,
                                    final String deleteMethod) {
 
         switch (deleteMethod) {
             case "excludeListed":
-                Map<String, com.mimacom.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
+                Map<String, com.ableneo.liferay.portal.setup.domain.Role> toBeDeletedRoles = convertRoleListToHashMap(
                         roles);
                 try {
                     for (Role role : RoleLocalServiceUtil.getRoles(-1, -1)) {
@@ -130,7 +130,7 @@ public final class SetupRoles {
                 break;
 
             case "onlyListed":
-                for (com.mimacom.liferay.portal.setup.domain.Role role : roles) {
+                for (com.ableneo.liferay.portal.setup.domain.Role role : roles) {
                     String name = role.getName();
                     try {
                         RoleLocalServiceUtil.deleteRole(RoleLocalServiceUtil.getRole(COMPANY_ID, name));
@@ -152,7 +152,7 @@ public final class SetupRoles {
 
     }
 
-    private static void addRolePermissions(com.mimacom.liferay.portal.setup.domain.Role role, long runAsUserId, long groupId, long companyId) {
+    private static void addRolePermissions(com.ableneo.liferay.portal.setup.domain.Role role, long runAsUserId, long groupId, long companyId) {
         if (role.getDefinePermissions() != null) {
             String siteName = role.getSite();
             if (siteName != null && !siteName.equals("")) {
@@ -227,11 +227,11 @@ public final class SetupRoles {
 
     }
 
-    private static Map<String, com.mimacom.liferay.portal.setup.domain.Role> convertRoleListToHashMap(
-            final List<com.mimacom.liferay.portal.setup.domain.Role> objects) {
+    private static Map<String, com.ableneo.liferay.portal.setup.domain.Role> convertRoleListToHashMap(
+            final List<com.ableneo.liferay.portal.setup.domain.Role> objects) {
 
-        HashMap<String, com.mimacom.liferay.portal.setup.domain.Role> map = new HashMap<>();
-        for (com.mimacom.liferay.portal.setup.domain.Role role : objects) {
+        HashMap<String, com.ableneo.liferay.portal.setup.domain.Role> map = new HashMap<>();
+        for (com.ableneo.liferay.portal.setup.domain.Role role : objects) {
             map.put(role.getName(), role);
         }
         return map;

@@ -43,8 +43,8 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.ableneo.liferay.portal.setup.LiferaySetup;
 import com.ableneo.liferay.portal.setup.core.util.CustomFieldSettingUtil;
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
-import com.mimacom.liferay.portal.setup.domain.Site;
+import com.ableneo.liferay.portal.setup.domain.CustomFieldSetting;
+import com.ableneo.liferay.portal.setup.domain.Site;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,11 +61,11 @@ public final class SetupOrganizations {
     }
 
     public static void setupOrganizations(
-            final List<com.mimacom.liferay.portal.setup.domain.Organization> organizations,
+            final List<com.ableneo.liferay.portal.setup.domain.Organization> organizations,
             final Organization parentOrg, final Group parentGroup) {
             final long userId = LiferaySetup.getRunAsUserId();
 
-        for (com.mimacom.liferay.portal.setup.domain.Organization organization : organizations) {
+        for (com.ableneo.liferay.portal.setup.domain.Organization organization : organizations) {
             try {
                 Organization liferayOrg = null;
                 Group liferayGroup = null;
@@ -168,7 +168,7 @@ public final class SetupOrganizations {
 
                 }
 
-                List<com.mimacom.liferay.portal.setup.domain.Organization> orgs = organization
+                List<com.ableneo.liferay.portal.setup.domain.Organization> orgs = organization
                         .getOrganization();
                 setupOrganizations(orgs, liferayOrg, liferayGroup);
 
@@ -180,7 +180,7 @@ public final class SetupOrganizations {
     }
 
     private static void setCustomFields(final long runAsUserId, final long groupId,
-                                        final long company, final com.mimacom.liferay.portal.setup.domain.Organization org,
+                                        final long company, final com.ableneo.liferay.portal.setup.domain.Organization org,
                                         final Organization liferayOrg) {
 
             Class clazz = Organization.class;
@@ -197,12 +197,12 @@ public final class SetupOrganizations {
     }
 
     public static void deleteOrganization(
-            final List<com.mimacom.liferay.portal.setup.domain.Organization> organizations,
+            final List<com.ableneo.liferay.portal.setup.domain.Organization> organizations,
             final String deleteMethod) {
 
         switch (deleteMethod) {
             case "excludeListed":
-                Map<String, com.mimacom.liferay.portal.setup.domain.Organization> toBeDeletedOrganisations = convertOrganisationListToHashMap(
+                Map<String, com.ableneo.liferay.portal.setup.domain.Organization> toBeDeletedOrganisations = convertOrganisationListToHashMap(
                         organizations);
                 try {
                     for (Organization organisation : OrganizationLocalServiceUtil
@@ -223,7 +223,7 @@ public final class SetupOrganizations {
                 break;
 
             case "onlyListed":
-                for (com.mimacom.liferay.portal.setup.domain.Organization organisation : organizations) {
+                for (com.ableneo.liferay.portal.setup.domain.Organization organisation : organizations) {
                     String name = organisation.getName();
                     try {
                         Organization o = OrganizationLocalServiceUtil.getOrganization(COMPANY_ID, name);
@@ -253,11 +253,11 @@ public final class SetupOrganizations {
         }
     }
 
-    private static Map<String, com.mimacom.liferay.portal.setup.domain.Organization> convertOrganisationListToHashMap(
-            final List<com.mimacom.liferay.portal.setup.domain.Organization> objects) {
+    private static Map<String, com.ableneo.liferay.portal.setup.domain.Organization> convertOrganisationListToHashMap(
+            final List<com.ableneo.liferay.portal.setup.domain.Organization> objects) {
 
-        HashMap<String, com.mimacom.liferay.portal.setup.domain.Organization> map = new HashMap<>();
-        for (com.mimacom.liferay.portal.setup.domain.Organization organization : objects) {
+        HashMap<String, com.ableneo.liferay.portal.setup.domain.Organization> map = new HashMap<>();
+        for (com.ableneo.liferay.portal.setup.domain.Organization organization : objects) {
             map.put(organization.getName(), organization);
         }
         return map;

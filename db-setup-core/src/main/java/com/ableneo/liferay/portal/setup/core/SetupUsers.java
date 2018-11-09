@@ -41,7 +41,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.ableneo.liferay.portal.setup.core.util.CustomFieldSettingUtil;
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
+import com.ableneo.liferay.portal.setup.domain.CustomFieldSetting;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -59,10 +59,10 @@ public final class SetupUsers {
 
     }
 
-    public static void setupUsers(final List<com.mimacom.liferay.portal.setup.domain.User> users,
+    public static void setupUsers(final List<com.ableneo.liferay.portal.setup.domain.User> users,
             final long runAsUser, final long groupId) {
 
-        for (com.mimacom.liferay.portal.setup.domain.User user : users) {
+        for (com.ableneo.liferay.portal.setup.domain.User user : users) {
             User liferayUser = null;
             try {
                 liferayUser = UserLocalServiceUtil.getUserByEmailAddress(COMPANY_ID,
@@ -91,7 +91,7 @@ public final class SetupUsers {
 
     private static void setCustomFields(final long runAsUser, final long groupId,
             final long company, final User liferayUser,
-            final com.mimacom.liferay.portal.setup.domain.User user) {
+            final com.ableneo.liferay.portal.setup.domain.User user) {
         Class clazz = liferayUser.getClass();
         for (CustomFieldSetting cfs : user.getCustomFieldSetting()) {
             String resolverHint = "Custom value for user " + user.getScreenName() + ", "
@@ -102,7 +102,7 @@ public final class SetupUsers {
         }
     }
 
-    private static User addUser(final com.mimacom.liferay.portal.setup.domain.User setupUser) {
+    private static User addUser(final com.ableneo.liferay.portal.setup.domain.User setupUser) {
 
         LOG.info("User " + setupUser.getEmailAddress() + " not exists, creating...");
 
@@ -148,10 +148,10 @@ public final class SetupUsers {
     }
 
     private static void addUserToOrganizations(
-        final com.mimacom.liferay.portal.setup.domain.User setupUser, final User liferayUser) {
+        final com.ableneo.liferay.portal.setup.domain.User setupUser, final User liferayUser) {
 
         try {
-            for (com.mimacom.liferay.portal.setup.domain.Organization organization : setupUser
+            for (com.ableneo.liferay.portal.setup.domain.Organization organization : setupUser
                     .getOrganization()) {
                 Organization liferayOrganization = OrganizationLocalServiceUtil
                         .getOrganization(COMPANY_ID, organization.getName());
@@ -166,11 +166,11 @@ public final class SetupUsers {
 
     }
 
-    private static void addRolesToUser(final com.mimacom.liferay.portal.setup.domain.User setupUser,
+    private static void addRolesToUser(final com.ableneo.liferay.portal.setup.domain.User setupUser,
             final User liferayUser) {
 
         try {
-            for (com.mimacom.liferay.portal.setup.domain.Role userRole : setupUser.getRole()) {
+            for (com.ableneo.liferay.portal.setup.domain.Role userRole : setupUser.getRole()) {
 
                 Role role = RoleLocalServiceUtil.getRole(COMPANY_ID, userRole.getName());
                 long[] roleIds = {role.getRoleId()};
@@ -207,13 +207,13 @@ public final class SetupUsers {
      * listed in the setup.xml. from security reasons, no administrators, or
      * default users are deleted
      */
-    public static void deleteUsers(final List<com.mimacom.liferay.portal.setup.domain.User> users,
+    public static void deleteUsers(final List<com.ableneo.liferay.portal.setup.domain.User> users,
             final String deleteMethod) {
 
         switch (deleteMethod) {
         case "excludeListed":
 
-            Map<String, com.mimacom.liferay.portal.setup.domain.User> usersMap = convertUserListToHashMap(
+            Map<String, com.ableneo.liferay.portal.setup.domain.User> usersMap = convertUserListToHashMap(
                     users);
             try {
                 List<User> allUsers = UserLocalServiceUtil.getUsers(-1, -1);
@@ -238,7 +238,7 @@ public final class SetupUsers {
             break;
 
         case "onlyListed":
-            for (com.mimacom.liferay.portal.setup.domain.User user : users) {
+            for (com.ableneo.liferay.portal.setup.domain.User user : users) {
                 try {
                     String email = user.getEmailAddress();
                     User u = UserLocalServiceUtil.getUserByEmailAddress(COMPANY_ID, email);
@@ -257,11 +257,11 @@ public final class SetupUsers {
         }
     }
 
-    private static Map<String, com.mimacom.liferay.portal.setup.domain.User> convertUserListToHashMap(
-            final List<com.mimacom.liferay.portal.setup.domain.User> objects) {
+    private static Map<String, com.ableneo.liferay.portal.setup.domain.User> convertUserListToHashMap(
+            final List<com.ableneo.liferay.portal.setup.domain.User> objects) {
 
-        HashMap<String, com.mimacom.liferay.portal.setup.domain.User> map = new HashMap<>();
-        for (com.mimacom.liferay.portal.setup.domain.User user : objects) {
+        HashMap<String, com.ableneo.liferay.portal.setup.domain.User> map = new HashMap<>();
+        for (com.ableneo.liferay.portal.setup.domain.User user : objects) {
             map.put(user.getEmailAddress(), user);
         }
         return map;

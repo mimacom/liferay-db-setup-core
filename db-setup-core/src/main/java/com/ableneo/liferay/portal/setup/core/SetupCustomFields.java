@@ -37,8 +37,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.*;
-import com.mimacom.liferay.portal.setup.domain.CustomFields;
-import com.mimacom.liferay.portal.setup.domain.RolePermission;
+import com.ableneo.liferay.portal.setup.domain.CustomFields;
+import com.ableneo.liferay.portal.setup.domain.RolePermission;
 
 import java.io.Serializable;
 import java.text.DateFormat;

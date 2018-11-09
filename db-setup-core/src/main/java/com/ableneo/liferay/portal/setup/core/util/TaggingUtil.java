@@ -39,8 +39,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.mimacom.liferay.portal.setup.domain.Article;
-import com.mimacom.liferay.portal.setup.domain.Tag;
+import com.ableneo.liferay.portal.setup.domain.Article;
+import com.ableneo.liferay.portal.setup.domain.Tag;
 
 import java.util.List;
 

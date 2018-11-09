@@ -29,8 +29,8 @@ package com.ableneo.liferay.portal.setup;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.mimacom.liferay.portal.setup.domain.ObjectFactory;
-import com.mimacom.liferay.portal.setup.domain.Setup;
+import com.ableneo.liferay.portal.setup.domain.ObjectFactory;
+import com.ableneo.liferay.portal.setup.domain.Setup;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

@@ -64,7 +64,7 @@ import com.ableneo.liferay.portal.setup.core.util.ResourcesUtil;
 import com.ableneo.liferay.portal.setup.core.util.TaggingUtil;
 import com.ableneo.liferay.portal.setup.core.util.TitleMapUtil;
 import com.ableneo.liferay.portal.setup.core.util.WebFolderUtil;
-import com.mimacom.liferay.portal.setup.domain.*;
+import com.ableneo.liferay.portal.setup.domain.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

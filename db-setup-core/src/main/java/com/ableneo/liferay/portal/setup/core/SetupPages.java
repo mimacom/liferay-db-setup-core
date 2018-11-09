@@ -48,9 +48,9 @@ import com.ableneo.liferay.portal.setup.LiferaySetup;
 import com.ableneo.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.ableneo.liferay.portal.setup.core.util.ResolverUtil;
 import com.ableneo.liferay.portal.setup.core.util.TitleMapUtil;
-import com.mimacom.liferay.portal.setup.domain.*;
-import com.mimacom.liferay.portal.setup.domain.Organization;
-import com.mimacom.liferay.portal.setup.domain.Theme;
+import com.ableneo.liferay.portal.setup.domain.*;
+import com.ableneo.liferay.portal.setup.domain.Organization;
+import com.ableneo.liferay.portal.setup.domain.Theme;
 
 import javax.portlet.ReadOnlyException;
 import javax.portlet.ValidatorException;

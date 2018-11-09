@@ -40,10 +40,10 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.ableneo.liferay.portal.setup.LiferaySetup;
 import com.ableneo.liferay.portal.setup.core.util.CustomFieldSettingUtil;
-import com.mimacom.liferay.portal.setup.domain.CustomFieldSetting;
-import com.mimacom.liferay.portal.setup.domain.Role;
-import com.mimacom.liferay.portal.setup.domain.UserAsMember;
-import com.mimacom.liferay.portal.setup.domain.UserGroup;
+import com.ableneo.liferay.portal.setup.domain.CustomFieldSetting;
+import com.ableneo.liferay.portal.setup.domain.Role;
+import com.ableneo.liferay.portal.setup.domain.UserAsMember;
+import com.ableneo.liferay.portal.setup.domain.UserGroup;
 import java.util.List;
 import java.util.Objects;
 

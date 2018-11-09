@@ -44,7 +44,7 @@ import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.ableneo.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.ableneo.liferay.portal.setup.core.util.PortletConstants;
-import com.mimacom.liferay.portal.setup.domain.*;
+import com.ableneo.liferay.portal.setup.domain.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,10 +64,10 @@ public class SetupSites {
 
     }
 
-    public static void setupSites(final List<com.mimacom.liferay.portal.setup.domain.Site> groups, final Group parentGroup) {
+    public static void setupSites(final List<com.ableneo.liferay.portal.setup.domain.Site> groups, final Group parentGroup) {
 
         CompanyThreadLocal.setCompanyId(COMPANY_ID);
-        for (com.mimacom.liferay.portal.setup.domain.Site site : groups) {
+        for (com.ableneo.liferay.portal.setup.domain.Site site : groups) {
             try {
                 Group liferayGroup = null;
                 long groupId = -1;
@@ -152,7 +152,7 @@ public class SetupSites {
                 // Users and Groups should be referenced to live Group
                 setMembership(site.getMembership(), COMPANY_ID, liferayGroup.getGroupId());
 
-                List<com.mimacom.liferay.portal.setup.domain.Site> sites = site
+                List<com.ableneo.liferay.portal.setup.domain.Site> sites = site
                         .getSite();
                 setupSites(sites, liferayGroup);
 
@@ -336,7 +336,7 @@ public class SetupSites {
     }
 
     public static void deleteSite(
-            final List<com.mimacom.liferay.portal.setup.domain.Site> sites,
+            final List<com.ableneo.liferay.portal.setup.domain.Site> sites,
             final String deleteMethod) {
 
         switch (deleteMethod) {
@@ -356,7 +356,7 @@ public class SetupSites {
                 break;
 
             case "onlyListed":
-                for (com.mimacom.liferay.portal.setup.domain.Site site : sites) {
+                for (com.ableneo.liferay.portal.setup.domain.Site site : sites) {
                     String name = site.getName();
                     try {
                         com.liferay.portal.kernel.model.Group o = GroupLocalServiceUtil.getGroup(COMPANY_ID, name);
@@ -395,11 +395,11 @@ public class SetupSites {
         }
     }
 
-    private static Map<String, com.mimacom.liferay.portal.setup.domain.Site> convertSiteListToHashMap(
-            final List<com.mimacom.liferay.portal.setup.domain.Site> objects) {
+    private static Map<String, com.ableneo.liferay.portal.setup.domain.Site> convertSiteListToHashMap(
+            final List<com.ableneo.liferay.portal.setup.domain.Site> objects) {
 
         HashMap<String, Site> map = new HashMap<>();
-        for (com.mimacom.liferay.portal.setup.domain.Site site : objects) {
+        for (com.ableneo.liferay.portal.setup.domain.Site site : objects) {
             map.put(site.getName(), site);
         }
         return map;

@@ -39,7 +39,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.mimacom.liferay.portal.setup.domain.*;
+import com.ableneo.liferay.portal.setup.domain.*;
 
 import java.util.*;
 

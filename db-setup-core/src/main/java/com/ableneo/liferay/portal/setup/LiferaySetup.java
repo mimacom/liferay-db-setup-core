@@ -43,8 +43,8 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.mimacom.liferay.portal.setup.core.*;
-import com.mimacom.liferay.portal.setup.domain.*;
+import com.ableneo.liferay.portal.setup.core.*;
+import com.ableneo.liferay.portal.setup.domain.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -181,13 +181,13 @@ public final class LiferaySetup {
         for (ObjectsToBeDeleted otbd : objectsToBeDeleted) {
 
             if (otbd.getRoles() != null) {
-                List<com.mimacom.liferay.portal.setup.domain.Role> roles = otbd.getRoles()
+                List<com.ableneo.liferay.portal.setup.domain.Role> roles = otbd.getRoles()
                         .getRole();
                 SetupRoles.deleteRoles(roles, otbd.getDeleteMethod());
             }
 
             if (otbd.getUsers() != null) {
-                List<com.mimacom.liferay.portal.setup.domain.User> users = otbd.getUsers()
+                List<com.ableneo.liferay.portal.setup.domain.User> users = otbd.getUsers()
                         .getUser();
                 SetupUsers.deleteUsers(users, otbd.getDeleteMethod());
             }
@@ -209,7 +209,7 @@ public final class LiferaySetup {
      * Returns Liferay user, that has Administrator role assigned.
      *
      * @param companyId company ID
-     * @return Liferay {@link com.mimacom.liferay.portal.setup.domain.User}
+     * @return Liferay {@link com.ableneo.liferay.portal.setup.domain.User}
      * instance, if no user is found, returns null
      * @throws Exception if cannot obtain permission checker
      */

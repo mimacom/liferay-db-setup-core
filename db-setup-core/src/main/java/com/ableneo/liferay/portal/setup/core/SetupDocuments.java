@@ -38,8 +38,8 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.ableneo.liferay.portal.setup.core.util.FolderUtil;
 import com.ableneo.liferay.portal.setup.core.util.ResourcesUtil;
-import com.mimacom.liferay.portal.setup.domain.Document;
-import com.mimacom.liferay.portal.setup.domain.Site;
+import com.ableneo.liferay.portal.setup.domain.Document;
+import com.ableneo.liferay.portal.setup.domain.Site;
 
 import java.io.IOException;
 import java.util.ArrayList;
