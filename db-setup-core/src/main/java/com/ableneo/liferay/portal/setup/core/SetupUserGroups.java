@@ -4,7 +4,8 @@ package com.ableneo.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Original work Copyright (C) 2016 - 2018 mimacom ag  * Modified work Copyright (C) 2018 - 2020 ableneo, s. r. o.
+ * Original work Copyright (C) 2016 - 2018 mimacom ag
+ * Modified work Copyright (C) 2018 - 2020 ableneo, s. r. o.
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

@@ -184,7 +184,7 @@ public final class DocumentUtil {
         if (fileEntry == null) {
             try {
                 fileEntry = DLAppLocalServiceUtil.addFileEntry(userId, repoId, folderId, fname,
-                        mtype, title, title, "Ableneo import", content, new ServiceContext());
+                        mtype, title, title, "Mimacom import", content, new ServiceContext());
             } catch (PortalException e) {
                 LOG.error("Error while trying to add file entry: " + title, e);
             } catch (SystemException e) {
