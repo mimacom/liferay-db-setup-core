@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.mimacom.liferay</groupId>
+  <groupId>com.ableneo.liferay</groupId>
   <artifactId>build-parent</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
@@ -12,16 +12,5 @@
   <modules>
     <module>db-setup-core</module>
   </modules>
-
-  <distributionManagement>
-    <repository>
-      <id>mimacom-repo-id-deploy-open</id>
-      <url>${mimacom-deploy-path-releases-open}</url>
-    </repository>
-    <snapshotRepository>
-      <id>mimacom-repo-id-deploy-open</id>
-      <url>${mimacom-deploy-path-snapshots-open}</url>
-    </snapshotRepository>
-  </distributionManagement>
 
 </project>
