@@ -1,4 +1,4 @@
-# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/mimacom/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/mimacom/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/mimacom/liferay-db-setup-core.png)](https://gitter.im/mimacom/liferay-db-setup-core)
+# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/ableneo/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/ableneo/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/ableneo/liferay-db-setup-core.png)](https://gitter.im/ableneo/liferay-db-setup-core)
 Library that allows to setup a number of Liferay artifacts in the DB. It uses xml configuration and Liferay APIs to add all configured artifacts.
 
 # Usage
@@ -12,17 +12,17 @@ We didn't publish binary yet so you'll need to build the jar yourself. Here are 
 1. grab jar from <code>db-setup-core/target</code> or use as a dependency in your maven project
 ```xml
 <dependency>
-    <groupId>com.mimacom.liferay</groupId>
+    <groupId>com.ableneo.liferay</groupId>
     <artifactId>db-setup-core</artifactId>
     <version>2.1.2</version>
 </dependency>
 ```
 
 ## Integration
-Run <code>com.mimacom.liferay.portal.setup.LiferaySetup#setup(java.io.File)</code> with following xml configuration:
+Run <code>com.ableneo.liferay.portal.setup.LiferaySetup#setup(java.io.File)</code> with following xml configuration:
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
-<setup xmlns="http://www.mimacom.com/liferay/setup">
+<setup xmlns="http://www.ableneo.com/liferay/setup">
     <configuration>
         <runasuser>test@liferay.com</runasuser>
     </configuration>

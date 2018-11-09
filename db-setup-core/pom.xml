@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.mimacom.liferay</groupId>
+        <groupId>com.ableneo.liferay</groupId>
         <artifactId>build-parent</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -34,7 +34,7 @@
                 <configuration>
                     <outputDirectory>${project.build.directory}/generated-sources/sources</outputDirectory>
                     <schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
-                    <packageName>com.mimacom.liferay.portal.setup.domain</packageName>
+                    <packageName>com.ableneo.liferay.portal.setup.domain</packageName>
                     <clearOutputDir>false</clearOutputDir>
                 </configuration>
             </plugin>
@@ -143,11 +143,11 @@
         </dependency>
     </dependencies>
     <scm>
-        <url>https://github.com/mimacom/liferay-db-setup-core</url>
+        <url>https://github.com/ableneo/liferay-db-setup-core</url>
     </scm>
     <organization>
-        <name>mimacom ag</name>
-        <url>http://www.mimacom.com</url>
+        <name>ableneo s. r. o.</name>
+        <url>http://www.ableneo.com</url>
     </organization>
 
     <licenses>
