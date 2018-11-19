@@ -12,10 +12,10 @@ package com.mimacom.liferay.portal.setup;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,6 +50,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,10 +68,12 @@ public final class LiferaySetup {
 
     public static void setupFiles(final List<File> files) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
 
+        List<Setup> setups = new ArrayList<>();
         for (File file : files) {
             Setup setup = MarshallUtil.unmarshall(file);
-            setup(setup);
+            setups.add(setup);
         }
+        setup(setups);
     }
 
     public static void setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
@@ -80,10 +83,12 @@ public final class LiferaySetup {
 
     public static void setupInputStreams(final List<InputStream> inputStreams) throws ParserConfigurationException, SAXException, JAXBException {
 
+        List<Setup> setups = new ArrayList<>();
         for (InputStream inputStream : inputStreams) {
             Setup setup = MarshallUtil.unmarshall(inputStream);
-            setup(setup);
+            setups.add(setup);
         }
+        setup(setups);
     }
 
     public static void setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
@@ -91,33 +96,33 @@ public final class LiferaySetup {
         setupInputStreams(Arrays.asList(inputStream));
     }
 
-    public static boolean setup(final Setup setup) {
+    public static void setup(final List<Setup> setups) {
 
-        try {
-            Configuration configuration = setup.getConfiguration();
+        for (Setup setup : setups) {
+            try {
+                Configuration configuration = setup.getConfiguration();
 
-            String runAsUser = configuration.getRunasuser();
-            if (runAsUser == null || runAsUser.isEmpty()) {
-                setAdminPermissionCheckerForThread(PortalUtil.getDefaultCompanyId());
-                LOG.info("Using default administrator.");
-            } else {
-                User user = UserLocalServiceUtil.getUserByEmailAddress(PortalUtil.getDefaultCompanyId(), runAsUser);
-                runAsUserId = user.getUserId();
-                PrincipalThreadLocal.setName(runAsUserId);
-                PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(user);
-                PermissionThreadLocal.setPermissionChecker(permissionChecker);
+                String runAsUser = configuration.getRunasuser();
+                if (runAsUser == null || runAsUser.isEmpty()) {
+                    setAdminPermissionCheckerForThread(PortalUtil.getDefaultCompanyId());
+                    LOG.info("Using default administrator.");
+                } else {
+                    User user = UserLocalServiceUtil.getUserByEmailAddress(PortalUtil.getDefaultCompanyId(), runAsUser);
+                    runAsUserId = user.getUserId();
+                    PrincipalThreadLocal.setName(runAsUserId);
+                    PermissionChecker permissionChecker = PermissionCheckerFactoryUtil.create(user);
+                    PermissionThreadLocal.setPermissionChecker(permissionChecker);
 
-                LOG.info("Execute setup module as user " + setup.getConfiguration().getRunasuser());
+                    LOG.info("Execute setup module as user " + setup.getConfiguration().getRunasuser());
+                }
+
+                setupPortal(setup);
+            } catch (Exception e) {
+                LOG.error("An error occured while executing the portal setup ", e);
+            } finally {
+                PrincipalThreadLocal.setName(null);
+                PermissionThreadLocal.setPermissionChecker(null);
             }
-
-            setupPortal(setup);
-            return true;
-        } catch (Exception e) {
-            LOG.error("An error occured while executing the portal setup ", e);
-            return false;
-        } finally {
-            PrincipalThreadLocal.setName(null);
-            PermissionThreadLocal.setPermissionChecker(null);
         }
     }
 
