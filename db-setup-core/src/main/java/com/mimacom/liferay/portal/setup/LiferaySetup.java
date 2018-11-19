@@ -12,10 +12,10 @@ package com.mimacom.liferay.portal.setup;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -65,38 +65,30 @@ public final class LiferaySetup {
 
     }
 
-    public static boolean setupFiles(final List<File> files) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+    public static void setupFiles(final List<File> files) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
 
-        boolean status = true;
         for (File file : files) {
             Setup setup = MarshallUtil.unmarshall(file);
-            if (!setup(setup)) {
-                status = false;
-            }
+            setup(setup);
         }
-        return status;
     }
 
-    public static boolean setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+    public static void setup(final File file) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
 
-        return setupFiles(Arrays.asList(file));
+        setupFiles(Arrays.asList(file));
     }
 
-    public static boolean setupInputStreams(final List<InputStream> inputStreams) throws ParserConfigurationException, SAXException, JAXBException {
+    public static void setupInputStreams(final List<InputStream> inputStreams) throws ParserConfigurationException, SAXException, JAXBException {
 
-        boolean status = true;
         for (InputStream inputStream : inputStreams) {
             Setup setup = MarshallUtil.unmarshall(inputStream);
-            if (!setup(setup)) {
-                status = false;
-            }
+            setup(setup);
         }
-        return status;
     }
 
-    public static boolean setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
+    public static void setup(final InputStream inputStream) throws FileNotFoundException, ParserConfigurationException, SAXException, JAXBException {
 
-        return setupInputStreams(Arrays.asList(inputStream));
+        setupInputStreams(Arrays.asList(inputStream));
     }
 
     public static boolean setup(final Setup setup) {
