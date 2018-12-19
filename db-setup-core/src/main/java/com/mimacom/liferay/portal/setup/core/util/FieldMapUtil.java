@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.mimacom.liferay.portal.setup.domain.DescriptionTranslation;
 import com.mimacom.liferay.portal.setup.domain.TitleTranslation;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -42,10 +43,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
-public final class TitleMapUtil {
-    private static final Log LOG = LogFactoryUtil.getLog(TitleMapUtil.class);
+public final class FieldMapUtil {
+    private static final Log LOG = LogFactoryUtil.getLog(FieldMapUtil.class);
 
-    private TitleMapUtil() {
+    private FieldMapUtil() {
     }
 
     public static Map<Locale, String> getTitleMap(final List<TitleTranslation> translations,
@@ -56,23 +57,41 @@ public final class TitleMapUtil {
         titleMap.put(siteDefaultLocale, defaultLocaleTitle);
         if (translations != null) {
             for (TitleTranslation tt : translations) {
-                try {
-                    String[] s = tt.getLocale().split("_");
-
-                    Locale l = null;
-                    if (s.length > 1) {
-                        l = new Locale(s[0], s[1]);
-                    } else {
-                        l = new Locale(s[0]);
-                    }
-                    titleMap.put(l, tt.getTitleText());
-                } catch (Exception ex) {
-                    LOG.error("Exception while retrieving locale " + tt.getLocale() + " for "
-                            + locationHint);
-                }
+                fillFieldEntry(tt.getLocale(),tt.getTitleText(),titleMap,locationHint);
             }
         }
         return titleMap;
+    }
+
+    public static Map<Locale, String> getDescriptionMap(final List<DescriptionTranslation> translations,
+            final long groupId, final String defaultLocaleTitle, final String locationHint){
+        Map<Locale, String> descriptionMap = new HashMap<>();
+        Locale siteDefaultLocale = getDefaultLocale(groupId, locationHint);
+
+        descriptionMap.put(siteDefaultLocale, defaultLocaleTitle);
+        if (translations != null) {
+            for (DescriptionTranslation tt : translations) {
+                fillFieldEntry(tt.getLocale(),tt.getTitleText(),descriptionMap,locationHint);
+            }
+        }
+        return descriptionMap;
+    }
+
+    private static void fillFieldEntry( String locale,String text,Map<Locale, String> fieldMap,String locationHint){
+        try {
+            String[] s = locale.split("_");
+
+            Locale l = null;
+            if (s.length > 1) {
+                l = new Locale(s[0], s[1]);
+            } else {
+                l = new Locale(s[0]);
+            }
+            fieldMap.put(l, text);
+        } catch (Exception ex) {
+            LOG.error("Exception while retrieving locale " + locale + " for "
+                      + locationHint);
+        }
     }
 
     public static Locale getDefaultLocale(final long groupId, final String locationHint) {

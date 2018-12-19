@@ -37,7 +37,6 @@ import com.liferay.portal.kernel.model.*;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.*;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
-import com.liferay.portal.kernel.settings.TypedSettings;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
@@ -46,9 +45,8 @@ import com.liferay.portal.kernel.util.Validator;
 import com.mimacom.liferay.portal.setup.LiferaySetup;
 import com.mimacom.liferay.portal.setup.core.util.CustomFieldSettingUtil;
 import com.mimacom.liferay.portal.setup.core.util.ResolverUtil;
-import com.mimacom.liferay.portal.setup.core.util.TitleMapUtil;
+import com.mimacom.liferay.portal.setup.core.util.FieldMapUtil;
 import com.mimacom.liferay.portal.setup.domain.*;
-import com.mimacom.liferay.portal.setup.domain.Organization;
 import com.mimacom.liferay.portal.setup.domain.Theme;
 
 import javax.portlet.ReadOnlyException;
@@ -169,7 +167,7 @@ public final class SetupPages {
                     if (listLayoutPrototype != null && listLayoutPrototype.size() > 0) {
                         lp = listLayoutPrototype.get(0);
                     } else {
-                        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(
+                        Map<Locale, String> titleMap = FieldMapUtil.getTitleMap(
                                 pageTemplate.getTitleTranslation(), groupId, name,
                                 " Page template  " + name);
                         lp = LayoutPrototypeLocalServiceUtil.addLayoutPrototype(userid, company,
@@ -384,8 +382,8 @@ public final class SetupPages {
                                      final long parentLayoutId, final boolean isPrivate)
             throws SystemException, PortalException {
 
-        Map<Locale, String> titleMap = TitleMapUtil.getTitleMap(currentPage.getTitleTranslation(), groupId,
-                currentPage.getName(), " Page with title " + currentPage.getFriendlyURL());
+        Map<Locale, String> titleMap = FieldMapUtil.getTitleMap(currentPage.getTitleTranslation(), groupId,
+                                                                currentPage.getName(), " Page with title " + currentPage.getFriendlyURL());
 
         Locale locale = LocaleUtil.getSiteDefault();
 
