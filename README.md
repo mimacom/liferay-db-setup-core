@@ -1,4 +1,4 @@
-# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/ableneo/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/ableneo/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/ableneo/liferay-db-setup-core.png)](https://gitter.im/ableneo/liferay-db-setup-core)[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liferay-db-setup-core-2_x&metric=alert_status)](https://sonarcloud.io/dashboard?id=liferay-db-setup-core-2_x)
+# Liferay Portal DB Setup core [![Build Status](https://travis-ci.org/ableneo/liferay-db-setup-core.svg?branch=master)](https://travis-ci.org/ableneo/liferay-db-setup-core) [![Gitter chat](https://badges.gitter.im/ableneo/liferay-db-setup-core.png)](https://gitter.im/ableneo/liferay-db-setup-core) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liferay-db-setup-core-2_x&metric=alert_status)](https://sonarcloud.io/dashboard?id=liferay-db-setup-core-2_x)
 Library that allows to setup a number of Liferay artifacts in the DB. It uses xml and Liferay APIs to add all configured artifacts.
 
 # Usage
