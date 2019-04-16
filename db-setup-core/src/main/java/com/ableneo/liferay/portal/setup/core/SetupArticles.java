@@ -27,6 +27,9 @@ package com.ableneo.liferay.portal.setup.core;
  * #L%
  */
 
+import com.ableneo.liferay.portal.setup.LiferaySetup;
+import com.ableneo.liferay.portal.setup.core.util.*;
+import com.ableneo.liferay.portal.setup.domain.*;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetLinkConstants;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
@@ -53,26 +56,12 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.LocalizationUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.*;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.ableneo.liferay.portal.setup.LiferaySetup;
-import com.ableneo.liferay.portal.setup.core.util.ResolverUtil;
-import com.ableneo.liferay.portal.setup.core.util.ResourcesUtil;
-import com.ableneo.liferay.portal.setup.core.util.TaggingUtil;
-import com.ableneo.liferay.portal.setup.core.util.TitleMapUtil;
-import com.ableneo.liferay.portal.setup.core.util.WebFolderUtil;
-import com.ableneo.liferay.portal.setup.domain.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mapa, guno..
@@ -330,8 +319,10 @@ public final class SetupArticles {
 
         LOG.info("Adding ADT " + template.getName());
         long classNameId = PortalUtil.getClassNameId(template.getClassName());
-        long resourceClassnameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
 
+        long resourceClassnameId = Validator.isBlank(template.getResourceClassName()) ? ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class)
+                                                                                      : ClassNameLocalServiceUtil.getClassNameId(template.getResourceClassName());
+        
         Map<Locale, String> nameMap = new HashMap<Locale, String>();
 
         Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(groupId);
