@@ -10,5 +10,6 @@ buildNumber.properties
 .mvn/timing.properties
 *.classpath
 *.iml
+*.orig
 .project
 .settings

@@ -4,8 +4,7 @@ package com.ableneo.liferay.portal.setup.core.util;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Original work Copyright (C) 2016 - 2018 mimacom ag
- * Modified work Copyright (C) 2018 - 2020 ableneo, s. r. o.
+ * Copyright (C) 2016 - 2019 ableneo s. r. o.
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +40,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.ableneo.liferay.portal.setup.domain.Article;
 import com.ableneo.liferay.portal.setup.domain.Tag;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.List;
 
@@ -50,15 +50,21 @@ public final class TaggingUtil {
     private TaggingUtil() {
     }
 
-    public static void associateTags(long groupId, Article article, JournalArticle journalArticle) throws PortalException {
+    public static void associateTagsAndCategories(long groupId, Article article, JournalArticle journalArticle) throws PortalException {
 
         List<Tag> tags = article.getTag();
         String[] tagNames = null;
         if (tags != null) {
             tagNames = tags.stream().map(Tag::getName).toArray(String[]::new);
         }
+
+        long[] categoryIds=article.getCategory().stream().map(category -> ResolverUtil.lookupAll(LiferaySetup.getRunAsUserId(), groupId, journalArticle.getCompanyId(),
+                                                                              category.getId(), article.getPath())).filter(categoryString-> Validator.isNumber(categoryString))
+                                                                                .mapToLong(categoryString->Long.parseLong(categoryString)).toArray();
+
+
         AssetEntry entry = AssetEntryLocalServiceUtil.getEntry(JournalArticle.class.getName(), journalArticle.getResourcePrimKey());
-        AssetEntryLocalServiceUtil.updateEntry(LiferaySetup.getRunAsUserId(), groupId, JournalArticle.class.getName(), entry.getClassPK(), null, tagNames);
+        AssetEntryLocalServiceUtil.updateEntry(LiferaySetup.getRunAsUserId(), groupId, JournalArticle.class.getName(), entry.getClassPK(), categoryIds, tagNames);
     }
 
     /*

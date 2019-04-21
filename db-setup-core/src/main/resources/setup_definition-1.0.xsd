@@ -587,6 +587,13 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="description-translation">
+        <xs:complexType>
+            <xs:attribute name="locale" type="xs:string" use="required"/>
+            <xs:attribute name="title-text" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="theme">
         <xs:complexType>
             <xs:attribute name="name" use="required" type="xs:string"/>
@@ -594,14 +601,17 @@
     </xs:element>
 
     <xs:complexType name="structure">
-        <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="key" use="required" type="xs:string"/>
-        <xs:attribute name="path" use="required" type="xs:string"/>
-        <xs:attribute name="parent" use="optional" type="xs:string"/>
+            <xs:sequence>
+                <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="key" use="required" type="xs:string"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="parent" use="optional" type="xs:string"/>
     </xs:complexType>
 
     <xs:element name="article-template">
-        <xs:complexType>
+        <xs:complexType >
             <xs:attribute name="name" type="xs:string"/>
             <xs:attribute name="key" use="required" type="xs:string"/>
             <xs:attribute name="path" use="required" type="xs:string"/>
@@ -658,6 +668,8 @@
                     <li>{{UUID_OF_ORG_WITH_NAME=&lt; name of the organization &gt;$}}</li>
                     <li>{{ID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
                     <li>{{UUDID_OF_USER_GROUP_WITH_NAME=&lt; name of the user group &gt;$}}</li>
+                    <!--Category name is expected to come following a parent/children relationship separated by slash, i.e : ParentCategory/Child1/desiredCategoryName -->
+                    <li>{{$CATEGORY-ID-BY-VOCABULARY-AND-PATH=[:: name of the site ::][:: name of the vocabulary ::]&lt; category name path &gt;$}}</li>
                 </ul>
             </xs:documentation>
         </xs:annotation>
@@ -665,9 +677,12 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="title-translation" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="description-translation" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element maxOccurs="1" minOccurs="0" ref="related-assets"/>
                 <xs:element maxOccurs="unbounded" minOccurs="0" ref="tag"/>
                 <xs:element ref="role-permissions" minOccurs="0" maxOccurs="1"/>
+
+                <xs:element ref="category"  minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
             <xs:attribute name="article-structure-key" type="xs:string"/>
             <xs:attribute name="article-template-key" type="xs:string"/>
@@ -675,6 +690,8 @@
             <xs:attribute name="title" use="required" type="xs:string"/>
             <xs:attribute name="article-folder-path" type="xs:string"/>
             <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="article-description" type="xs:string"/>
+
         </xs:complexType>
     </xs:element>
 
@@ -879,6 +896,7 @@
             </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:string"/>
             <xs:attribute name="description" type="xs:string" default=""/>
+            <xs:attribute name="id" type="xs:string" default=""/>
         </xs:complexType>
     </xs:element>
 
