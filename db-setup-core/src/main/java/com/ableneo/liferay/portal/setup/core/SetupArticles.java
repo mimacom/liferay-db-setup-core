@@ -4,8 +4,7 @@ package com.ableneo.liferay.portal.setup.core;
  * #%L
  * Liferay Portal DB Setup core
  * %%
- * Original work Copyright (C) 2016 - 2018 mimacom ag
- * Modified work Copyright (C) 2018 - 2020 ableneo, s. r. o.
+ * Copyright (C) 2016 - 2019 ableneo s. r. o.
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +57,13 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.*;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.ableneo.liferay.portal.setup.LiferaySetup;
+import com.ableneo.liferay.portal.setup.core.util.ResolverUtil;
+import com.ableneo.liferay.portal.setup.core.util.ResourcesUtil;
+import com.ableneo.liferay.portal.setup.core.util.TaggingUtil;
+import com.ableneo.liferay.portal.setup.core.util.TitleMapUtil;
+import com.ableneo.liferay.portal.setup.core.util.WebFolderUtil;
+import com.ableneo.liferay.portal.setup.domain.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -70,11 +76,13 @@ public final class SetupArticles {
 
     private static final Log LOG = LogFactoryUtil.getLog(SetupArticles.class);
     private static final HashMap<String, List<String>> DEFAULT_PERMISSIONS;
+    private static final HashMap<String, List<String>> DEFAULT_DDM_PERMISSIONS;
     private static final int ARTICLE_PUBLISH_YEAR = 2008;
     private static final int MIN_DISPLAY_ROWS = 10;
 
     static {
         DEFAULT_PERMISSIONS = new HashMap<String, List<String>>();
+        DEFAULT_DDM_PERMISSIONS= new HashMap<String, List<String>>();
         List<String> actionsOwner = new ArrayList<String>();
 
         actionsOwner.add(ActionKeys.VIEW);
@@ -86,15 +94,26 @@ public final class SetupArticles {
         actionsOwner.add(ActionKeys.UPDATE);
         actionsOwner.add(ActionKeys.UPDATE_DISCUSSION);
 
+        List<String> ddmActionsOwner = new ArrayList<String>();
+
+        ddmActionsOwner.add(ActionKeys.VIEW);
+        ddmActionsOwner.add(ActionKeys.DELETE);
+        ddmActionsOwner.add(ActionKeys.UPDATE);
+        ddmActionsOwner.add(ActionKeys.PERMISSIONS);
+
+
         DEFAULT_PERMISSIONS.put(RoleConstants.OWNER, actionsOwner);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.OWNER, ddmActionsOwner);
 
         List<String> actionsUser = new ArrayList<String>();
         actionsUser.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.USER, actionsUser);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.USER, actionsUser);
 
         List<String> actionsGuest = new ArrayList<String>();
         actionsGuest.add(ActionKeys.VIEW);
         DEFAULT_PERMISSIONS.put(RoleConstants.GUEST, actionsGuest);
+        DEFAULT_DDM_PERMISSIONS.put(RoleConstants.GUEST, actionsGuest);
     }
 
     private SetupArticles() {
@@ -180,6 +199,8 @@ public final class SetupArticles {
                                        final long classNameId)
             throws SystemException, PortalException, IOException, URISyntaxException {
 
+        // TODO fix after merging SetupContextThreadLocal
+        long companyId = -1l;
         LOG.info("Adding Article structure " + structure.getName());
         Map<Locale, String> nameMap = new HashMap<>();
         Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(groupId);
@@ -235,15 +256,22 @@ public final class SetupArticles {
                 }
             }
 
-            DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
+            DDMStructure ddmStructureSaved=DDMStructureLocalServiceUtil.updateStructure(LiferaySetup.getRunAsUserId(), ddmStructure.getStructureId(),
                     ddmStructure.getParentStructureId(), nameMap, descMap, ddmForm, ddmFormLayout, new ServiceContext());
             LOG.info("Template successfully updated: " + structure.getName());
+
+            SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
+                    ,companyId,ddmStructureSaved.getStructureId(),DDMStructure.class.getName()+"-"+JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_DDM_PERMISSIONS);
+
             return;
         }
 
         DDMStructure newStructure = DDMStructureLocalServiceUtil.addStructure(
                 LiferaySetup.getRunAsUserId(), groupId, structure.getParent(), classNameId,
                 structure.getKey(), nameMap, descMap, ddmForm, ddmFormLayout, "json", 0, new ServiceContext());
+
+        SetupPermissions.updatePermission("Structure "+structure.getKey(),groupId
+                ,companyId,newStructure.getStructureId(),DDMStructure.class.getName()+ "-" + JournalArticle.class.getName(),structure.getRolePermissions(),DEFAULT_DDM_PERMISSIONS);
         LOG.info("Added Article structure: " + newStructure.getName());
     }
 
@@ -319,10 +347,9 @@ public final class SetupArticles {
 
         LOG.info("Adding ADT " + template.getName());
         long classNameId = PortalUtil.getClassNameId(template.getClassName());
-
         long resourceClassnameId = Validator.isBlank(template.getResourceClassName()) ? ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class)
                                                                                       : ClassNameLocalServiceUtil.getClassNameId(template.getResourceClassName());
-        
+
         Map<Locale, String> nameMap = new HashMap<Locale, String>();
 
         Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(groupId);
@@ -400,6 +427,14 @@ public final class SetupArticles {
             titleMap.put(articleDefaultLocale, article.getTitle());
         }
 
+
+        Map<Locale,String> descriptionMap=null;
+        if(article.getArticleDescription()!=null && !article.getArticleDescription().isEmpty()) {
+            // FIXME after merging support-specifying-company branch descriptionMap=TitleMapUtil.getTitleMap(article.getDescriptionTranslation(), groupId, article.getArticleDescription(), " Article with description " + article.getArticleId());
+            if (!descriptionMap.containsKey(articleDefaultLocale)) {
+                descriptionMap.put(articleDefaultLocale, article.getArticleDescription());
+            }
+        }
         ServiceContext serviceContext = new ServiceContext();
         serviceContext.setScopeGroupId(groupId);
 
@@ -423,7 +458,7 @@ public final class SetupArticles {
                 journalArticle = JournalArticleLocalServiceUtil.addArticle(
                         LiferaySetup.getRunAsUserId(), groupId, folderId, 0, 0,
                         article.getArticleId(), generatedId,
-                        JournalArticleConstants.VERSION_DEFAULT, titleMap, null, content,
+                        JournalArticleConstants.VERSION_DEFAULT, titleMap, descriptionMap, content,
                         article.getArticleStructureKey(), article.getArticleTemplateKey(),
                         StringPool.BLANK, 1, 1, ARTICLE_PUBLISH_YEAR, 0, 0, 0, 0, 0, 0, 0, true, 0,
                         0, 0, 0, 0, true, true, false, StringPool.BLANK, null, null,
@@ -440,6 +475,7 @@ public final class SetupArticles {
                         + article.getArticleId() + " already exists. Will be overwritten.");
                 journalArticle.setTitleMap(titleMap);
                 journalArticle.setContent(content);
+                journalArticle.setDescriptionMap(descriptionMap);
 
                 JournalArticleLocalServiceUtil.updateJournalArticle(journalArticle);
 
@@ -450,9 +486,10 @@ public final class SetupArticles {
                 }
                 LOG.info("Updated JournalArticle: " + journalArticle.getTitle());
             }
-            TaggingUtil.associateTags(groupId, article, journalArticle);
+            TaggingUtil.associateTagsAndCategories(groupId, article, journalArticle);
             processRelatedAssets(article, journalArticle, LiferaySetup.getRunAsUserId(), groupId,
                     companyId);
+
             SetupPermissions.updatePermission("Article " + journalArticle.getArticleId(), groupId,
                     companyId, journalArticle.getResourcePrimKey(), JournalArticle.class,
                     article.getRolePermissions(), DEFAULT_PERMISSIONS);
